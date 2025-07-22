@@ -7,7 +7,6 @@
   <li>1x Buzzer</li>
   <li>1x Botão de pressão</li>
   <li>1x LED</li>
-  <li>1x Botão de pressão</li>
 </ul>
 
 #
