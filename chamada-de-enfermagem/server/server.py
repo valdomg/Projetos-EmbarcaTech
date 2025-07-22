@@ -16,7 +16,7 @@ def hello_world():
     return "<p>Hello, World!</p>"
 
 '''
-Rota para o microcontrolador do Posto de Enfermagem
+Rota/tópico para o microcontrolador do Posto de Enfermagem
 '''
 
 '''
@@ -28,7 +28,7 @@ Rota para página de relatório
 '''
 
 '''
-Rota para salvar o chamado
+Rota para salvar o chamado no BD
 '''
 
 
