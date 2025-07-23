@@ -1,6 +1,54 @@
-from flask import Flask
+from flask import Flask, request
+from flask_mqtt import Mqtt
 
 app = Flask(__name__)
+
+
+'''
+Configurações para o Client
+'''
+app.config['MQTT_BROKER_URL']       =       '192.168.1.19' #url do broker/endereço ip
+app.config['MQTT_BROKER_PORT']      =       1885
+app.config['MQTT_USERNAME']         =       '' 
+app.config['MQTT_PASSWORD']         =       ''
+app.config['MQTT_KEEPALIVE']        =       60
+app.config['MQTT_TLS_ENABLE']       =       False
+
+mqtt = Mqtt(app)
+
+'''
+Conexão em um tópico [inscrição]
+'''
+@mqtt.on_connect()
+def handle_connect(client, userdata, flags, rc):
+    print("Conectado ao broker MQTT Local com código:", rc)
+    mqtt.subscribe('teste/topic')
+
+'''
+Lidando com mensagens [inscrição]
+'''
+@mqtt.on_message()
+def handle_mqtt_message(client, userdata,message):
+    payload = message.payload.decode()
+    print(f'Mensagem recebida no tópico {message.topic}: {payload}')
+
+
+'''
+Publicando uma mensagem no tópico 
+'''
+@app.route('/publicar', methods=['POST'])
+def publish_message():
+    data = request.json
+    topic = data.get('topic')
+    message = data.get('message')
+    mqtt.publish(topic, message)
+    return {'status', 'mensagem recebida'}
+
+'''
+Desiscrevendo de um tópico
+'''
+def unsubscribe_topic(topic):
+    mqtt.unsubscribe(topic)
 
 
 '''
