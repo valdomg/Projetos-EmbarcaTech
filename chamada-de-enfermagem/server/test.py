@@ -3,37 +3,84 @@ from flask_mqtt import Mqtt
 
 app = Flask(__name__)
 
-# Configuração do broker MQTT
-app.config['MQTT_BROKER_URL'] = 'test.mosquitto.org'  # ou IP do seu broker
-app.config['MQTT_BROKER_PORT'] = 1883
-app.config['MQTT_USERNAME'] = ''  # se necessário
-app.config['MQTT_PASSWORD'] = ''  # se necessário
-app.config['MQTT_KEEPALIVE'] = 60
-app.config['MQTT_TLS_ENABLED'] = False
+
+'''
+Configurações para o Client
+'''
+app.config['MQTT_BROKER_URL']       =       ''  #url do broker/endereço ip
+app.config['MQTT_BROKER_PORT']      =       ''
+app.config['MQTT_USERNAME']         =       '' 
+app.config['MQTT_PASSWORD']         =       ''
+app.config['MQTT_KEEPALIVE']        =       60
+app.config['MQTT_TLS_ENABLE']       =       False
+
+topic = 'teste/topico'                          #topico para teste
 
 mqtt = Mqtt(app)
 
-# Subscreve ao tópico após conectar
+'''
+Conexão em um tópico [inscrição]
+'''
 @mqtt.on_connect()
 def handle_connect(client, userdata, flags, rc):
-    print("Conectado ao broker MQTT com código:", rc)
-    mqtt.subscribe('teste/topico')
+    print("Conectado ao broker MQTT Local com código:", rc)
+    mqtt.subscribe(topic)
 
-# Quando uma mensagem for recebida
+'''
+Lidando com mensagens [inscrição]
+'''
 @mqtt.on_message()
-def handle_mqtt_message(client, userdata, message):
+def handle_mqtt_message(client, userdata,message):
     payload = message.payload.decode()
     print(f'Mensagem recebida no tópico {message.topic}: {payload}')
 
-# Rota HTTP para publicar via MQTT
+
+'''
+Publicando uma mensagem no tópico 
+'''
 @app.route('/publicar', methods=['POST'])
 def publish_message():
-    dados = request.json
-    topico = dados.get('topico')
-    mensagem = dados.get('mensagem')
-    mqtt.publish(topico, mensagem)
-    return {'status': 'mensagem publicada'}
+    data = request.json
+    topic = data.get('topic')
+    message = data.get('message')
+    mqtt.publish(topic, message)
+    return {'status', 'mensagem recebida'}
 
-# Início da aplicação Flask
+'''
+Desiscrevendo de um tópico
+'''
+def unsubscribe_topic(topic):
+    mqtt.unsubscribe(topic)
+
+
+'''
+Conexão com o MongoDB
+'''
+
+
+'''
+Rotas/tópicos para cada microcontrolador
+'''
+@app.route("/")
+def hello_world():
+    return "<p>Hello, World!</p>"
+
+'''
+Rota/tópico para o microcontrolador do Posto de Enfermagem
+'''
+
+'''
+Rota para página de login
+'''
+
+'''
+Rota para página de relatório
+'''
+
+'''
+Rota para salvar o chamado no BD
+'''
+
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
