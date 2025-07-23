@@ -7,12 +7,14 @@ app = Flask(__name__)
 '''
 Configurações para o Client
 '''
-app.config['MQTT_BROKER_URL']       =       '192.168.1.19' #url do broker/endereço ip
-app.config['MQTT_BROKER_PORT']      =       1885
+app.config['MQTT_BROKER_URL']       =       '' #url do broker/endereço ip
+app.config['MQTT_BROKER_PORT']      =       ''
 app.config['MQTT_USERNAME']         =       '' 
 app.config['MQTT_PASSWORD']         =       ''
 app.config['MQTT_KEEPALIVE']        =       60
 app.config['MQTT_TLS_ENABLE']       =       False
+
+topic = 'teste/topico'                          #topico para teste
 
 mqtt = Mqtt(app)
 
@@ -22,7 +24,7 @@ Conexão em um tópico [inscrição]
 @mqtt.on_connect()
 def handle_connect(client, userdata, flags, rc):
     print("Conectado ao broker MQTT Local com código:", rc)
-    mqtt.subscribe('teste/topic')
+    mqtt.subscribe(topic)
 
 '''
 Lidando com mensagens [inscrição]
