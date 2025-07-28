@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import express from 'express';
-
+import mqttClient from './mqtt/mqttclient.js';
 const app = express();
 app.use(express.json());
 
