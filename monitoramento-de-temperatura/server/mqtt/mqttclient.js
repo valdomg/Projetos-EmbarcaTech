@@ -14,6 +14,11 @@ mqttClient.on('connect', () => {
   console.log('Connected')
 })
 
+mqttClient.on('message', (topic, message) => {
+  console.log(`Received message on topic ${topic}:`, message.toString());
+});
+
+
 mqttClient.on('error', (err) => {
   console.error('MQTT connection error:', err);
 });
