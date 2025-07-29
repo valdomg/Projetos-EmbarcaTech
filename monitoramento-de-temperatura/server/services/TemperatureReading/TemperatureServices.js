@@ -19,7 +19,7 @@ class TemperatureService {
 
   getTemperatureReadingsByInterval = async (startDate, endDate) => {
     return await this.temperatureModel.find({
-      createdAt: {
+      timestamp: {
         $gte: new Date(startDate),
         $lte: new Date(endDate)
       }
