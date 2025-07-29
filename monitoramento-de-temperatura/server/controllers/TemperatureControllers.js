@@ -32,6 +32,40 @@ class TemperatureController {
     }
   }
 
+  getRoomTemperatures = async (req, res) => {
+    try {
+      const { roomId } = req.params;
+      const temperatures = await this.temperatureService.getRoomTemperatureReadings(roomId);
+      res.status(200).json(temperatures);
+    } catch (error) {
+      console.error('Error fetching room temperatures:', error);
+      res.status(500).json({ error: 'Error fetching room temperatures.' });
+    }
+  }
+
+  getRoomTemperaturesByInterval = async (req, res) => {
+    try {
+      const { roomId } = req.params;
+      const { startDate, endDate } = req.query;
+      const temperatures = await this.temperatureService.getRoomTemperatureReadingsByInterval(roomId, startDate, endDate);
+      res.status(200).json(temperatures);
+    } catch (error) {
+      console.error('Error fetching room temperatures by interval:', error);
+      res.status(500).json({ error: 'Error fetching room temperatures by interval.' });
+    }
+  }
+
+  getTemperatureReadingsByInterval = async (req, res) => {
+    try {
+      const { startDate, endDate } = req.query;
+      const temperatures = await this.temperatureService.getTemperatureReadingsByInterval(startDate, endDate);
+      res.status(200).json(temperatures);
+    } catch (error) {
+      console.error('Error fetching temperatures by interval:', error);
+      res.status(500).json({ error: 'Error fetching temperatures by interval.' });
+    }
+  }
+
 }
 
 export default TemperatureController;

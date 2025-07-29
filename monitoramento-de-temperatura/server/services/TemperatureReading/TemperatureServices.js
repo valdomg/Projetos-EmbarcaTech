@@ -17,6 +17,29 @@ class TemperatureService {
     return await this.temperatureModel.find();
   }
 
+  getTemperatureReadingsByInterval = async (startDate, endDate) => {
+    return await this.temperatureModel.find({
+      createdAt: {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate)
+      }
+    });
+  }
+
+  getRoomTemperatureReadings = async (roomId) => {
+    return await this.temperatureModel.find({ room: roomId });
+  }
+
+  getRoomTemperatureReadingsByInterval = async (roomId, startDate, endDate) => {
+    return await this.temperatureModel.find({
+      room: roomId,
+      timestamp: {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate)
+      }
+    });
+  }
+
   getTemperatureReadingById = async (id) => {
     return await this.temperatureModel.findById(id);
   }
