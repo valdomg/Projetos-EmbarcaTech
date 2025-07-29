@@ -5,7 +5,7 @@ class TemperatureService {
     this.temperatureModel = temperatureModel;
   }
 
-  async createTemperatureReading(data) {
+  createTemperatureReading = async (data) => {
     const temperatureReading = new this.temperatureModel({
       temperature: data.temperature,
       room: data.room,
@@ -15,15 +15,15 @@ class TemperatureService {
     return await temperatureReading.save();
   }
 
-  async getTemperatureReadings() {
+  getTemperatureReadings = async () => {
     return await this.temperatureModel.find();
   }
 
-  async getTemperatureReadingById(id) {
+  getTemperatureReadingById = async (id) => {
     return await this.temperatureModel.findById(id);
   }
 
-  async deleteTemperatureReading(id) {
+  deleteTemperatureReading = async (id) => {
     return await this.temperatureModel.findByIdAndDelete(id);
   }
 
