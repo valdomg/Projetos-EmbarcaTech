@@ -1,5 +1,6 @@
 from flask import Flask, request
 from flask_mqtt import Mqtt
+from mongo.MongoDBConnection import MongoDBConnection 
 
 app = Flask(__name__)
 
@@ -15,6 +16,10 @@ app.config['MQTT_KEEPALIVE']        =       60
 app.config['MQTT_TLS_ENABLE']       =       False
 topic = 'teste/topico'                          #topico para teste
 
+'''
+Configuração para o Mongo DB
+'''
+mongoDBConnection = MongoDBConnection()
 
 '''
 Mqtt para uso dentro do client
