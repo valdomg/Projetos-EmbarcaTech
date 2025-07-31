@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_mqtt import Mqtt
 from mongo.MongoDBConnection import MongoDBConnection 
 
@@ -67,11 +67,12 @@ Conexão com o MongoDB
 
 
 '''
-Rotas/tópicos para cada microcontrolador
+Rota de teste com o Banco de Dados Mongo
 '''
 @app.route("/")
-def hello_world():
-    return "<p>Hello, World!</p>"
+def data_mongo():
+    dados = mongoDBConnection.read_data()
+    return jsonify(dados)
 
 '''
 Rota/tópico para o microcontrolador do Posto de Enfermagem
