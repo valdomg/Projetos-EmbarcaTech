@@ -1,0 +1,13 @@
+.text-login {
+    font-size: 40pt;
+}
+
+.img-pequena {
+    width: 10px;
+    
+}
+
+.inp-borda {
+    border-width: 3px;
+    border-color: black;
+}
