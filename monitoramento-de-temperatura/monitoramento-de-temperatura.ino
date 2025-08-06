@@ -28,6 +28,14 @@ Adafruit_AHTX0 aht;
 WiFiClientSecure espClient;
 PubSubClient client(espClient);
 
+// ===== VARIAVEIS GLOBAIS =====
+
+unsigned long previousMQTTTime = 0;
+unsigned long previousDisplay = 0;
+
+unsigned long displayInterval = 1000;  // 1 segundo
+unsigned long MQTTInterval = 180000;   // 3 minutos
+
 // ===== STRUCTS =====
 struct EnvironmentData {  //Estrutura para desacoplamento do sensor
   float temperature;
@@ -191,9 +199,22 @@ void setup() {
 
 // ===== FUNÇÃO LOOP PRINCIPAL =====
 void loop() {
-
-  checkMQTTConnected();
-  publishSensorData();
   client.loop();
-  delay(3000);
+  checkMQTTConnected();
+
+  unsigned long timeNow = millis();
+
+  // Atualização periódica da interface (ex. display serial ou tela física)
+  if (timeNow - previousDisplay >= displayInterval) {
+
+    previousDisplay = timeNow;
+    // Logica do display
+  }
+
+  if (timeNow - previousMQTTTime >= MQTTInterval) {
+
+    previousMQTTTime = timeNow;
+    publishSensorData();
+  }
+
 }
