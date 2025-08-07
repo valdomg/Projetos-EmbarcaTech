@@ -42,6 +42,15 @@ describe('TemperatureService', () => {
       expect(saveMock).toHaveBeenCalled();
       expect(result).toBe('mocked saved reading');
     });
+
+    test.todo("Caso de falha ao criar leitura com campo faltando");
+    it("should throw an error if required fields are missing", async () => {
+      
+    });
+
+    test.todo("Caso de falha ao criar leitura com dados inválidos");
+
+    test.todo("Caso de falha ao criar leitura com microcontrolador não cadastrado");
   });
 
   describe('getTemperatureReadings', () => {
@@ -53,6 +62,8 @@ describe('TemperatureService', () => {
       expect(mockModel.find).toHaveBeenCalledWith();
       expect(result).toEqual(['reading1', 'reading2']);
     });
+
+    test.todo("retornar erro se não houver leituras");
   });
 
   describe('getTemperatureReadingsByInterval', () => {
@@ -73,6 +84,10 @@ describe('TemperatureService', () => {
       });
       expect(result).toBe(mockResult);
     });
+
+    test.todo("retornar erro se intervalo inválido");
+
+    test.todo("retornar erro se não houver leituras no intervalo");
   });
 
   describe('getRoomTemperatureReadings', () => {
@@ -85,6 +100,10 @@ describe('TemperatureService', () => {
       expect(mockModel.find).toHaveBeenCalledWith({ room: 'Sala' });
       expect(result).toBe(mockResult);
     });
+
+    test.todo("retornar erro se não houver leituras para a sala");
+
+    test.todo("retornar erro se sala não existir");
   });
 
   describe('getRoomTemperatureReadingsByInterval', () => {
@@ -106,6 +125,12 @@ describe('TemperatureService', () => {
       });
       expect(result).toBe(mockResult);
     });
+
+    test.todo("retornar erro se intervalo inválido");
+
+    test.todo("retornar erro se não houver leituras para a sala no intervalo");
+
+    test.todo("retornar erro se sala não existir");
   });
 
   describe('getTemperatureReadingById', () => {
@@ -118,6 +143,10 @@ describe('TemperatureService', () => {
       expect(mockModel.findById).toHaveBeenCalledWith('mockId');
       expect(result).toBe(mockReading);
     });
+
+    test.todo("retornar erro se leitura não existir");
+
+    test.todo("retornar erro se id inválido");
   });
 
   describe('deleteTemperatureReading', () => {
@@ -130,5 +159,7 @@ describe('TemperatureService', () => {
       expect(mockModel.findByIdAndDelete).toHaveBeenCalledWith('mockId');
       expect(result).toBe(deletedReading);
     });
+
+    test.todo("retornar erro se leitura não existir");
   });
 });

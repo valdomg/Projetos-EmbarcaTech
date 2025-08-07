@@ -1,6 +1,5 @@
 import TemperatureService from '../services/TemperatureReading/TemperatureServices.js';
 import TemperatureModel from '../models/Temperature.js';
-
 class TemperatureController {
   constructor() {
     this.temperatureService = new TemperatureService(TemperatureModel);

@@ -1,20 +1,38 @@
+import RoomServices from "../Room/RoomServices.js";
+import RoomModel from '../../models/Room.js';
+
 class TemperatureService {
   constructor(temperatureModel) {
     this.temperatureModel = temperatureModel;
+    this.roomService = new RoomServices(RoomModel);
   }
 
   createTemperatureReading = async (data) => {
-    const temperatureReading = new this.temperatureModel({
-      temperature: data.temperature,
-      room: data.room,
-      humidity: data.humidity,
-      microcontrollerId: data.microcontrollerId
+    const { microcontrollerId, temperature, humidity } = data;
+
+    if (!microcontrollerId || temperature == null || humidity == null) {
+      console.error("MQTT: Dados incompletos recebidos.");
+      return;
+    }
+
+    const room = await this.roomService.getRoomByMicrocontrollerId(microcontrollerId);
+
+    if (!room) {
+      console.error(`MQTT: Nenhuma sala encontrada com microcontrolador ${microcontrollerId}`);
+      return;
+    }
+
+    const reading = new this.temperatureModel({
+      room: room._id,
+      temperature,
+      humidity
     });
-    return await temperatureReading.save();
+
+    await reading.save();
   }
 
   getTemperatureReadings = async () => {
-    return await this.temperatureModel.find();
+    return await this.temperatureModel.find().populate('room');
   }
 
   getTemperatureReadingsByInterval = async (startDate, endDate) => {
@@ -41,7 +59,7 @@ class TemperatureService {
   }
 
   getTemperatureReadingById = async (id) => {
-    return await this.temperatureModel.findById(id);
+    return await this.temperatureModel.findById(id).populate('room');
   }
 
   deleteTemperatureReading = async (id) => {
