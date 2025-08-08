@@ -1,5 +1,4 @@
 #include "mqtt.h"
-#include "sensor.h"
 #include <WiFiClientSecure.h>
 
 const char* MQTT_SERVER = "xxxxxxxxxxx";
@@ -49,11 +48,11 @@ void publishFloat(const char* topic, float value) {
 
 /**
  * Realiza a leitura do sensor e publica os dados via MQTT.
+ *
+ * @param temperature - valor da temperatura.
+ * @param humidity -  valor da umidade.
  */
-void publishSensorData() {
-  EnvironmentData data = readSensorData();
-  if (!data.valid) return;
-  printSensorData(data);
-  publishFloat("laboratorio/temperatura", data.temperature);
-  publishFloat("laboratorio/humidade", data.humidity);
+void publishSensorData(float temperature, float humidity) {
+  publishFloat("laboratorio/temperatura", temperature);
+  publishFloat("laboratorio/humidade", humidity);
 }

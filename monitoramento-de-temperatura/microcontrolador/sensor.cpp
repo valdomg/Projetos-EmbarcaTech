@@ -21,7 +21,7 @@ void initializeSensor() {
 /**
  * Lê os dados de temperatura e umidade do sensor AHT10.
  * 
- * @return Estrutura contendo temperatura (°C), umidade (%) e status de validade.
+ * @return Estrutura contendo temperatura (°C), umidade (%) e status de validade dos dados.
  */
 EnvironmentData readSensorData() {
   sensors_event_t hum, temp;

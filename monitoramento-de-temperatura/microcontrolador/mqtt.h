@@ -8,6 +8,6 @@ extern PubSubClient client;
 void setupMQTT();
 void checkMQTTConnected();
 void publishFloat(const char* topic, float value);
-void publishSensorData();
+void publishSensorData(float temperature, float humidity);
 
 #endif

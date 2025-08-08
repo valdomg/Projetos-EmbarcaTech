@@ -3,10 +3,10 @@
 #include "mqtt.h"
 
 unsigned long previousMQTTTime = 0;
-const unsigned long MQTTInterval = 180000; // 3 segundo
+const unsigned long MQTTInterval = 180000;  // 3 minutos
 
-unsigned long previousDisplay = 0;
-unsigned long displayInterval = 1000;  // 1 segundo
+unsigned long previousSensorReading = 0;
+unsigned long sensorRedingInterval = 1000;  // 1 segundo
 
 void setup() {
   Serial.begin(115200);
@@ -22,12 +22,29 @@ void loop() {
   checkMQTTConnected();
 
   unsigned long now = millis();
-  if (now - previousMQTTTime >= MQTTInterval) {
-    previousMQTTTime = now;
-    publishSensorData();
-  }
-  if (now - previousDisplay >= displayInterval) {
-    previousDisplay = now;
+  if (now - previousSensorReading >= sensorRedingInterval) {
+    EnvironmentData data = readSensorData();
+
+    if (!data.valid) {
+      //logica se o sensor não funcionar
+    }
+
+    //logica para limite de temperatura
+
+    Serial.println("==== valor mostrado no display ====");
+    printSensorData(data);
+    Serial.println("===================================\n");
+
+    previousSensorReading = now;
+
     // Logica do display
+
+    if (now - previousMQTTTime >= MQTTInterval) {
+      previousMQTTTime = now;
+      publishSensorData(data.temperature, data.humidity);
+      Serial.println("==== valor enviado para o MQTT ====");
+      printSensorData(data);
+      Serial.println("===================================\n");
+    }
   }
 }
