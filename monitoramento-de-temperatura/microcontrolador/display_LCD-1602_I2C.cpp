@@ -48,47 +48,18 @@ void clearLine(uint8_t line) {
   }
 }
 
-
-/*Função de Exibição da Temperatura
-    Parâmetro:
-      - temp: valor da temperatura (float)
-      - alert: indica se a temperatura ultrapassou o limite (true = alerta)*/
-void show_temp(float temp, bool alert) {
-  // Limpa a linha 0 antes de escrever
-  clearLine(0);
-  // Posição inicial da linha 0
-  lcd.setCursor(0, 0);
-  // Se alerta for verdadeiro, exibe "TEMP ALTA". Caso contrário, mostra "Temp:""
-  if (alert) {
-    lcd.print(TEMPERATURE_ALERT_MESSAGE);
-  } else {
-    lcd.print(TEMPERATURE_MESSAGE);
-  }
-  lcd.print(temp, 2); // Imprime o valor da temperatura com 2 casa decimal
-  // Imprime o símbolo de grau seguido de "C"
-  lcd.write(DEGREE_SYMBOL);
-  lcd.print("C");
-}
-
-
-/*Função de Exibição da Umidade
-    Parâmetro:
-      - humi: valor da umidade (float)
-      - alert: indica se a umidade ultrapassou o limite (true = alerta)*/
-void show_humi(float humi, bool alert) {
-  // Limpa a linha 1 antes de escrever
-  clearLine(1);
-  // Posição inicial da linha 1
-  lcd.setCursor(0, 1);
-  // Se alerta for verdadeiro, exibe "UMID ALTA". Caso contrário, mostra "Umi"
-  if (alert) {
-    lcd.print(HUMIDITY_ALERT_MESSAGE);
-  } else {
-    lcd.print(HUMIDITY_MESSAGE);
-  }
-  // Imprime o valor da Umidade com 2 casa decimal
-  lcd.print(humi, 2);
-  lcd.print("%");
+// Função genérica substitui show_temp e show_humi
+void show_value(uint8_t line,
+                const char* normalMsg,
+                const char* alertMsg,
+                float value,
+                bool alert,
+                const char* unit) {
+  clearLine(line);
+  lcd.setCursor(0, line);
+  lcd.print(alert ? alertMsg : normalMsg);
+  lcd.print(value, 2);
+  lcd.print(unit);
 }
 
 
@@ -100,6 +71,6 @@ void show_humi(float humi, bool alert) {
      - alertHumi: indica se a umidade ultrapassou o limite (true = alerta)*/
 void show_data_tempHum_DisplayLCD_1602_I2C(float temp, float humi, bool alertTemp, bool alertHumi) {
   // Exibe os valores de temperatura e umidade, passando os respectivos estados de alerta
-  show_temp(temp, alertTemp);
-  show_humi(humi, alertHumi);
+  show_value(0, TEMPERATURE_MESSAGE, TEMPERATURE_ALERT_MESSAGE, temp, alertTemp, "C");
+  show_value(1, HUMIDITY_MESSAGE, HUMIDITY_ALERT_MESSAGE, humi, alertHumi, "%");
 }
