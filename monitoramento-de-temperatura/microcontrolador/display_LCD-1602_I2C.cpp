@@ -9,22 +9,20 @@ const uint8_t I2C_ADDR = 0x27; // Endereço padrão do módulo I2C do LCD
 const uint8_t LCD_COLUMNS = 16;
 const uint8_t LCD_LINES = 2;
 
-// Mensagem padrão exibida no display quando a temperatura ultrapassa o limite
-const char* TEMPERATURE_ALERT_MESSAGE = "ALERT TEMP ";
-// Mensagem padrão usada para exibir a temperatura quando está dentro do limite
-const char* TEMPERATURE_MESSAGE = "Temp: ";
-// Mensagem padrão exibida no display quando a umidade ultrapassa o limite
-const char* HUMIDITY_ALERT_MESSAGE = "ALERT UMI ";
-// Mensagem padrão usada para exibir a umidade quando está dentro do limite
-const char* HUMIDITY_MESSAGE = "Umid: ";
 
-// Código ASCII do símbolo de grau
-const uint8_t DEGREE_SYMBOL = 223;
+// Mensagem padrão exibida no display quando a temperatura ultrapassa o limite
+#define TEMPERATURE_ALERT_MESSAGE F("ALERT_T: ")
+// Mensagem padrão usada para exibir a temperatura quando está dentro do limite
+#define TEMPERATURE_MESSAGE F("T: ")
+// Mensagem padrão exibida no display quando a umidade ultrapassa o limite
+#define HUMIDITY_ALERT_MESSAGE F("ALERT_U: ")
+// Mensagem padrão usada para exibir a umidade quando está dentro do limite
+#define HUMIDITY_MESSAGE F("U: ")
+
 
 // Variáveis auxiliares para guardar último valor de temperatura e umidade
 float lastTemperature = -1000.0;
 float lastHumidity = -1000.0;
-
 // Limiares mínimos de atualização para evitar reescrever o display sem necessidade
 const float TEMP_UPDATE_THRESHOLD = 0.01;
 const float HUMI_UPDATE_THRESHOLD = 0.01;
@@ -56,17 +54,30 @@ void clearLine(uint8_t line) {
   }
 }
 
-// Função genérica substitui show_temp e show_humi
+
+/* Função genérica para exibir o valor de temperatura ou umidade
+   Parâmetros:
+     - line: linha escolhida do display (0 = primeira, 1 = segunda)
+     - normalMsg/alertMsg: ponteiros do tipo __FlashStringHelper (strings guardadas na Flash via F()).
+     - value: valor de temperatura ou umidade a mostrar.
+     - alert: se true, usa a mensagem de alerta; senão, a normal
+     - unit: sufixo de unidade (ex.: "%" ou "\xDF""C").*/
 void show_value(uint8_t line,
-                const char* normalMsg,
-                const char* alertMsg,
+                const __FlashStringHelper* normalMsg,
+                const __FlashStringHelper* alertMsg,
                 float value,
                 bool alert,
                 const char* unit) {
+  // Limpa a linha antes de escrever
   clearLine(line);
+  // Posição inicial da linha
   lcd.setCursor(0, line);
+  // escolhe e imprime a mensagem apropriada diretamente da Flash
+  //    Se alert for verdadeiro, exibe a mensagem de alerta. Caso contrário, mostra só a mensagem normal "U: " ou "T: "
   lcd.print(alert ? alertMsg : normalMsg);
+  // Imprime o valor no display com 2 casa decimal
   lcd.print(value, 2);
+  // Imprime a Unidade ("°C" ou "%")
   lcd.print(unit);
 }
 
@@ -78,6 +89,7 @@ void show_value(uint8_t line,
      - alertTemp: indica se a temperatura ultrapassou o limite (true = alerta)
      - alertHumi: indica se a umidade ultrapassou o limite (true = alerta)*/
 void show_data_tempHum_DisplayLCD_1602_I2C(float temp, float humi, bool alertTemp, bool alertHumi) {
+
   // Só chama a função se a temperatura mudou além do limiar (>= 0,01)
   if (fabs(temp - lastTemperature) >= TEMP_UPDATE_THRESHOLD) {
     // Linha 0: temperatura com prefixo "T: " ou "ALERT_T: ", sufixo "°C".
@@ -86,7 +98,7 @@ void show_data_tempHum_DisplayLCD_1602_I2C(float temp, float humi, bool alertTem
                TEMPERATURE_ALERT_MESSAGE,
                temp,
                alertTemp,
-               "C");
+               "\xDF""C");
     lastTemperature = temp;  // atualiza último valor
   }
 
