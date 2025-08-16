@@ -1,5 +1,6 @@
 #include <Wire.h> // Inclui a biblioteca padrão para comunicação I2C
 #include <LiquidCrystal_I2C.h> // Biblioteca que controla o display LCD 1602 via módulo I2C
+#include <math.h>                  // Biblioteca de funções matemáticas. Usada para "fabs(...)" valor absoluto de float/double.
 #include "display_LCD-1602_I2C.h" // Inclusão do arquivo de cabeçalho do módulo que contém as declarações de funções
 
 
@@ -20,6 +21,13 @@ const char* HUMIDITY_MESSAGE = "Umid: ";
 // Código ASCII do símbolo de grau
 const uint8_t DEGREE_SYMBOL = 223;
 
+// Variáveis auxiliares para guardar último valor de temperatura e umidade
+float lastTemperature = -1000.0;
+float lastHumidity = -1000.0;
+
+// Limiares mínimos de atualização para evitar reescrever o display sem necessidade
+const float TEMP_UPDATE_THRESHOLD = 0.01;
+const float HUMI_UPDATE_THRESHOLD = 0.01;
 
 // Instancia do LCD
 LiquidCrystal_I2C lcd(I2C_ADDR, LCD_COLUMNS, LCD_LINES);
@@ -70,7 +78,27 @@ void show_value(uint8_t line,
      - alertTemp: indica se a temperatura ultrapassou o limite (true = alerta)
      - alertHumi: indica se a umidade ultrapassou o limite (true = alerta)*/
 void show_data_tempHum_DisplayLCD_1602_I2C(float temp, float humi, bool alertTemp, bool alertHumi) {
-  // Exibe os valores de temperatura e umidade, passando os respectivos estados de alerta
-  show_value(0, TEMPERATURE_MESSAGE, TEMPERATURE_ALERT_MESSAGE, temp, alertTemp, "C");
-  show_value(1, HUMIDITY_MESSAGE, HUMIDITY_ALERT_MESSAGE, humi, alertHumi, "%");
+  // Só chama a função se a temperatura mudou além do limiar (>= 0,01)
+  if (fabs(temp - lastTemperature) >= TEMP_UPDATE_THRESHOLD) {
+    // Linha 0: temperatura com prefixo "T: " ou "ALERT_T: ", sufixo "°C".
+    show_value(0,
+               TEMPERATURE_MESSAGE,
+               TEMPERATURE_ALERT_MESSAGE,
+               temp,
+               alertTemp,
+               "C");
+    lastTemperature = temp;  // atualiza último valor
+  }
+
+  // Só chama a função se a umidade mudou além do limiar
+  if (fabs(humi - lastHumidity) >= HUMI_UPDATE_THRESHOLD) {
+    // Linha 1: umidade com prefixo "U: " ou "ALERT_U: ", sufixo "%".
+    show_value(1,
+               HUMIDITY_MESSAGE,
+               HUMIDITY_ALERT_MESSAGE,
+               humi,
+               alertHumi,
+               "%");
+    lastHumidity = humi;  // atualiza último valor
+  }
 }
