@@ -1,6 +1,8 @@
 #include "sensor.h"
 #include "wifi.h"
 #include "mqtt.h"
+#include "display_LCD-1602_I2C.h"
+
 
 unsigned long previousMQTTTime = 0;
 const unsigned long MQTTInterval = 180000;  // 3 minutos
@@ -11,6 +13,9 @@ unsigned long sensorRedingInterval = 1000;  // 1 segundo
 void setup() {
   Serial.begin(115200);
   initializeSensor();
+  // Chama a função para iniciar o display
+  lcd1602_init();
+
   if (!connectWiFi()) {
     Serial.println("WiFi não conectado.");
   }
@@ -33,11 +38,12 @@ void loop() {
 
     Serial.println("==== valor mostrado no display ====");
     printSensorData(data);
+
+    // Passa os dados e os status de alerta para a função de exibição
+    lcd1602_showData(data.temperature, data.humidity, false, false);
     Serial.println("===================================\n");
 
     previousSensorReading = now;
-
-    // Logica do display
 
     if (now - previousMQTTTime >= MQTTInterval) {
       previousMQTTTime = now;
