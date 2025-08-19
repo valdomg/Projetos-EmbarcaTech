@@ -37,7 +37,7 @@ class MongoDBConnection:
     '''
     Insere um novo documento na coleção
     '''
-    def insert_document_collection(self, local:str, room_number:int):
+    def insert_document_collection(self,collection:str, local:str, room_number:int):
 
         if self.client is not None:
             document = {
@@ -63,6 +63,20 @@ class MongoDBConnection:
         else:
             print('Client not connected')
 
+    '''
+    Verifica a existência de algum dado no banco de dados
+    '''
+    def check_if_document_exists(self, collection:str, device:str):
+        if self.client is not None:
+            collection = self.db[collection]
+
+            result = collection.find_one({"device": device})
+
+            if result is not None:
+                return True
+            
+        return False
+    
     '''
     Função para fechar a conexão com o banco de dados
     '''
