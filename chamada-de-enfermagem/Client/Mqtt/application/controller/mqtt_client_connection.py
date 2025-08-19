@@ -6,9 +6,9 @@ import json
 from application.models.callbacks import on_connect as ocm, on_message as oms, on_subscribe as osub
 
 load_dotenv()
-broker = os.getenv('BROKER_MQTT')
-port = int(os.getenv('PORT_MQTT'))
-topic = os.getenv('TOPIC')
+broker = os.getenv('BROKER_IP')
+port = int(os.getenv('BROKER_PORT'))
+topic = os.getenv('BROKER_TOPIC')
 
 print(broker, port, topic)
 
