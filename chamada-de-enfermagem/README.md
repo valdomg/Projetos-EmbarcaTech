@@ -35,17 +35,13 @@ pip install paho-mqtt
 ```
 ### **4. No arquivo .env coloque as credenciais para conexão com seu Banco de dados e do broker 
 ```
-MONGO_DB_HOST = ''
-MONGO_DB_PORT = ''
-MONGO_DB_USER = ''
-MONGO_DB_PASS = ''
-MONGO_DB_DATABASE = ''
-MONGO_DB_COLLECTION = ''
-DB_URI = ''
+MONGO_URI = ''
+MONGO_DATABASE = ''
 
-BROKER_MQTT=''
-PORT_MQTT=''
-TOPIC=''
+BROKER_KEY = ''
+BROKER_TOPIC = ''
+BROKER_IP = ''
+BROKER_PORT = ''
 ```
 
 ### **4. Abrir o Servidor 
