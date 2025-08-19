@@ -2,5 +2,75 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 }
 
+
+img {
+    width: 280px;
+    height: 100px;
+}
+
+h1,
+a {
+    color: white;
+    text-decoration: none;
+}
+
+p{
+    color: rgb(148, 147, 147);
+}
+
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: 100vh;
+
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 300px;
+}
+
+.login-form {
+    background-color: rgba(184, 191, 197, .4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 50px;
+    width: 550px;
+    height: 550px;
+    gap: 20px;
+    border: 1px solid rgba(131, 131, 131, .4);
+    border-radius: 15px;
+}
+
+
+input {
+    border-radius: 8px;
+    border: 1px transparent;
+    height: 40px;
+    padding: 6px;
+}
+
+button {
+    border-radius: 8px;
+    border: 1px transparent;
+    height: 40px;
+    padding: 6px;
+}
+
+.btn {
+    background-color: brown;
+    color: white;
+    cursor: pointer;
+    font-size: 18px;
+    width: auto;
+}
