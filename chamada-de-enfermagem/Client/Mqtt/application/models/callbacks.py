@@ -5,7 +5,7 @@ from application.models.MongoDBConnection import MongoDBConnection
 
 load_dotenv()
 
-topic = os.getenv('TOPIC')
+topic = os.getenv('BROKER_TOPIC')
 uri = os.getenv('DB_URI') 
 database = os.getenv('MONGO_DB_DATABASE')
 collection = os.getenv('MONGO_DB_COLLECTION')
