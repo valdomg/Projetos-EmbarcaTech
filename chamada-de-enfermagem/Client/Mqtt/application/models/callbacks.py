@@ -5,7 +5,7 @@ from application.models.MongoDBConnection import MongoDBConnection
 
 load_dotenv()
 
-topic = os.getenv('TOPIC')
+topic = os.getenv('BROKER_TOPIC')
 uri = os.getenv('DB_URI') 
 database = os.getenv('MONGO_DB_DATABASE')
 collection = os.getenv('MONGO_DB_COLLECTION')
@@ -50,10 +50,15 @@ def on_message(client, userdata, message):
     # Quebra o tópico em partes
     # ['dispositivos', 'enfermagem/posto', 'id_dispositivo', 'status/comando']
     partes = message.topic.split('/')
-    print(
-        f'cabeçalho: {partes[0]}; local: {partes[1]}; id dispositivo: {partes[2]}')
+    print(f'cabeçalho: {partes[0]}; local: {partes[1]}; id dispositivo: {partes[2]}')
     _, local, dispositivo_id = partes
 
+    mongo.start_connection()
+    if mongo.verify_document('devices', dispositivo_id):
+        print('Dispositivo não encontrado')
+        mongo.close_connection()
+        return
+        
     comando = payload.get('comando')
     mensagem = payload.get('mensagem')
     source = payload.get('source')
@@ -66,15 +71,12 @@ def on_message(client, userdata, message):
             '''
             Laço condicional para registrar chamada no banco de dados
             '''
-            mongo.start_connection()
-
             mongo.insert_document_collection('Enfermagem',source)
-
-            mongo.close_connection()
 
     if local == 'enfermagem':
         print(f'Mensagem enviada para: {dispositivo_id} para a sala: {source}, com o comando de: {comando}')
 
+    mongo.close_connection()
     print()
 
 '''
