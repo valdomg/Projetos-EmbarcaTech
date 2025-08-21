@@ -7,11 +7,9 @@ load_dotenv()
 
 topic = os.getenv('BROKER_TOPIC')
 uri = os.getenv('DB_URI') 
-database = os.getenv('MONGO_DB_DATABASE')
-collection = os.getenv('MONGO_DB_COLLECTION')
+database = os.getenv('MONGO_DATABASE')
 
-
-mongo = MongoDBConnection(uri, database, collection)
+mongo = MongoDBConnection(uri, database)
 '''
 Callback usado ao conectar o client a algum tópico do broker
 '''
@@ -51,33 +49,37 @@ def on_message(client, userdata, message):
     # ['dispositivos', 'enfermagem/posto', 'id_dispositivo', 'status/comando']
     partes = message.topic.split('/')
     print(f'cabeçalho: {partes[0]}; local: {partes[1]}; id dispositivo: {partes[2]}')
-    _, local, dispositivo_id = partes
+    
+    _, local_topic, dispositivo_id = partes
 
     mongo.start_connection()
-    if mongo.verify_document('devices', dispositivo_id):
+    if not mongo.check_if_document_exists('devices', dispositivo_id):
         print('Dispositivo não encontrado')
+        mongo.close_connection() 
+    
+    else:
+        print('Dispositivo logado!')
+            
+        comando = payload.get('comando')
+        mensagem = payload.get('mensagem')
+        local_emergencia = payload.get('local')
+        room_number = payload.get('room_number')
+
+        print(comando)
+        if local_topic == 'posto_enfermagem':
+            print(f'Mensagem recebida do dispositivo: {dispositivo_id} da {local_emergencia}: {room_number}, com comando de: {comando}')
+
+            if comando == 'ligar':
+                '''
+                Laço condicional para registrar chamada no banco de dados
+                '''
+                print(mongo.insert_document_collection('chamadas', dispositivo_id, local_emergencia, room_number))
+
+        if local_topic == 'enfermagem':
+            print(f'Mensagem enviada para: {dispositivo_id} para a {local_emergencia}: {room_number}, com o comando de: {comando}')
+
         mongo.close_connection()
-        return
-        
-    comando = payload.get('comando')
-    mensagem = payload.get('mensagem')
-    source = payload.get('source')
-
-    if local == 'posto_enfermagem':
-        print(f'Mensagem recebida do dispositivo: {dispositivo_id} da sala: {source}, com comando de: {comando}')
-
-
-        if comando == 'ligar':
-            '''
-            Laço condicional para registrar chamada no banco de dados
-            '''
-            mongo.insert_document_collection('Enfermagem',source)
-
-    if local == 'enfermagem':
-        print(f'Mensagem enviada para: {dispositivo_id} para a sala: {source}, com o comando de: {comando}')
-
-    mongo.close_connection()
-    print()
+        print()
 
 '''
 Callback para conferir se a inscrição em algum tópico foi bem sucedida
