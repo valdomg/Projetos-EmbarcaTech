@@ -1,16 +1,7 @@
 import paho.mqtt.client as mqtt
-from dotenv import load_dotenv
-import os
 from time import sleep
 import json
 from application.models.callbacks import on_connect as ocm, on_message as oms, on_subscribe as osub
-
-load_dotenv()
-broker = os.getenv('BROKER_IP')
-port = int(os.getenv('BROKER_PORT'))
-topic = os.getenv('BROKER_TOPIC')
-
-print(broker, port, topic)
 
 '''
 Classe de conexão do mqtt
@@ -24,8 +15,8 @@ keepalive = tempo para verificar o estado do broker (ativo ou não)
 '''
 
 class MqttClientConnection:
-    def __init__(self, broker=broker, port=port, client_name= "Notebook", keepalive=60):
-        self.broker_ip = broker
+    def __init__(self, broker_ip:str, port:int, client_name:str, keepalive:int):
+        self.broker_ip = broker_ip
         self.port = port
         self.client_name = client_name
         self.keepalive = keepalive
