@@ -1,7 +1,7 @@
 import paho.mqtt.client as mqtt
 from time import sleep
 import json
-from application.models.callbacks import on_connect as ocm, on_message as oms, on_subscribe as osub
+from application.models.callbacks import on_connect as ocm, on_message as oms, on_subscribe as osub, on_disconnect as ods
 
 '''
 Classe de conexão do mqtt
@@ -31,6 +31,7 @@ class MqttClientConnection:
         mqtt_client.on_connect = ocm
         mqtt_client.on_message = oms
         mqtt_client.on_subscribe = osub
+        mqtt_client.on_disconnect = ods
 
         mqtt_client.connect(host=self.broker_ip, port=self.port, keepalive=self.keepalive)
         self.mqtt_client = mqtt_client
