@@ -15,18 +15,24 @@ keepalive = tempo para verificar o estado do broker (ativo ou não)
 '''
 
 class MqttClientConnection:
-    def __init__(self, broker_ip:str, port:int, client_name:str, keepalive:int):
-        self.broker_ip = broker_ip
-        self.port = port
-        self.client_name = client_name
-        self.keepalive = keepalive
-        self.mqtt_client = None
+    def __init__(self, broker_ip:str, port:int, client_name:str, user_name:str, password:str ,keepalive:int):
+        
+        self.broker_ip      =       broker_ip
+        self.port           =       port
+        self.client_name    =       client_name
+        self.user_name      =       user_name
+        self.password       =       password
+        self.keepalive      =       keepalive
+        self.mqtt_client    =       None
 
     '''
     Função para conectar o client ao broker, definir as funções de callback
     '''
     def start_connection(self):
         mqtt_client = mqtt.Client(self.client_name)
+
+        if self.user_name and self.password:
+            mqtt_client.username_pw_set(self.user_name, self.password)
 
         mqtt_client.on_connect = ocm
         mqtt_client.on_message = oms
