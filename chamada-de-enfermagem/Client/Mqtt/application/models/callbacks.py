@@ -23,12 +23,13 @@ def on_disconnect(client, userdata, rc):
     if rc != 0:
         print('Desconexão inesperada, tentando novamente...', rc)
 
+    print('Tentando novamente...')
     try:
         client.reconnect()
         print('Reconexão bem sucedida!')
 
     except Exception as e:
-        print('Conexão mal sucedidade, erro:', rc)
+        print('Conexão mal sucedida, erro:', rc)
 
 
 '''
