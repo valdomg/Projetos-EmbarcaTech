@@ -19,6 +19,17 @@ def on_connect(client, userdata, flags, rc):
 
     client.subscribe(topic)
 
+def on_disconnect(client, userdata, rc):
+    if rc != 0:
+        print('Desconexão inesperada, tentando novamente...', rc)
+
+    try:
+        client.reconnect()
+        print('Reconexão bem sucedida!')
+
+    except Exception as e:
+        print('Conexão mal sucedidade, erro:', rc)
+
 
 '''
     Callback para formatar as mensagens recebidas nos tópicos
