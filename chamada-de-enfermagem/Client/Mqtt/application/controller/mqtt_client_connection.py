@@ -42,21 +42,21 @@ class MqttClientConnection:
     '''
     def start(self):
         self.start_connection()
-
+        self.publish_on_topic('dispositivos/teste', 'olá broker')
         while True: sleep(0.001)
 
     '''
     Função para publicar em algum tópico 
     '''
-    def publish_on_topic(self, local, dispositivo_id, comando, mensagem, source=None):
+    def publish_on_topic(self,topic, msg):
 
-        topic = f"dispositivos/{local}/{dispositivo_id}"
-        
         payload = {
-            "id": dispositivo_id,
-            "comando": comando,
-            "mensagem": mensagem,
-            "source": source,
+            'id': self.client_name,
+            'estado': 'oscioso',
+            'mensagem': msg,
+            'room_number': 00,
+            'local': 'servidor',
+            'comando': None
         }
 
         self.mqtt_client.publish(topic, json.dumps(payload))
