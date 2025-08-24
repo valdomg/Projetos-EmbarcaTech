@@ -21,17 +21,22 @@ class MongoDBConnection:
     '''
     def start_connection(self):
         
-        try:
-            self.client = MongoClient(self.uri, server_api=ServerApi('1'))
-            self.db = self.client[self.database_name]
-            self.client.admin.command('ping')
-            print("Pinged your deployment. You successfully connected to MongoDB!")
-        except ConnectionFailure as e:
-            self.client = None
-            self.db = None
-            print(e)
+        if self.uri != None and self.database_name != None:
+            try:
+                self.client = MongoClient(self.uri, server_api=ServerApi('1'))
+                self.db = self.client[self.database_name]
+                self.client.admin.command('ping')
+                print("Pinged your deployment. You successfully connected to MongoDB!")
+                return True
+            except ConnectionFailure as e:
+                self.client = None
+                self.db = None
+                print(e)
+                return False
+        else:
+            print('Database não definida')
+            return False
         
-    
     '''
     Insere um novo documento na coleção
     '''
