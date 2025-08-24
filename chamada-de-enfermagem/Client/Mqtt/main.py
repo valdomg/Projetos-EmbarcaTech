@@ -10,7 +10,7 @@ port = int(os.getenv('BROKER_PORT'))
 topic = os.getenv('BROKER_TOPIC')
 client_name = os.getenv('CLIENT_NAME')
 user_name = os.getenv('CLIENT_USERNAME')
-password = os.getenv('BROKER_KEY')
+password = os.getenv('CLIENT_PASS')
 
 print(broker, port, topic)
 
