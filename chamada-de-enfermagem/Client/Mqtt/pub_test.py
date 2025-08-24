@@ -4,9 +4,11 @@ import paho.mqtt.client as mqtt
 BROKER_HOST = 'localhost'
 BROKER_PORT = 1883
 
+
 def publish_message(topic: str, payload: dict):
     """Publica uma mensagem MQTT no tópico especificado."""
-    client = mqtt.Client(client_id='Publisher')
+    client = mqtt.Client(client_id='pub_test')
+    client.username_pw_set('pub_test', '123')
     client.connect(BROKER_HOST, BROKER_PORT)
     client.publish(topic, json.dumps(payload))
     client.disconnect()
