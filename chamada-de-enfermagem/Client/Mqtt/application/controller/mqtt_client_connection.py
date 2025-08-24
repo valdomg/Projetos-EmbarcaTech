@@ -8,9 +8,11 @@ Classe de conexão do mqtt
 
 atributos
 
-broker = ip do broker
-port = porta do broker
-client_name = nome do client
+broker          = ip do broker
+port            = porta do broker
+client_name     = nome do client
+user_name       = nome de usuário para a senha
+password        = senha para o client
 keepalive = tempo para verificar o estado do broker (ativo ou não)
 '''
 
@@ -34,10 +36,10 @@ class MqttClientConnection:
         if self.user_name and self.password:
             mqtt_client.username_pw_set(self.user_name, self.password)
 
-        mqtt_client.on_connect = ocm
-        mqtt_client.on_message = oms
-        mqtt_client.on_subscribe = osub
-        mqtt_client.on_disconnect = ods
+        mqtt_client.on_connect      = ocm
+        mqtt_client.on_message      = oms
+        mqtt_client.on_subscribe    = osub
+        mqtt_client.on_disconnect   = ods
 
         mqtt_client.connect(host=self.broker_ip, port=self.port, keepalive=self.keepalive)
         self.mqtt_client = mqtt_client
@@ -48,7 +50,7 @@ class MqttClientConnection:
     '''
     def start(self):
         self.start_connection()
-        self.publish_on_topic('dispositivos/teste', 'olá broker')
+        self.publish_on_topic('dispositivos/teste/client', 'olá broker')
         while True: sleep(0.001)
 
     '''
