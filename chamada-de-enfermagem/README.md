@@ -38,10 +38,14 @@ pip install paho-mqtt
 MONGO_URI = ''
 MONGO_DATABASE = ''
 
-BROKER_KEY = ''
-BROKER_TOPIC = ''
 BROKER_IP = ''
 BROKER_PORT = ''
+BROKER_TOPIC = ''
+
+CLIENT_NAME = ''
+CLIENT_USERNAME = ''
+CLIENT_PASS = ''
+
 ```
 
 ### **4. Abrir o Servidor 
