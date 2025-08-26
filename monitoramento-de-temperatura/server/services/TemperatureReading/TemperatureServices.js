@@ -1,11 +1,9 @@
-import TemperatureModel from '../../models/Temperature.js';
-
 class TemperatureService {
   constructor(temperatureModel) {
     this.temperatureModel = temperatureModel;
   }
 
-  async createTemperatureReading(data) {
+  createTemperatureReading = async (data) => {
     const temperatureReading = new this.temperatureModel({
       temperature: data.temperature,
       room: data.room,
@@ -15,15 +13,38 @@ class TemperatureService {
     return await temperatureReading.save();
   }
 
-  async getTemperatureReadings() {
+  getTemperatureReadings = async () => {
     return await this.temperatureModel.find();
   }
 
-  async getTemperatureReadingById(id) {
+  getTemperatureReadingsByInterval = async (startDate, endDate) => {
+    return await this.temperatureModel.find({
+      timestamp: {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate)
+      }
+    });
+  }
+
+  getRoomTemperatureReadings = async (roomId) => {
+    return await this.temperatureModel.find({ room: roomId });
+  }
+
+  getRoomTemperatureReadingsByInterval = async (roomId, startDate, endDate) => {
+    return await this.temperatureModel.find({
+      room: roomId,
+      timestamp: {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate)
+      }
+    });
+  }
+
+  getTemperatureReadingById = async (id) => {
     return await this.temperatureModel.findById(id);
   }
 
-  async deleteTemperatureReading(id) {
+  deleteTemperatureReading = async (id) => {
     return await this.temperatureModel.findByIdAndDelete(id);
   }
 
