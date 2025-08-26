@@ -1,3 +1,5 @@
+@import url(header.css);
+
 * {
     margin: 0;
     padding: 0;
@@ -17,7 +19,7 @@ a {
     text-decoration: none;
 }
 
-p{
+p {
     color: rgb(148, 147, 147);
 }
 
@@ -75,41 +77,6 @@ button {
     width: auto;
 }
 
-.icons{
-    color: white;
-    justify-content: center;
-    align-items: center;
-    display: flex;
-    flex-direction: row;
-    padding-bottom: 10px;
-    font-size: 18px;
-    gap: 20px;
-}
-
-.fa{
-    border: 1px solid white;
-    border-radius: 5px;
-    padding: 15px;
-}
-
-nav {
-    padding-top: 20px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-evenly;
-    align-items: center;
-    background-color: brown;
-}
-
-nav a img {
-    width: 150px;
-    height: 50px;
-}
-
-nav h1{
-    font-size: 40px;
-}
-
 .dashboard {
     display: flex;
     justify-content: center;
@@ -122,18 +89,18 @@ nav h1{
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content:center;
+    justify-content: center;
     gap: 100px;
 }
 
-.temp{
+.temp {
     align-items: center;
     justify-items: center;
     cursor: pointer;
     padding: 20px;
 }
 
-.umid{
+.umid {
     align-items: center;
     justify-items: center;
     cursor: pointer;
@@ -141,31 +108,49 @@ nav h1{
 }
 
 .relatorio {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  height: 80vh;
-  margin-top: 30px;
-  gap: 20px;
-  padding: 15px;
-  background: #f3f3f3;
-  border-radius: 8px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    height: 80vh;
+    margin-top: 30px;
+    gap: 20px;
+    padding: 15px;
+    background: #f3f3f3;
+    border-radius: 8px;
 }
 
 .relatorio label,
 .relatorio input,
 .relatorio button {
-  margin: 8px 0;
+    margin: 8px 0;
 }
 
 .relatorio button {
-  padding: 8px 12px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+    padding: 8px 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
 }
 
 
+/*  BREAKPOINTS */
+@media (max-width: 767px) {
+    .dashbord {
+        margin-top: 3rem;
+        gap: 2rem;
+    }
+
+    .monitor {
+        flex-direction: column;
+        margin-top: 3rem;
+        gap: 1px;
+    }
+
+    .temp,
+    .umid {
+        padding: 5px;
+    }
+}
