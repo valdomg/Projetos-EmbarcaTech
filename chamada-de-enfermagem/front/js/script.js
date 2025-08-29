@@ -17,4 +17,3 @@ socket.on("todas-chamadas", (chamadas) => {
 socket.on("nova-chamada", (chamada) => {
     adicionarChamada(chamada);
 });
-
