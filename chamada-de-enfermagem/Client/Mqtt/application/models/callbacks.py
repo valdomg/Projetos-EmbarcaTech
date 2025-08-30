@@ -6,7 +6,7 @@ from application.models.MongoDBConnection import MongoDBConnection
 load_dotenv()
 
 topic = os.getenv('BROKER_TOPIC')
-uri = os.getenv('DB_URI') 
+uri = os.getenv('MONGO_URI') 
 database = os.getenv('MONGO_DATABASE')
 
 mongo = MongoDBConnection(uri, database)
@@ -64,11 +64,11 @@ def on_message(client, userdata, message):
     
     _, local_topic, dispositivo_id = partes
 
-    if mongo.start_connection() != True:
+    if mongo.start_connection() == False:
         mongo.close_connection()
         
     else:
-        if mongo.check_if_document_exists('devices', dispositivo_id) != True:
+        if mongo.check_if_document_exists('devices','device', dispositivo_id) != True:
             print('Dispositivo não encontrado')
             mongo.close_connection() 
         
