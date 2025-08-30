@@ -3,12 +3,13 @@ import paho.mqtt.client as mqtt
 
 BROKER_HOST = 'localhost'
 BROKER_PORT = 1883
-
+id_test = 'pub_test'
+pass_test = '123'
 
 def publish_message(topic: str, payload: dict):
     """Publica uma mensagem MQTT no tópico especificado."""
-    client = mqtt.Client(client_id='pub_test')
-    client.username_pw_set('pub_test', '123')
+    client = mqtt.Client(client_id=id_test)
+    client.username_pw_set(id_test, pass_test)
     client.connect(BROKER_HOST, BROKER_PORT)
     client.publish(topic, json.dumps(payload))
     client.disconnect()
@@ -42,21 +43,23 @@ def pub_posto_enfermagem(dispositivo_id: str, estado: str, mensagem: str, room_n
 
 # ====== EXEMPLOS DE USO ======
 pub_enfermagem_dispositivo(
+
         dispositivo_id='Enfermagem1',
         estado='emergencia',
         mensagem='Ligar LED',
-        room_number='14',
+        room_number='1',
         local='Enfermagem',
         comando='ligar'
-    )
+        
+)
 
 
 pub_posto_enfermagem(
         dispositivo_id='Enfermagem1',
-        estado='oscioso',
-        mensagem='Desligar LED',
-        room_number='14',
+        estado='emergencia',
+        mensagem='Ligar LED',
+        room_number='1',
         local='Enfermagem',
-        comando='desligar'
-    )
+        comando='ligar'
+)
 
