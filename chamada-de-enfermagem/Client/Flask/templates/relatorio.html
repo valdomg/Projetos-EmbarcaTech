@@ -3,8 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.css' ) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css' ) }}">
+
+    <!--
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.css">
     <link rel="stylesheet" href="/css/custom.css">
+    -->
+
     <title>Chamada de enfermagem</title>
 </head>
 <body>
@@ -12,7 +20,7 @@
         <nav class="navbar bg-danger">
             <div class="container-fluid">
                 <span class="navbar-brand d-flex">
-                    <img class="" src="static/logo2.png" alt="" width="200">
+                    <img class="" src="static/img/logo2.png" alt="" width="200">
                     <h1 class="text-white m-auto px-3">Chamada de enfermagem</h1>
                 </span>
             </div>
@@ -42,9 +50,15 @@
     <!-- socket de teste -->
     <script src="http://localhost:3000/socket.io/socket.io.js"></script>
 
+    <script src="{{ url_for('static',filename='bootstrap/js/bootstrap.bundle.js' ) }}"></script>
+    <script src="{{ url_for('static',filename='chart.js/Chart.bundle.min.js' ) }}"></script>
+    <script src="{{ url_for('static',filename='js/script.js' ) }}"></script>
+    <script src="{{ url_for('static',filename='js/grafico.js' ) }}"></script>
+    <!--
     <script src="./bootstrap/js/bootstrap.bundle.js"></script>
     <script src="./chart.js/Chart.bundle.min.js"></script>
     <script src="./js/script.js"></script>
     <script src="./js/grafico.js"></script>
+    -->
 </body>
 </html>
