@@ -104,7 +104,7 @@ CLIENT_PASS = ''
 
 ```
 
-### **4. Abrir o Servidor 
+### **4. Conectar o Client MQTT ao Broker 
 ```bash
 cd ./chamada-de-enfermagem/server/Mqtt/
 ```
@@ -114,9 +114,19 @@ py main.py        #Windows
 ```bash
 python main.py    #Linux
 ```
+### **5. Abrir o Client Flask para visualizar a tabela de chamadas
+```bash
+cd ./chamada-de-enfermagem/Client
+```
+```bash
+python -m Flask.app        #Windows
+```
+```bash
+python -m Flask.app   #Linux
+```
 
-### **5. Realizar um teste
-Em outro terminal execute o arquivo pub_test.py
+### **6. Realizar um teste
+Em outro terminal execute o arquivo pub_test.py e veja a nova chamada dentro do app 
 ```bash
 py pub_test.py  #Windows
 ```
