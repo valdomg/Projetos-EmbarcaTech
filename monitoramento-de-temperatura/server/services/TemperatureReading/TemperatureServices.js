@@ -28,7 +28,7 @@ class TemperatureService {
       humidity
     });
 
-    await reading.save();
+    return await reading.save();
   }
 
   getTemperatureReadings = async () => {

@@ -8,6 +8,10 @@ const mockModel = {
   create: jest.fn(),
 };
 
+const mockRoomService = {
+  getRoomByMicrocontrollerId: jest.fn(),
+};
+
 describe('TemperatureService', () => {
   let service;
   let saveMock;
@@ -20,11 +24,15 @@ describe('TemperatureService', () => {
         save: saveMock
       };
     };
+
     model.find = mockModel.find;
     model.findById = mockModel.findById;
     model.findByIdAndDelete = mockModel.findByIdAndDelete;
 
+    // Criando instância do serviço com mock de RoomServices
     service = new TemperatureService(model);
+    service.roomService = mockRoomService;
+
     jest.clearAllMocks();
   });
 
@@ -37,6 +45,8 @@ describe('TemperatureService', () => {
         microcontrollerId: 'abc123'
       };
 
+      mockRoomService.getRoomByMicrocontrollerId.mockResolvedValue({ _id: 'mockRoomId' });
+
       const result = await service.createTemperatureReading(data);
 
       expect(saveMock).toHaveBeenCalled();
@@ -44,9 +54,6 @@ describe('TemperatureService', () => {
     });
 
     test.todo("Caso de falha ao criar leitura com campo faltando");
-    it("should throw an error if required fields are missing", async () => {
-      
-    });
 
     test.todo("Caso de falha ao criar leitura com dados inválidos");
 
@@ -55,7 +62,9 @@ describe('TemperatureService', () => {
 
   describe('getTemperatureReadings', () => {
     it('should fetch all readings', async () => {
-      mockModel.find.mockResolvedValueOnce(['reading1', 'reading2']);
+      mockModel.find.mockReturnValueOnce({
+        populate: jest.fn().mockResolvedValue(['reading1', 'reading2'])
+      });
 
       const result = await service.getTemperatureReadings();
 
@@ -135,13 +144,18 @@ describe('TemperatureService', () => {
 
   describe('getTemperatureReadingById', () => {
     it('should return a reading by id', async () => {
-      const mockReading = { temperature: 30 };
-      mockModel.findById.mockResolvedValueOnce(mockReading);
+
+      const mockPopulate = jest.fn().mockResolvedValue({ temperature: 30 });
+
+      mockModel.findById.mockReturnValueOnce({
+         populate: mockPopulate
+      });
 
       const result = await service.getTemperatureReadingById('mockId');
 
       expect(mockModel.findById).toHaveBeenCalledWith('mockId');
-      expect(result).toBe(mockReading);
+      expect(mockPopulate).toHaveBeenCalledWith('room');
+      expect(result).toEqual({ temperature: 30 });
     });
 
     test.todo("retornar erro se leitura não existir");
