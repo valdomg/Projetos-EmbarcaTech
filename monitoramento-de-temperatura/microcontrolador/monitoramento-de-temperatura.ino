@@ -2,13 +2,16 @@
 #include "wifi.h"
 #include "mqtt.h"
 #include "display_LCD-1602_I2C.h"
+#include "buzzer.h"
 
 
 constexpr unsigned long MQTT_INTERVAL_MS = 180000;  // 3 minutos
 constexpr unsigned long SENSOR_INTERVAL_MS = 1000;  // 1 segundo
 
-constexpr uint8_t TEMPERATURE_MAX = 25;
-constexpr uint8_t HUMIDITY_MIN = 40;
+constexpr uint8_t TEMPERATURE_MAX = 23;
+constexpr uint8_t TEMPERATURE_MIN = 14;
+
+constexpr uint8_t HUMIDITY_MIN = 30;
 constexpr uint8_t HUMIDITY_MAX = 60;
 
 unsigned long lastMQTTPublishTime = 0;
@@ -28,7 +31,7 @@ checkErrors(const EnvironmentData& data) {
     status.sensorError = true;
   }
 
-  if (data.temperature > TEMPERATURE_MAX) {
+  if (data.temperature > TEMPERATURE_MAX || data.temperature < TEMPERATURE_MIN) {
     status.temperatureError = true;
   }
 
@@ -65,7 +68,6 @@ void maybePublishMQTT(const EnvironmentData& data, unsigned long now) {
 
 void handleSensorData(EnvironmentData& data, unsigned long now) {
 
-  //logica para limite de temperatura
   ErrorStatus errors = checkErrors(data);
 
   updateDisplay(data, errors);
@@ -75,14 +77,26 @@ void handleSensorData(EnvironmentData& data, unsigned long now) {
     return;
   }
 
+  maybeHandleAlerts(errors, now);
   maybePublishMQTT(data, now);
 }
+
+void maybeHandleAlerts(const ErrorStatus& errors, unsigned long now) {
+  if (errors.humidityError || errors.temperatureError) {
+    toggleBuzzer(now);
+  } else {
+    disableSoundAlert();
+  }
+}
+
 
 void setup() {
   Serial.begin(115200);
   initializeSensor();
   // Chama a função para iniciar o display
   lcd1602_init();
+
+  buzzerInit();
 
   if (!connectWiFi()) {
     Serial.println("WiFi não conectado.");
