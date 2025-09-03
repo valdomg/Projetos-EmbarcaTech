@@ -29,7 +29,6 @@ describe('TemperatureService', () => {
     model.findById = mockModel.findById;
     model.findByIdAndDelete = mockModel.findByIdAndDelete;
 
-    // Criando instância do serviço com mock de RoomServices
     service = new TemperatureService(model);
     service.roomService = mockRoomService;
 
@@ -72,7 +71,16 @@ describe('TemperatureService', () => {
       expect(result).toEqual(['reading1', 'reading2']);
     });
 
-    test.todo("retornar erro se não houver leituras");
+    it('should return an empty array if no readings found', async () => {
+      mockModel.find.mockReturnValueOnce({
+        populate: jest.fn().mockResolvedValue([])
+      });
+
+      const result = await service.getTemperatureReadings();
+
+      expect(mockModel.find).toHaveBeenCalledWith();
+      expect(result).toEqual([]);
+    });
   });
 
   describe('getTemperatureReadingsByInterval', () => {
@@ -94,9 +102,12 @@ describe('TemperatureService', () => {
       expect(result).toBe(mockResult);
     });
 
-    test.todo("retornar erro se intervalo inválido");
+  it("should return an error if the interval is invalid", async () => {
+    const startDate = '2025-07-30T14:00:00Z';
+    const endDate = '2025-07-29T14:00:00Z';
 
-    test.todo("retornar erro se não houver leituras no intervalo");
+    await expect(service.getTemperatureReadingsByInterval(startDate, endDate)).rejects.toThrow("Intervalo de datas inválido");
+  });
   });
 
   describe('getRoomTemperatureReadings', () => {
@@ -110,9 +121,11 @@ describe('TemperatureService', () => {
       expect(result).toBe(mockResult);
     });
 
-    test.todo("retornar erro se não houver leituras para a sala");
+    it('should return an error if the room does not exist', async () => {
+      mockRoomService.getRoomByMicrocontrollerId.mockResolvedValue(null);
 
-    test.todo("retornar erro se sala não existir");
+      await expect(service.getRoomTemperatureReadings('Sala')).rejects.toThrow("Sala não encontrada");
+    });
   });
 
   describe('getRoomTemperatureReadingsByInterval', () => {
@@ -134,12 +147,6 @@ describe('TemperatureService', () => {
       });
       expect(result).toBe(mockResult);
     });
-
-    test.todo("retornar erro se intervalo inválido");
-
-    test.todo("retornar erro se não houver leituras para a sala no intervalo");
-
-    test.todo("retornar erro se sala não existir");
   });
 
   describe('getTemperatureReadingById', () => {
@@ -158,9 +165,10 @@ describe('TemperatureService', () => {
       expect(result).toEqual({ temperature: 30 });
     });
 
-    test.todo("retornar erro se leitura não existir");
+    it("should return an error if the id is invalid", async () => {
+      await expect(service.getTemperatureReadingById(null)).rejects.toThrow("ID inválido");
+    });
 
-    test.todo("retornar erro se id inválido");
   });
 
   describe('deleteTemperatureReading', () => {
@@ -174,6 +182,10 @@ describe('TemperatureService', () => {
       expect(result).toBe(deletedReading);
     });
 
-    test.todo("retornar erro se leitura não existir");
+    it("should return an error if the reading does not exist", async () => {
+      mockModel.findByIdAndDelete.mockResolvedValueOnce(undefined);
+
+      await expect(service.deleteTemperatureReading('mockId')).rejects.toThrow("Leitura não encontrada");
+    });
   });
 });

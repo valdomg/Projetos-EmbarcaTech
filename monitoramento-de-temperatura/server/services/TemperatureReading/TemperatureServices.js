@@ -36,6 +36,9 @@ class TemperatureService {
   }
 
   getTemperatureReadingsByInterval = async (startDate, endDate) => {
+
+    await this.validateInterval(startDate, endDate);
+
     return await this.temperatureModel.find({
       timestamp: {
         $gte: new Date(startDate),
@@ -45,10 +48,19 @@ class TemperatureService {
   }
 
   getRoomTemperatureReadings = async (roomId) => {
-    return await this.temperatureModel.find({ room: roomId });
+    const room = await this.temperatureModel.find({ room: roomId });
+
+    if (!room) {
+      throw new Error("Sala não encontrada");
+    }
+
+    return room;
   }
 
   getRoomTemperatureReadingsByInterval = async (roomId, startDate, endDate) => {
+    await this.validateInterval(startDate, endDate);
+
+
     return await this.temperatureModel.find({
       room: roomId,
       timestamp: {
@@ -59,11 +71,40 @@ class TemperatureService {
   }
 
   getTemperatureReadingById = async (id) => {
-    return await this.temperatureModel.findById(id).populate('room');
+    if (!id) {
+      throw new Error("ID inválido");
+    }
+
+    const result = await this.temperatureModel.findById(id).populate('room');
+
+    if (!result) {
+      throw new Error("Leitura não encontrada");
+    }
+
+    return result;
   }
 
   deleteTemperatureReading = async (id) => {
-    return await this.temperatureModel.findByIdAndDelete(id);
+    const result = await this.temperatureModel.findByIdAndDelete(id);
+    if (!result) {
+      throw new Error("Leitura não encontrada");
+    }
+    return result;
+  }
+
+  validateInterval = async (startDate, endDate) => {
+    if (!startDate || !endDate) {
+      throw new Error("Ambos os campos de data são obrigatórios");
+    }
+
+    if (startDate > endDate) {
+      throw new Error("Intervalo de datas inválido");
+    }
+
+    if (endDate > new Date()) {
+      throw new Error("Data final não pode ser no futuro");
+    }
+    return true;
   }
 
 }
