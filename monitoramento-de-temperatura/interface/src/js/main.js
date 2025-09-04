@@ -43,7 +43,6 @@ var gauge1 = new JustGage({
   symbol: '°c',
   gaugeWidthScale: 0.9,
   title: "Lone Ranger",
-  label: "Última",
   // label: "Temperatura",
   pointer: "true",
   pointerOptions: {
