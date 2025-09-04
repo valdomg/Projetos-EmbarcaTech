@@ -4,6 +4,10 @@ class RoomServices {
   }
 
   createRoom = async (roomData) => {
+    if(!roomData.name || !roomData.microcontrollerId){
+      throw new Error("Nome e microcontrollerId são obrigatórios");
+    }
+
     const room = new this.RoomModel(roomData);
     return await room.save();
   }
@@ -27,6 +31,7 @@ class RoomServices {
   deleteRoom = async (roomId) => {
     return await this.RoomModel.findByIdAndDelete(roomId);
   }
+
 }
 
 export default RoomServices;
