@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+     <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.css' ) }}">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css' ) }}">
+
+    <!--
+    <link rel="stylesheet" href="./bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="/css/custom.css">
+    -->
+    <title>Chamada de enfermagem</title>
+</head>
+<body>
+    <header>
+        <nav class="navbar bg-danger ">
+            <div class="container-fluid">
+                <span class="navbar-brand d-flex">
+                    <img class="" src="static/img/logo2.png" alt="" width="200">
+                    <h1 class="text-white m-auto px-3">Chamada de enfermagem</h1>
+                </span>
+            </div>
+        </nav>
+    </header>
+
+
+    <div class="container-fluid mt-5">
+        <div class="row gx-3 ">
+            <div class="container col borda-conteiner m-3">
+                <div class="row m-3">
+                    <h3 class="float-end">Graficos:</h3>
+                    <select name="" id="tipo-grafico" class="form-select" style="width:250px">
+                        <option value="hora" selected>Chamadas por hora</option>
+                        <option value="mes">Chamadas no mês</option>
+                    </select>
+
+                    <canvas id="grafico-chamadas"  style="width:100%;max-width: 50vw"></canvas>
+                </div>
+            </div>
+            <div class="container col borda-conteiner m-3">
+                <div class="row m-3 w-75 mx-auto">
+                    <h3>Chamadas recentes:</h3>
+                    <div id="chamadas-lista">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+
+    <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.bundle.js' ) }}"></script>
+    <script src="{{ url_for('static', filename='chart.js/Chart.bundle.min.js' ) }}"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/grafico.js') }}"></script>
+    
+</body>
+</html>

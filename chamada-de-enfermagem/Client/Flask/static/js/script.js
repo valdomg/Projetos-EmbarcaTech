@@ -1,4 +1,4 @@
-const socket = io("http://localhost:3000");
+const socket = io();
 
 const chamadasLista = document.getElementById("chamadas-lista");
 
@@ -17,4 +17,3 @@ socket.on("todas-chamadas", (chamadas) => {
 socket.on("nova-chamada", (chamada) => {
     adicionarChamada(chamada);
 });
-

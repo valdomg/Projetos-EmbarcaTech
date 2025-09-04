@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 
 <head>
     <meta charset="UTF-8">
@@ -10,36 +10,41 @@
 </head>
 
 <body>
+    <!-- <header>
+        <nav>
+            <a href=""><img src="src/img/logo1.png" alt=""></a>
+            <h1>Monitoramento de Temperatura</h1>
+            <a href="">Sair</a>
+        </nav>
+        
+    </header> -->
 
-
+    <main>
         <nav>
             <a><img src="src/img/logo2.png"></a>
             <h1>Monitoramento de Temperatura</h1>
             <div class="icons">
-                <a href="relatorio.html" title="Relatório"><i class="fa fa-file-excel-o"></i></a>
+                <a href="index.html" title="Relatório"><i class="fa fa-file-excel-o"></i></a>
                 <a href="login.html" title="Sair"><i class="fa fa-sign-out"></i></a>
+                <!-- <input type="date" class="interval"> -->
             </div>
         </nav>
 
-        <div class="dashboard">
-            <div class="monitor">
-                <div class="temp">
-                    <h4>Temperatura</h4>
-                    <div id="gauge" style="width:400px; height:320px"></div>
 
-                </div>
-                <div class="umid">
-                    <h4>Umidade</h4>
-                    <div id="gauge2" class="gauge" style="width:400px; height:320px"></div>
-
-                </div>
-            </div>
-            <p id="temperatura"></p>
-            <div>
-
-            </div>
+        <div class="relatorio">
+            <h3>Gerar Relatório</h3>
+            <label for="periodo">Escolha o período:</label>
+            <select id="periodo">
+                <option value="1">Últimas 24h</option>
+                <option value="2">Últimos 2 dias</option>
+                <option value="7">Últimos 7 dias</option>
+                <option value="30">Últimos 30 dias</option>
+            </select>
+            <button id="emitirRelatorio">Emitir Relatório (CSV)</button>
         </div>
 
+
+    </main>
 
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.4/raphael-min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/justgage/1.2.9/justgage.min.js"></script>

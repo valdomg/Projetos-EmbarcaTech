@@ -1,0 +1,156 @@
+@import url(header.css);
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+
+img {
+    width: 280px;
+    height: 100px;
+}
+
+h1,
+a {
+    color: white;
+    text-decoration: none;
+}
+
+p {
+    color: rgb(148, 147, 147);
+}
+
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: 100vh;
+
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 300px;
+}
+
+.login-form {
+    background-color: rgba(184, 191, 197, .4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 50px;
+    width: 550px;
+    height: 550px;
+    gap: 20px;
+    border: 1px solid rgba(131, 131, 131, .4);
+    border-radius: 15px;
+}
+
+
+input {
+    border-radius: 8px;
+    border: 1px transparent;
+    height: 40px;
+    padding: 6px;
+}
+
+button {
+    border-radius: 8px;
+    border: 1px transparent;
+    height: 40px;
+    padding: 6px;
+}
+
+.btn {
+    background-color: brown;
+    color: white;
+    cursor: pointer;
+    font-size: 18px;
+    width: auto;
+}
+
+.dashboard {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: 90vh;
+}
+
+.monitor {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 100px;
+}
+
+.temp {
+    align-items: center;
+    justify-items: center;
+    cursor: pointer;
+    padding: 20px;
+}
+
+.umid {
+    align-items: center;
+    justify-items: center;
+    cursor: pointer;
+    padding: 20px;
+}
+
+.relatorio {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    height: 80vh;
+    margin-top: 30px;
+    gap: 20px;
+    padding: 15px;
+    background: #f3f3f3;
+    border-radius: 8px;
+}
+
+.relatorio label,
+.relatorio input,
+.relatorio button {
+    margin: 8px 0;
+}
+
+.relatorio button {
+    padding: 8px 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+
+/*  BREAKPOINTS */
+@media (max-width: 767px) {
+    .dashbord {
+        margin-top: 3rem;
+        gap: 2rem;
+    }
+
+    .monitor {
+        flex-direction: column;
+        margin-top: 3rem;
+        gap: 1px;
+    }
+
+    .temp,
+    .umid {
+        padding: 5px;
+    }
+}
