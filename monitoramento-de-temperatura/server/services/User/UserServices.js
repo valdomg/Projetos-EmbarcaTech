@@ -18,11 +18,19 @@ class UserService {
     if(! await this.validatePassword(userData.password)) {
       throw new Error("Senha deve ter pelo menos 8 caracteres, incluindo uma letra maiúscula, uma letra minúscula, um número e um caractere especial");
     }
-    userData.password = this.hashPassword(userData.password);
+    userData.password = await this.hashPassword(userData.password);
 
     const user = new this.userModel(userData);
     await user.save();
     return user;
+  };
+
+  getUserByEmail = async (email) => {
+    if (!email) {
+      throw new Error("Email é obrigatório");
+    }
+
+    return this.userModel.findOne({ email });
   };
 
   validatePassword = async (password) => {
@@ -30,9 +38,10 @@ class UserService {
     return regex.test(password);
   }
 
-  hashPassword = (plainPassword) => {
-    const salt = bcrypt.genSaltSync(process.env.HASH_SALT_ROUNDS || 10);
-    return bcrypt.hashSync(plainPassword, salt);
+  hashPassword = async (plainPassword) => {
+    const saltRounds = 10;
+    const salt = await bcrypt.genSalt(saltRounds);
+    return bcrypt.hash(plainPassword, salt);
   }
 }
 

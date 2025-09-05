@@ -80,11 +80,12 @@ describe('UserService', () => {
     });
 
     describe('hashPassword', () => {
-        it('should return a hashed password', () => {
+        it('should return a hashed password', async () => {
             const plain = 'Password1!';
-            const hash = userService.hashPassword(plain);
+            const hash = await userService.hashPassword(plain);
+            const isMatch = await bcrypt.compare(plain, hash);
             expect(hash).not.toBe(plain);
-            expect(bcrypt.compareSync(plain, hash)).toBe(true);
+            expect(isMatch).toBe(true);
         });
     });
 });
