@@ -5,6 +5,11 @@
 WiFiClientSecure espClient;
 PubSubClient client(espClient);
 
+
+static unsigned long lastAttempConnectMQTT = 0;
+
+static const unsigned long reconnectIntervalMQTT = 3000;
+
 /**
  * Configura a conexão com o servidor MQTT
  */
@@ -18,17 +23,22 @@ void setupMQTT() {
  * Verifica a conexão com MQTT, e reconecta se necessario.
  */
 void checkMQTTConnected() {
-  if (!client.connected()) {
-    while (!client.connected()) {
-      Serial.print("Tentando conectar ao MQTT... ");
-      if (client.connect("ESP32", MQTT_USER, MQTT_PASS)) {
-        Serial.println("Conectado!");
-        client.subscribe(MQTT_SUBSCRIPTION_TOPIC);
-      } else {
-        Serial.print("Erro, rc=");
-        Serial.println(client.state());
-        delay(5000);
-      }
+
+  client.loop();
+  if (client.connected()) return;
+
+  unsigned long now = millis();
+
+  if (now - lastAttempConnectMQTT >= reconnectIntervalMQTT){
+
+    lastAttempConnectMQTT = now; 
+    Serial.print("Tentando conectar ao MQTT... ");
+    if (client.connect(MQTT_DEVICE_ID, MQTT_USER, MQTT_PASS)) {
+      Serial.println("Conectado!");
+      client.subscribe(MQTT_SUBSCRIPTION_TOPIC);
+    } else {
+      Serial.print("Erro, rc=");
+      Serial.println(client.state());
     }
   }
 }
@@ -56,9 +66,7 @@ void publicReponseDivice(const char* id, float value) {
   snprintf(payload, sizeof(payload), "%.2f", value);
 
   char topic[50];
-  snprintf(topic, sizeof(topic), "%s/%s",MQTT_PUBLICATION_TOPIC, id);
-  
+  snprintf(topic, sizeof(topic), "%s/%s", MQTT_PUBLICATION_TOPIC, id);
+
   client.publish(topic, payload);
 }
-
-
