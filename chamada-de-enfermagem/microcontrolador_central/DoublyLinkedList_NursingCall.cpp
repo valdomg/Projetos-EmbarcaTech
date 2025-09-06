@@ -34,3 +34,26 @@ int List_NursingCall::getInfirmaryCurrent() {
 bool List_NursingCall::hasNursingCall() {
     return total > 0;
 }
+
+// =========================
+//        Add Nó
+// =========================
+void List_NursingCall::add(int infirmary) { // Adicionar um nó ao final da lista
+    NursingCall* new_node = new NursingCall; // Cria um novo nó
+    new_node->infirmary = infirmary; // O campo infirmary do novo nó recebe o valor correspondente
+    new_node->next = nullptr; // Como vai ser o último nó, o campo next é vazio
+    new_node->prev = tail; // Liga o prev do novo ao tail atual
+
+    if (tail != nullptr) { // Se havia um tail, ajusta tail->next
+        tail->next = new_node;
+    } else { // senão (lista vazia) ajusta head
+        head = new_node;
+    }
+
+    // Atualiza tail com o novo nó
+    tail = new_node;
+    // define current como o novo nó
+    current = new_node;
+    // Incrementa total
+    total++;
+}

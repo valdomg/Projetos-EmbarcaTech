@@ -26,6 +26,8 @@ class List_NursingCall {
     int getTotal();
     int getInfirmaryCurrent();
     bool hasNursingCall();
+
+    void add(int infirmary);
 };
 
 #endif // DOUBLY_LINKED_LIST_NURSING_CALL_H
