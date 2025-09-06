@@ -22,6 +22,10 @@ class List_NursingCall {
   public:
     List_NursingCall();
     ~List_NursingCall();
+
+    int getTotal();
+    int getInfirmaryCurrent();
+    bool hasNursingCall();
 };
 
 #endif // DOUBLY_LINKED_LIST_NURSING_CALL_H
