@@ -57,3 +57,21 @@ void List_NursingCall::add(int infirmary) { // Adicionar um nó ao final da list
     // Incrementa total
     total++;
 }
+
+
+// =========================
+//        Navegações
+// =========================
+void List_NursingCall::next() { // Move current para próximo nó
+    // Se o current ou o próximo nó de current não for vazio 
+    if (current != nullptr && current->next != nullptr) {
+        current = current->next;
+    }
+}
+
+void List_NursingCall::prev() { // Move current para o nó anterior
+    // Se o current ou o nó anterior de current não for vazio 
+    if (current != nullptr && current->prev != nullptr) {
+        current = current->prev;
+    }
+}

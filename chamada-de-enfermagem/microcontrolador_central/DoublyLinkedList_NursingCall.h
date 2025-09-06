@@ -28,6 +28,8 @@ class List_NursingCall {
     bool hasNursingCall();
 
     void add(int infirmary);
+    void next();
+    void prev();
 };
 
 #endif // DOUBLY_LINKED_LIST_NURSING_CALL_H
