@@ -14,6 +14,26 @@ const uint8_t LCD_LINES = 4;
 LiquidCrystal_I2C lcd(I2C_ADDR, LCD_COLUMNS, LCD_LINES);
 
 
+// Função que mostra os dados no display
+void show_infirmary_numberCalls(List_NursingCall &listCalls) {
+  // Linha 3 - mostrando o número da enfermaria
+  lcd.setCursor(12, 2);
+  if (listCalls.hasNursingCall()) {
+
+    lcd.print("< ");
+    lcd.print(listCalls.getInfirmaryCurrent());
+    lcd.print(" >");
+
+  } else {
+    lcd.print(" X      ");
+  }
+
+  // Linha 4 - mostrando a quantidade de chamados não resolvidos
+  lcd.setCursor(17, 3);
+  lcd.print(listCalls.getTotal());
+}
+
+
 void fixed_data() {
   lcd.setCursor(1, 0);  // Posiciona o cursor na coluna 1, linha 0
   lcd.print(F("Chamada Enfermagem"));
