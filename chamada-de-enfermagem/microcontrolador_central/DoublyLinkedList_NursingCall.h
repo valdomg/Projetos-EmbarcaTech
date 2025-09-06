@@ -30,6 +30,7 @@ class List_NursingCall {
     void add(int infirmary);
     void next();
     void prev();
+    void removeCurrent();
 };
 
 #endif // DOUBLY_LINKED_LIST_NURSING_CALL_H

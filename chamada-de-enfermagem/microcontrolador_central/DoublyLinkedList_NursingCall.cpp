@@ -75,3 +75,46 @@ void List_NursingCall::prev() { // Move current para o nó anterior
         current = current->prev;
     }
 }
+
+
+// =========================
+//        Remoção
+// =========================
+void List_NursingCall::removeCurrent() {
+    // Se current é NULL, não remove.
+    if (current == nullptr) return; 
+
+    // variável auxiliar para segurar o nó que será removido 
+    NursingCall* temp = current;
+
+    /* ==============================
+        Ajustar o ponteiro anterior
+       ==============================*/
+    // Se existe um nó anterior, faz esse nó apontar (next) para o próximo de temp
+    if (temp->prev != nullptr) {
+        temp->prev->next = temp->next;
+    } else { // Caso contrário - temp é o primeiro da lista
+        // Atualiza head para ser o próximo nó
+        head = temp->next;
+    }
+
+    /* ==============================
+        Ajustar o ponteiro seguinte
+       ==============================*/
+    if (temp->next != nullptr) {
+        // Se existe um nó seguinte - faz esse nó apontar (prev) para o anterior de temp
+        temp->next->prev = temp->prev;
+        // Atualiza current para esse próximo nó
+        current = temp->next;
+    } else { // Caso contrário - temp é último da lista
+        // Atualiza tail para o anterior de temp
+        tail = temp->prev;
+        // Atualiza current para esse anterior
+        current = temp->prev;
+    }
+
+    // Remove da memória o nó que foi desconectado, evitando vazamento de memória
+    delete temp;
+    // Decrementa o número de nós da lista
+    total--;
+}
