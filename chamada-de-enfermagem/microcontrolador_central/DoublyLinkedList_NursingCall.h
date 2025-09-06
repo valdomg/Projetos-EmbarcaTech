@@ -31,6 +31,7 @@ class List_NursingCall {
     void next();
     void prev();
     void removeCurrent();
+    void clear(); 
 };
 
 #endif // DOUBLY_LINKED_LIST_NURSING_CALL_H

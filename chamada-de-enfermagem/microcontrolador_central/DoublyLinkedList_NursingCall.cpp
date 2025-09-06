@@ -11,9 +11,11 @@ List_NursingCall::List_NursingCall() {
 }
 
 
-/* Destrutor */
+/* Destrutor:
+    - chama clear() para liberar memória dos nós antes de o objeto ser destruído 
+    - previne vazamentos se a lista ainda tiver nós */
 List_NursingCall::~List_NursingCall() {
-     
+    clear(); 
 }
 
 
@@ -117,4 +119,23 @@ void List_NursingCall::removeCurrent() {
     delete temp;
     // Decrementa o número de nós da lista
     total--;
+}
+
+// Limpar toda a lista
+void List_NursingCall::clear() {
+    // Cria um ponteiro auxiliar - começa apontando para o primeiro nó da lista
+    NursingCall* temp = head;
+    while (temp != nullptr) { // enquanto ainda houver nós na lista
+        // Salva o endereço do próximo nó antes de apagar o nó atual
+        NursingCall* prox = temp->next;
+        // Deletando o nó atual
+        delete temp;
+        // Faz temp apontar para o próximo nó salvo em prox
+        temp = prox;
+    }
+    // Reseta a lista
+    head = nullptr;
+    tail = nullptr;
+    current = nullptr;
+    total = 0;
 }
