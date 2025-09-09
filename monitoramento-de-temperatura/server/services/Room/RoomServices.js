@@ -26,7 +26,7 @@ class RoomServices {
 
     const room = await this.RoomModel.findById(roomId);
     if (!room) {
-      throwApiError.badRequest("Sala não encontrada");
+      throw ApiError.badRequest("Sala não encontrada");
     }
     return room;
   }
