@@ -19,6 +19,9 @@ router.get('/room/:roomId/temperatures', temperatureController.getRoomTemperatur
 router.get('/room/:roomId/temperatures/interval', temperatureController.getRoomTemperaturesByInterval);
 
 router.post('/user', userController.createUser);
+router.get('/users', userController.getAllUsers);
 router.get('/user/:email', userController.getUserByEmail);
+router.put('/user/:userId', userController.updateUser);
+router.delete('/user/:userId', userController.deleteUser);
 
 export default router;

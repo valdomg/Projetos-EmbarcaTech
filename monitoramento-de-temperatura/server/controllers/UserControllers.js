@@ -31,6 +31,38 @@ class UserController {
     }
   };
 
+  getAllUsers = async (req, res) => {
+    try {
+      const users = await this.userService.getAllUsers();
+      res.status(200).json(users);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  updateUser = async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const updateData = req.body;
+      const updatedUser = await this.userService.updateUser(userId, updateData);
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  deleteUser = async (req, res) => {
+    try {
+      const { userId } = req.params;
+      await this.userService.deleteUser(userId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      res.status(400).json({ error: error.message });
+    }
+  }
 }
 
 export default UserController;

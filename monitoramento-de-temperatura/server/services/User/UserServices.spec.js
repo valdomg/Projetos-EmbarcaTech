@@ -2,14 +2,6 @@ import * as bcrypt from 'bcrypt';
 import { describe, jest } from '@jest/globals';
 import UserService from './UserServices';
 
-const mockModel = {
-    find: jest.fn(),
-    findById: jest.fn(),
-    findByIdAndDelete: jest.fn(),
-    create: jest.fn(),
-    findOne: jest.fn(),
-};
-
 describe('UserService', () => {
     let userModelMock;
     let userService;
