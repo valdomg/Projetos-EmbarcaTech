@@ -2,26 +2,31 @@ import express from 'express';
 import TemperatureController from './controllers/TemperatureControllers.js';
 import RoomController from './controllers/RoomControllers.js';
 import UserController from './controllers/UserControllers.js';
+import AuthController from './controllers/AuthControllers.js';
+import { authenticate } from './middlewares/auth.js';
 
 const router = express.Router();
 const temperatureController = new TemperatureController();
 const roomController = new RoomController();
 const userController = new UserController();
+const authController = new AuthController();
 
-router.get('/temperatures', temperatureController.getAllTemperatures);
-router.get('/temperature/:id', temperatureController.getTemperatureById);
-router.get('/temperatures/interval', temperatureController.getTemperatureReadingsByInterval);
+router.post("/login", authController.signIn);
+
+router.get('/temperatures', authenticate, temperatureController.getAllTemperatures);
+router.get('/temperature/:id', authenticate, temperatureController.getTemperatureById);
+router.get('/temperatures/interval', authenticate, temperatureController.getTemperatureReadingsByInterval);
 
 
-router.post('/room', roomController.createRoom);
-router.get('/rooms', roomController.getAllRooms);
-router.get('/room/:roomId/temperatures', temperatureController.getRoomTemperatures);
-router.get('/room/:roomId/temperatures/interval', temperatureController.getRoomTemperaturesByInterval);
+router.post('/room', authenticate, roomController.createRoom);
+router.get('/rooms', authenticate, roomController.getAllRooms);
+router.get('/room/:roomId/temperatures', authenticate, temperatureController.getRoomTemperatures);
+router.get('/room/:roomId/temperatures/interval', authenticate, temperatureController.getRoomTemperaturesByInterval);
 
-router.post('/user', userController.createUser);
-router.get('/users', userController.getAllUsers);
-router.get('/user/:email', userController.getUserByEmail);
-router.put('/user/:userId', userController.updateUser);
-router.delete('/user/:userId', userController.deleteUser);
+router.post('/user', authenticate, userController.createUser);
+router.get('/users', authenticate, userController.getAllUsers);
+router.get('/user/:email', authenticate, userController.getUserByEmail);
+router.put('/user/:userId', authenticate, userController.updateUser);
+router.delete('/user/:userId', authenticate, userController.deleteUser);
 
 export default router;

@@ -11,11 +11,11 @@ class AuthService {
     signIn = async (email, password) => {
         const user = await this.userModel.findOne({ email });
         if (!user) {
-            throw new Error("User not found");
+            throw new Error("Credenciais inválidas");
         }
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            throw new Error("Invalid password");
+            throw new Error("Credenciais inválidas");
         }
 
         const token = jsonwebtoken.sign(
