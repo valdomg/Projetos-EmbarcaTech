@@ -1,4 +1,5 @@
 import * as bcrypt from 'bcrypt';
+import ApiError from '../../utils/errors.js';
 
 class UserService {
   constructor(userModel) {
@@ -7,44 +8,51 @@ class UserService {
 
   createUser = async (userData) => {
     if (!userData.name || !userData.email) {
-      throw new Error("Nome e email são obrigatórios");
+      throw ApiError.badRequest("Nome e email são obrigatórios");
     }
 
     const existingUser = await this.userModel.findOne({ email: userData.email });
     if (existingUser) {
-      throw new Error("Email já está em uso");
+      throw ApiError.badRequest("Email já está em uso");
     }
 
-    if(! await this.validatePassword(userData.password)) {
-      throw new Error("Senha deve ter pelo menos 8 caracteres, incluindo uma letra maiúscula, uma letra minúscula, um número e um caractere especial");
+    if (! await this.validatePassword(userData.password)) {
+      throw ApiError.badRequest("Senha deve ter pelo menos 8 caracteres, incluindo uma letra maiúscula, uma letra minúscula, um número e um caractere especial");
     }
     userData.password = await this.hashPassword(userData.password);
 
     const user = new this.userModel(userData);
     await user.save();
-    return user;
+    return { id: user._id, name: user.name, email: user.email };
 
   }
 
   getUserById = async (userId) => {
-    if(!userId) {
-      throw new Error("ID do usuário é obrigatorio");
+    if (!userId) {
+      throw ApiError.badRequest("ID do usuário é obrigatorio");
     }
 
     const user = await this.userModel.findById(userId);
-    if(!user) {
-      throw new Error("Usuário não encontrado");
+    if (!user) {
+      throw ApiError.badRequest("Usuário não encontrado");
     }
     return user;
   }
 
   getAllUsers = async () => {
-    return this.userModel.find();
+    const users = await this.userModel.find();
+    return users.map(user => (
+      {
+        _id: user._id,
+        name: user.name,
+        email: user.email
+      }
+    ));
   }
 
   getUserByEmail = async (email) => {
     if (!email) {
-      throw new Error("Email é obrigatório");
+      throw ApiError.badRequest("Email é obrigatório");
     }
 
     return this.userModel.findOne({ email });
@@ -54,7 +62,7 @@ class UserService {
     if (updateData.email) {
       const existingUser = await this.userModel.findOne({ email: updateData.email });
       if (existingUser && existingUser.id !== userId) {
-        throw new Error("Email já está em uso");
+        throw ApiError.badRequest("Email já está em uso");
       }
     }
 
@@ -64,18 +72,18 @@ class UserService {
       { new: true }
     );
     if (!updatedUser) {
-      throw new Error("Usuário não encontrado");
+      throw ApiError.badRequest("Usuário não encontrado");
     }
-    return updatedUser;
+    return { _id: updatedUser._id, name: updatedUser.name, email: updatedUser.email };
   }
 
   deleteUser = async (userId) => {
-    if(!userId) {
-      throw new Error("ID do usuário é obrigatorio");
+    if (!userId) {
+      throw ApiError.badRequest("ID do usuário é obrigatorio");
     }
     const user = await this.userModel.findById(userId);
-    if(!user) {
-      throw new Error("Usuário não encontrado");
+    if (!user) {
+      throw ApiError.badRequest("Usuário não encontrado");
     }
 
     await this.userModel.findByIdAndDelete(userId);

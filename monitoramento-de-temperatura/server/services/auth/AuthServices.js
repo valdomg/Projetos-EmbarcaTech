@@ -1,6 +1,7 @@
 import jsonwebtoken from 'jsonwebtoken';
 import * as bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
+import ApiError from '../../utils/errors.js';
 dotenv.config();
 
 class AuthService {
@@ -11,11 +12,11 @@ class AuthService {
     signIn = async (email, password) => {
         const user = await this.userModel.findOne({ email });
         if (!user) {
-            throw new Error("Credenciais inválidas");
+            throw ApiError.badRequest("Credenciais inválidas");
         }
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            throw new Error("Credenciais inválidas");
+            throw ApiError.badRequest("Credenciais inválidas");
         }
 
         const token = jsonwebtoken.sign(
