@@ -23,7 +23,24 @@ class UserService {
     const user = new this.userModel(userData);
     await user.save();
     return user;
-  };
+
+  }
+
+  getUserById = async (userId) => {
+    if(!userId) {
+      throw new Error("ID do usuário é obrigatorio");
+    }
+
+    const user = await this.userModel.findById(userId);
+    if(!user) {
+      throw new Error("Usuário não encontrado");
+    }
+    return user;
+  }
+
+  getAllUsers = async () => {
+    return this.userModel.find();
+  }
 
   getUserByEmail = async (email) => {
     if (!email) {
@@ -31,7 +48,39 @@ class UserService {
     }
 
     return this.userModel.findOne({ email });
-  };
+  }
+
+  updateUser = async (userId, updateData) => {
+    if (updateData.email) {
+      const existingUser = await this.userModel.findOne({ email: updateData.email });
+      if (existingUser && existingUser.id !== userId) {
+        throw new Error("Email já está em uso");
+      }
+    }
+
+    const updatedUser = await this.userModel.findByIdAndUpdate(
+      userId,
+      { name: updateData.name, email: updateData.email },
+      { new: true }
+    );
+    if (!updatedUser) {
+      throw new Error("Usuário não encontrado");
+    }
+    return updatedUser;
+  }
+
+  deleteUser = async (userId) => {
+    if(!userId) {
+      throw new Error("ID do usuário é obrigatorio");
+    }
+    const user = await this.userModel.findById(userId);
+    if(!user) {
+      throw new Error("Usuário não encontrado");
+    }
+
+    await this.userModel.findByIdAndDelete(userId);
+  }
+
 
   validatePassword = async (password) => {
     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
