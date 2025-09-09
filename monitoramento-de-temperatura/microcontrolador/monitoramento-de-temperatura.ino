@@ -3,6 +3,7 @@
 #include "mqtt.h"
 #include "display_LCD-1602_I2C.h"
 #include "buzzer.h"
+#include "led.h"
 
 
 constexpr unsigned long MQTT_INTERVAL_MS = 180000;  // 3 minutos
@@ -84,8 +85,10 @@ void handleSensorData(EnvironmentData& data, unsigned long now) {
 void maybeHandleAlerts(const ErrorStatus& errors, unsigned long now) {
   if (errors.humidityError || errors.temperatureError) {
     toggleBuzzer(now);
+    toggleLed(now);
   } else {
     disableSoundAlert();
+    turnOffLed();
   }
 }
 
@@ -97,6 +100,7 @@ void setup() {
   lcd1602_init();
 
   buzzerInit();
+  ledInit();
 
   if (!connectWiFi()) {
     Serial.println("WiFi não conectado.");
