@@ -3,6 +3,8 @@
 #include "mqtt.h"
 #include "display_LCD-1602_I2C.h"
 #include "buzzer.h"
+#include "led.h"
+#include "button.h"
 
 
 constexpr unsigned long MQTT_INTERVAL_MS = 180000;  // 3 minutos
@@ -11,11 +13,13 @@ constexpr unsigned long SENSOR_INTERVAL_MS = 1000;  // 1 segundo
 constexpr uint8_t TEMPERATURE_MAX = 23;
 constexpr uint8_t TEMPERATURE_MIN = 14;
 
-constexpr uint8_t HUMIDITY_MIN = 30;
+constexpr uint8_t HUMIDITY_MIN = 10;
 constexpr uint8_t HUMIDITY_MAX = 60;
 
 unsigned long lastMQTTPublishTime = 0;
 unsigned long lastSensorReadTime = 0;
+
+bool isSoundMuted = 0;
 
 struct ErrorStatus {
   bool humidityError;
@@ -83,20 +87,38 @@ void handleSensorData(EnvironmentData& data, unsigned long now) {
 
 void maybeHandleAlerts(const ErrorStatus& errors, unsigned long now) {
   if (errors.humidityError || errors.temperatureError) {
-    toggleBuzzer(now);
+
+    if (buttonWasPressed()) {
+      isSoundMuted = !isSoundMuted;
+    }
+
+    if (isSoundMuted) {
+      disableSoundAlert();
+
+    } else {
+      toggleBuzzer(now);
+    }
+    toggleLed(now);
   } else {
+
+    resetButtonState();
     disableSoundAlert();
+    turnOffLed();
   }
 }
 
 
 void setup() {
   Serial.begin(115200);
+
+  buttonInit();
+
   initializeSensor();
   // Chama a função para iniciar o display
   lcd1602_init();
 
   buzzerInit();
+  ledInit();
 
   if (!connectWiFi()) {
     Serial.println("WiFi não conectado.");
