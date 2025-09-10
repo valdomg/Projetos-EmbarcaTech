@@ -1,9 +1,10 @@
 
+import { buscarTemperaturas } from "./api";
 
 async function carregarTemperaturas() {
   try {
-    const response = await fetch("https://api.thingspeak.com/channels/2922648/feeds.json?api_key=E29GDPTCKLB578Q8&results=1");
-    const data = await response.json();
+
+    const data = await buscarTemperaturas();
 
 
     const temperatura = data.feeds[0].field3;
