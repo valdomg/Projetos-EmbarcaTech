@@ -100,11 +100,33 @@ button {
     padding: 20px;
 }
 
+
 .umid {
     align-items: center;
     justify-items: center;
     cursor: pointer;
     padding: 20px;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    margin: 100px 100px 10px 100px;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    border-radius: 8px;
+}
+
+
+.temp-sala {
+    background-color: rgb(207, 207, 207);
+    color: white;
+    align-items: center;
+    justify-items: center;
+    cursor: pointer;
+    padding: 10px;
+    gap: 20px;
 }
 
 .relatorio {
