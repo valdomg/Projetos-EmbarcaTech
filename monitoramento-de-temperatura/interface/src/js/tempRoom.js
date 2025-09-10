@@ -25,11 +25,11 @@ async function roomUpdate() {
     const humGaugeId = `gauge-hum-${salaAtual}`;
 
     const card = document.createElement("div");
-    card.className = "monitor"; // container principal
+    card.className = "room"; // container principal
 
     card.innerHTML = `
-    
-
+     <h3>${ultimaLeitura.room.toUpperCase()}</h3>
+     <div class="monitor">
       <div class="temp">
         <div id="${tempGaugeId}" style="width:320px; height:240px;"></div>
         <h4>Temperatura</h4>
@@ -38,12 +38,16 @@ async function roomUpdate() {
         <div id="${humGaugeId}" style="width:320px; height:240px;"></div>
         <h4>Umidade</h4>
       </div>
+      </div>
     </div>  
+    <p><em>Última atualização: ${new Date(ultimaLeitura.timestamp).toLocaleString("pt-BR")}</em></p>
     
 `;
-
-
     grid.appendChild(card);
+
+
+
+
 
     createGauge(tempGaugeId, humGaugeId, ultimaLeitura);
 

@@ -27,9 +27,11 @@ p {
     color: rgb(148, 147, 147);
 }
 
+.body-page{
+    background-color: white;
+}
 
 .container {
-    background-color: white;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -61,8 +63,8 @@ form {
 
 
 input {
+    border: 1px solid rgba(128, 128, 128, .5);
     border-radius: 8px;
-    border: 1px transparent;
     height: 40px;
     padding: 6px;
 }
@@ -96,6 +98,7 @@ button {
     align-items: center;
     justify-content: center;
     gap: 100px;
+    margin-bottom: 20px;
 }
 
 .temp {
@@ -127,20 +130,33 @@ button {
     border-radius: 8px;
 }
 
-
 .temp-sala {
-    background-color: rgb(68, 67, 67);
+    background-color: rgba(68, 67, 67, .6);
+    border-radius: 3px;
     color: white;
     align-items: center;
     justify-items: center;
     cursor: pointer;
     padding: 10px;
     gap: 20px;
+    transition: transform 0.2 ease, box-shadow 0.2s ease;
+}
+
+.temp-sala:hover{
+  transform: scale(1.02); 
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); 
+}
+
+.room{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: white;
 }
 
 .relatorio {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     height: 80vh;
@@ -164,6 +180,8 @@ button {
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    width: 200px;
+    font-size: 18px;
 }
 
 
