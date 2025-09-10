@@ -7,6 +7,10 @@
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 }
 
+body{
+    background-color: black;
+}
+
 
 img {
     width: 280px;
@@ -120,7 +124,7 @@ button {
 
 
 .temp-sala {
-    background-color: rgb(207, 207, 207);
+    background-color: rgb(68, 67, 67);
     color: white;
     align-items: center;
     justify-items: center;

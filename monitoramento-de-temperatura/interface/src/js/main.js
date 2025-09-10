@@ -59,4 +59,4 @@ async function carregarTemperaturas() {
 
 
 carregarTemperaturas();
-setInterval(carregarTemperaturas, 60000); // atualiza a cada 10s
+setInterval(carregarTemperaturas, 60000); // atualiza a cada 1min
