@@ -5,7 +5,8 @@
   "scripts": {
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --watchAll --verbose --runInBand",
     "start": "node app.js",
-    "swagger": "node docs/swagger.js"
+    "swagger": "node docs/swagger.js",
+    "seed": "node database/seed.js"
   },
   "type": "module",
   "author": "",
