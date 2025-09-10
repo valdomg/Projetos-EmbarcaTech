@@ -12,16 +12,19 @@ class TemperatureService {
     const { microcontrollerId, temperature, humidity } = data;
 
     if (!microcontrollerId || temperature == null || humidity == null) {
+      console.error("MQTT: Dados incompletos recebidos.");
       throw new Error("MQTT: Dados incompletos recebidos.");
     }
 
     if (typeof temperature !== "number" || typeof humidity !== "number") {
-      throw new Error("Temperatura e umidade devem ser números.");
+      console.error("MQTT: Temperatura e umidade devem ser números.");
+      throw new Error("MQTT: Temperatura e umidade devem ser números.");
     }
 
     const room = await this.roomService.getRoomByMicrocontrollerId(microcontrollerId);
 
     if (!room) {
+      console.error(`MQTT: Nenhuma sala encontrada com microcontrolador ${microcontrollerId}`);
       throw new Error(`MQTT: Nenhuma sala encontrada com microcontrolador ${microcontrollerId}`);
     }
 
