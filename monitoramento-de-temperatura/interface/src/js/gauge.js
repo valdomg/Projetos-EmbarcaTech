@@ -1,9 +1,9 @@
 
-export function createGauge(gaugeId){
+export function createGauge(tempId, UmidId, dado){
 
-var gaugeId = new JustGage({
-  id: gaugeId, // the id of the html element
-  value: 50,
+new JustGage({
+  id: tempId, // the id of the html element
+  value: dado.temperature,
   min: 0,
   max: 100,
   decimals: 0,
@@ -28,9 +28,9 @@ var gaugeId = new JustGage({
 //   gauge.refresh(Math.random() * 100);
 // }, 5000)
 
-var gauge2 = new JustGage({
-  id: gaugeId, // the id of the html element
-  value: 50,
+new JustGage({
+  id: UmidId, // the id of the html element
+  value: dado.humidity,
   min: 0,
   max: 100,
   decimals: 0,

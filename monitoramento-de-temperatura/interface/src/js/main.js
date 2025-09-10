@@ -1,33 +1,62 @@
 
-import { buscarTemperaturas } from "./api";
+import { buscarTemperaturas } from './api.js';
+import { createGauge } from './gauge.js';
 
+
+//carrega dados de temperatura de todas as salas cadastradas no sistema.
 async function carregarTemperaturas() {
   try {
+    const dados = await buscarTemperaturas();
 
-    const data = await buscarTemperaturas();
-
-
-    const temperatura = data.feeds[0].field3;
-    const umidade = data.feeds[0].field1;
-    const date = new Date(data.feeds[0].created_at).toLocaleString('pt-BR');
-
-    document.getElementById('temperatura').textContent = `Última atualização: ${date}`;
-
-    console.log(temperatura);
-    console.log(umidade);
-    if (!isNaN(temperatura)) {
-      gauge1.refresh(temperatura);
+    if (!dados.length) {
+      console.error("Nenhum dado encontrado.");
+      return;
     }
 
-    if (!isNaN(umidade)) {
-      gauge2.refresh(umidade);
-    }
+    // Agrupa por sala e pega a última leitura
+    const ultimasPorSala = {};
+    dados.forEach(dado => {
+      const sala = dado.room; // certifique-se que o campo no JSON se chama "room"
+      if (!ultimasPorSala[sala] || new Date(dado.timestamp) > new Date(ultimasPorSala[sala].timestamp)) {
+        ultimasPorSala[sala] = dado;
+      }
+    });
+
+    // Transforma em array
+    const salas = Object.values(ultimasPorSala);
+
+
+    // Renderiza grid
+    const grid = document.getElementById("salasGrid");
+    grid.innerHTML = "";
+
+    salas.forEach(sala => {
+      const card = document.createElement("div");
+      card.className = "temp-sala";
+      card.onclick = () => abrirSala(sala.room);
+
+      // ids únicos para cada gauge
+      const tempGaugeId = `gauge-temp-${sala.room}`;
+      const humGaugeId = `gauge-hum-${sala.room}`;
+
+      card.innerHTML = `
+    <h3>${sala.room.toUpperCase()}</h3>
+    <div id="${tempGaugeId}" style="width:200px; height:200px;"></div>
+    
+    <p><em>Última atualização: ${new Date(sala.timestamp).toLocaleString("pt-BR")}</em></p>
+  `;
+
+      grid.appendChild(card);
+
+      // cria o gauge de temperatura
+      createGauge(tempGaugeId, humGaugeId, sala);
+    });
+
   } catch (error) {
-    console.error('Erro ao buscar dados:', error);
-    document.getElementById('temperatura').textContent = 'Erro ao carregar!';
+    console.error("Erro ao carregar salas:", error);
   }
-};
+}
 
 
-// Atualiza a cada 5s
-setInterval(carregarTemperaturas, 5000);
+carregarTemperaturas();
+setInterval(carregarTemperaturas, 60000); // atualiza a cada 10s
