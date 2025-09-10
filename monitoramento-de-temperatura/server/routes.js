@@ -22,6 +22,10 @@ router.post('/room', authenticate, roomController.createRoom);
 router.get('/rooms', authenticate, roomController.getAllRooms);
 router.get('/room/:roomId/temperatures', authenticate, temperatureController.getRoomTemperatures);
 router.get('/room/:roomId/temperatures/interval', authenticate, temperatureController.getRoomTemperaturesByInterval);
+router.get('/room/id/:roomId', authenticate, roomController.getRoomById);
+router.get('/room/microcontroller/:microcontrollerId', authenticate, roomController.getRoomByMicrocontrollerId);
+router.put('/room/:roomId', authenticate, roomController.updateRoom);
+router.delete('/room/:roomId', authenticate, roomController.deleteRoom);
 
 router.post('/user', authenticate, userController.createUser);
 router.get('/users', authenticate, userController.getAllUsers);

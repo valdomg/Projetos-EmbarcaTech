@@ -11,7 +11,11 @@ class UserController {
           #swagger.tags = ['Users']
           #swagger.summary = 'cria um novo usuário'
           #swagger.description = 'Esse endpoint cria um novo usuário no sistema. É necessário fornecer um nome, email e senha válidos no corpo da requisição. O email deve ser único e a senha deve atender aos critérios de segurança estabelecidos. Ao criar um usuário com sucesso, o sistema retorna os detalhes do usuário criado, excluindo a senha por razões de segurança.'
-        */
+          #swagger.security = [{
+            "bearerAuth": []
+          }] 
+        
+          */
     const userData = req.body;
     /*  #swagger.requestBody = {
                 required: true,
@@ -33,7 +37,7 @@ class UserController {
 
     const user = await this.userService.createUser(userData);
     res.status(201).json(user);
-    /*  #swagger.responses[200] = {
+    /*  #swagger.responses[201] = {
                 description: "Usuário criado com sucesso",
                 content: {
                     "application/json": {
@@ -56,7 +60,10 @@ class UserController {
           #swagger.tags = ['Users']
           #swagger.summary = 'Busca um usuário pelo email'
           #swagger.description = 'Esse endpoint busca um usuário existente no sistema pelo seu email. É necessário fornecer um email válido como parâmetro. Se o usuário for encontrado, o sistema retorna os detalhes do usuário, excluindo a senha por razões de segurança.'
-        */
+          #swagger.security = [{
+            "bearerAuth": []
+          }]         
+          */
     const { email } = req.params;
     const user = await this.userService.getUserByEmail(email);
     res.status(200).json(user);
@@ -96,7 +103,10 @@ class UserController {
           #swagger.tags = ['Users']
           #swagger.summary = 'Busca todos os usuários'
           #swagger.description = 'Esse endpoint retorna uma lista de todos os usuários cadastrados no sistema.'
-        */
+          #swagger.security = [{
+            "bearerAuth": []
+          }] 
+          */
     const users = await this.userService.getAllUsers();
     res.status(200).json(users);
     /*  #swagger.responses[200] = {
@@ -125,7 +135,10 @@ class UserController {
       #swagger.tags = ['Users']
       #swagger.summary = 'Atualiza um usuário existente'
       #swagger.description = 'Esse endpoint atualiza os dados de um usuário existente no sistema. É necessário fornecer um ID de usuário válido como parâmetro e os novos dados no corpo da requisição.'
-    */
+          #swagger.security = [{
+            "bearerAuth": []
+          }] 
+      */
     const { userId } = req.params;
     /*  #swagger.requestBody = {
                 required: true,
@@ -154,7 +167,10 @@ class UserController {
       #swagger.tags = ['Users']
       #swagger.summary = 'Deleta um usuário existente'
       #swagger.description = 'Esse endpoint deleta um usuário existente no sistema. É necessário fornecer um ID de usuário válido como parâmetro.'
-    */
+          #swagger.security = [{
+            "bearerAuth": []
+          }] 
+      */
     const { userId } = req.params;
     await this.userService.deleteUser(userId);
     res.status(204).send();
