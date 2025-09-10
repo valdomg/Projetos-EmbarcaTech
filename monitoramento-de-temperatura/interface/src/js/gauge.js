@@ -6,7 +6,7 @@ export function createGauge(tempId, umidId, dado) {
         id: tempId, // the id of the html element
         value: dado.temperature,
         min: 0,
-        max: 50,
+        max: 100,
         decimals: 0,
         symbol: '°c',
         gaugeWidthScale: 1,

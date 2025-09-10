@@ -17,7 +17,7 @@ img {
     height: 100px;
 }
 
-h1,
+h1, h4,
 a {
     color: white;
     text-decoration: none;
@@ -99,6 +99,8 @@ button {
 }
 
 .temp {
+    /* background-color: rgb(68, 67, 67);
+    border-radius: 10px; */
     align-items: center;
     justify-items: center;
     cursor: pointer;
@@ -107,6 +109,8 @@ button {
 
 
 .umid {
+    /* background-color: rgb(68, 67, 67);
+    border-radius: 10px; */
     align-items: center;
     justify-items: center;
     cursor: pointer;

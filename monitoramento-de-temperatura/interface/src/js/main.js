@@ -60,3 +60,9 @@ async function carregarTemperaturas() {
 
 carregarTemperaturas();
 setInterval(carregarTemperaturas, 60000); // atualiza a cada 1min
+
+
+//redirecionamento para pagina de uma sala apartir do id
+function abrirSala(salaId) {
+  window.location.href = `room.html?sala=${salaId}`;
+}
