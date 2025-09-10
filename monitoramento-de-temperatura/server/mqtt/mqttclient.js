@@ -12,6 +12,8 @@ const mqttClient = mqtt.connect(connectUrl, {
   clean: true,
   connectTimeout: 4000,
   reconnectPeriod: 1000,
+  username: process.env.MQTT_USER,
+  password: process.env.MQTT_PASSWORD
 })
 
 mqttClient.on('connect', () => {
