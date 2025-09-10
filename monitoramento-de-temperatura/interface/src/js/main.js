@@ -25,6 +25,7 @@ async function carregarTemperaturas() {
     // Transforma em array
     const salas = Object.values(ultimasPorSala);
 
+    sortRoom(salas);
 
     // Renderiza grid
     const grid = document.getElementById("salasGrid");
@@ -65,4 +66,15 @@ setInterval(carregarTemperaturas, 60000); // atualiza a cada 1min
 //redirecionamento para pagina de uma sala apartir do id
 function abrirSala(salaId) {
   window.location.href = `room.html?sala=${salaId}`;
+}
+
+ // Ordena pelo nome da sala (ordem crescente)
+function sortRoom(salas){ 
+    salas.sort((a, b) => {
+      // extrai apenas os números do nome (ex: sala-01 -> 1)
+      const numA = parseInt(a.room.replace(/\D/g, ''), 10);
+      const numB = parseInt(b.room.replace(/\D/g, ''), 10);
+
+      return numA - numB;
+    });
 }
