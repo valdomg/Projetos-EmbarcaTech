@@ -2,7 +2,7 @@
 const params = new URLSearchParams(window.location.search);
 const salaAtual = params.get("sala");
 
-import { buscarTemperaturaSala } from './api.js';
+import { buscarTemperaturaSala, buscarTempIntervalo } from './api.js';
 import { createGauge } from './gauge.js';
 
 
@@ -58,3 +58,60 @@ async function roomUpdate() {
 
 roomUpdate();
 setInterval(roomUpdate, 60000); // atualiza de 1 em 1 minuto
+
+
+
+
+function calcularIntervalo() {
+  const agora = new Date();
+  const start = new Date(agora);
+  start.setHours(agora.getHours() - 24); // Subtrai 24 horas para obter o "start" de 24 horas atrás
+
+  // Formatar as datas no formato ISO 8601 para passar na URL
+  const startISO = start.toISOString();
+  const endISO = agora.toISOString(); // A data de "agora" será o "end"
+
+  return { start: startISO, end: endISO };
+}
+
+
+// Função que busca e exibe a temperatura das últimas 24 horas
+async function tempIntervalRoom() {
+  try {
+    const { start, end } = calcularIntervalo(); // Calcula o intervalo de 24 horas
+
+    const dados = await buscarTempIntervalo(salaAtual, start, end);
+    console.log(dados);
+
+    if (!dados.length) {
+      console.error("Nenhum dado encontrado.");
+      return;
+    }
+
+    // Renderiza grid
+    const grid = document.getElementById("list");
+    grid.innerHTML = "";
+
+    dados.forEach(sala => {
+      const list = document.createElement("div");
+      list.className = "temp-sala";
+
+      list.innerHTML = `
+    <h3>${sala.room.toUpperCase()}</h3>
+    <h3>Temperatura: ${sala.temperature}</h3>
+    <h3>Umidade: ${sala.humidity}</h3>    
+    <p><em>Última atualização: ${new Date(sala.timestamp).toLocaleString("pt-BR")}</em></p>
+    <p>-----------------------------------------------------</p>
+  `;
+
+      grid.appendChild(list);
+    });
+
+  } catch (error) {
+    console.error("Erro ao carregar salas:", error);
+  }
+}
+
+// Chama a função intervalo
+tempIntervalRoom();
+setInterval(tempIntervalRoom, 60000); // Atualiza a cada 1 minuto
