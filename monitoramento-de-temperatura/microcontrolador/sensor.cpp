@@ -1,5 +1,6 @@
-#include "sensor.h"
 #include <Wire.h>
+#include "sensor.h"
+#include "log.h"
 
 Adafruit_AHTX0 aht;
 
@@ -10,11 +11,9 @@ void initializeSensor() {
   Wire.begin(4, 5);  // Pinos fixos aqui ou passados por parâmetro depois
 
   if (!aht.begin()) {
-    Serial.println("Sensor AHT10 não inicializado");
+    log(LOG_ERROR,"Sensor AHT10 não inicializado");
     while (1) delay(10);
   }
-
-  Serial.println("Sensor AHT10 inicializado com sucesso!");
 }
 
 
@@ -40,17 +39,3 @@ EnvironmentData readSensorData() {
   return data;
 }
 
-/**
- * Exibe os dados do sensor no monitor serial.
- *
- *@param data - Estrutura contendo os valores de temperatura (°C) e umidade (%).
- */
-void printSensorData(const EnvironmentData& data) {
-  Serial.print("Temperatura: ");
-  Serial.print(data.temperature);
-  Serial.println(" °C");
-
-  Serial.print("Umidade: ");
-  Serial.print(data.humidity);
-  Serial.println(" %");
-}
