@@ -5,6 +5,7 @@
 #include "buzzer.h"
 #include "led.h"
 #include "button.h"
+#include "log.h"
 
 
 constexpr unsigned long MQTT_INTERVAL_MS = 180000;  // 3 minutos
@@ -33,29 +34,26 @@ checkErrors(const EnvironmentData& data) {
 
   if (!data.valid) {
     status.sensorError = true;
+    log(LOG_WARN, "Erro na leitura do sensor");
   }
 
   if (data.temperature > TEMPERATURE_MAX || data.temperature < TEMPERATURE_MIN) {
     status.temperatureError = true;
+    log(LOG_WARN, "Temperatura fora do intervalo estipulado");
   }
 
   if (data.humidity > HUMIDITY_MAX || data.humidity < HUMIDITY_MIN) {
     status.humidityError = true;
+    log(LOG_WARN, "Humidade fora do intervalo estipulado");
   }
 
   return status;
 }
 
-void logSensorData(const char* context, const EnvironmentData& data) {
-
-  Serial.printf("==== valor mostrado no %s ====\n", context);
-  printSensorData(data);
-  Serial.println("===================================\n");
-}
-
 void updateDisplay(const EnvironmentData& data, const ErrorStatus& errors) {
 
-  logSensorData("Display", data);
+  // logSensorData("Display", data);
+  log(LOG_INFO, "Dados Display Temperatura: %.2f°C Humidade %.2f%%", data.temperature, data.humidity);
   // Passa os dados e os status de alerta para a função de exibição
   lcd1602_showData(data.temperature, data.humidity, errors.temperatureError, errors.humidityError);
 }
@@ -66,7 +64,7 @@ void maybePublishMQTT(const EnvironmentData& data, unsigned long now) {
     lastMQTTPublishTime = now;
     publishSensorData(data.temperature, data.humidity);
 
-    logSensorData("MQTT", data);
+    log(LOG_INFO, "Dados MQTT Temperatura: %.2f°C Humidade %.2f%%", data.temperature, data.humidity);
   }
 }
 
@@ -77,7 +75,7 @@ void handleSensorData(EnvironmentData& data, unsigned long now) {
   updateDisplay(data, errors);
 
   if (errors.sensorError) {
-    Serial.println("Sensor falhou");
+    log(LOG_ERROR, "Erro no sensor de temperatura");
     return;
   }
 
@@ -89,6 +87,7 @@ void maybeHandleAlerts(const ErrorStatus& errors, unsigned long now) {
   if (errors.humidityError || errors.temperatureError) {
 
     if (buttonWasPressed()) {
+      log(LOG_INFO,"Botao pressionado");
       isSoundMuted = !isSoundMuted;
     }
 
@@ -109,20 +108,30 @@ void maybeHandleAlerts(const ErrorStatus& errors, unsigned long now) {
 
 
 void setup() {
-  Serial.begin(115200);
+
+  logInit(LOG_DEBUG);
 
   buttonInit();
+  log(LOG_INFO, "Botao iniciado");
 
   initializeSensor();
+  log(LOG_INFO, "Sensor iniciado");
+
   // Chama a função para iniciar o display
   lcd1602_init();
+  log(LOG_INFO, "LCD iniciada");
 
   buzzerInit();
+  log(LOG_INFO, "Buzzer iniciado iniciado");
+
   ledInit();
+  log(LOG_INFO, "LED iniciado");
+
 
   if (!connectWiFi()) {
-    Serial.println("WiFi não conectado.");
+    log(LOG_ERROR, "Erro na conexão com wifi");
   }
+
   setupMQTT();
 }
 
@@ -131,6 +140,7 @@ void loop() {
   checkMQTTConnected();
 
   unsigned long now = millis();
+  
   if (now - lastSensorReadTime >= SENSOR_INTERVAL_MS) {
     lastSensorReadTime = now;
     EnvironmentData data = readSensorData();

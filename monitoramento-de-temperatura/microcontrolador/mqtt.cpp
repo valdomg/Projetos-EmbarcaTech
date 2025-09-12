@@ -1,5 +1,6 @@
 #include "mqtt.h"
 #include <WiFiClientSecure.h>
+#include "log.h"
 
 const char* MQTT_SERVER = "xxxxxxxxxxx";
 const char* MQTT_USER = "xxxxxxxxxxxx";
@@ -14,6 +15,7 @@ PubSubClient client(espClient);
 void setupMQTT() {
   espClient.setInsecure();  // Não verifica certificado
   client.setServer(MQTT_SERVER, 8883);
+  log(LOG_INFO, "MQTT inicializado");
 }
 
 /**
@@ -22,12 +24,10 @@ void setupMQTT() {
 void checkMQTTConnected() {
   if (!client.connected()) {
     while (!client.connected()) {
-      Serial.print("Tentando conectar ao MQTT... ");
       if (client.connect("ESP8266Client", MQTT_USER, MQTT_PASS)) {
-        Serial.println("Conectado!");
+        log(LOG_INFO, "Conectado ao Broker MQTT");
       } else {
-        Serial.print("Erro, rc=");
-        Serial.println(client.state());
+        log(LOG_ERROR, "Erro ao conectar com Broker MQTT, numero do erro: %d", client.state());
         delay(5000);
       }
     }
@@ -46,7 +46,7 @@ void publishFloat(const char* topic, float value) {
   client.publish(topic, payload);
 }
 
-/**
+/** 
  * Realiza a leitura do sensor e publica os dados via MQTT.
  *
  * @param temperature - valor da temperatura.

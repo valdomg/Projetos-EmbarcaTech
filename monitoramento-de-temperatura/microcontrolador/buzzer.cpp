@@ -1,4 +1,5 @@
 #include "buzzer.h"
+#include "log.h"
 
 // ------------------------------------------------------------
 // Variável de controle interno do módulo
@@ -32,6 +33,7 @@ void toggleBuzzer(unsigned long now) {
     // Inverte o estado atual do pino do buzzer:
     // se estava HIGH passa para LOW, e vice-versa
     digitalWrite(PIN_BUZZER, !digitalRead(PIN_BUZZER));
+    log(LOG_INFO, "Buzzer alternou o estado");
   }
 }
 
