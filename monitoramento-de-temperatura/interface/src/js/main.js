@@ -5,6 +5,13 @@ import { createGauge } from './gauge.js';
 
 //carrega dados de temperatura de todas as salas cadastradas no sistema.
 async function carregarTemperaturas() {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    alert("Sessão expirou, Faça login novamente");
+    window.location.href = "login.html";
+    return;
+  }
   try {
     const dados = await buscarTemperaturas();
 
@@ -55,6 +62,12 @@ async function carregarTemperaturas() {
 
   } catch (error) {
     console.error("Erro ao carregar salas:", error);
+
+    if (error.message.includes("401") || error.message.includes("403")) {
+      alert("Acesso não autorizado. Faça login novamente.");
+      localStorage.removeItem("token");
+      window.location.href = "login.html";
+    }
   }
 }
 
@@ -68,20 +81,20 @@ function abrirSala(salaId) {
   window.location.href = `room.html?sala=${salaId}`;
 }
 
- // Ordena pelo nome da sala (ordem crescente)
-function sortRoom(salas){ 
-    salas.sort((a, b) => {
-      // extrai apenas os números do nome (ex: sala-01 -> 1)
-      const numA = parseInt(a.room.replace(/\D/g, ''), 10);
-      const numB = parseInt(b.room.replace(/\D/g, ''), 10);
+// Ordena pelo nome da sala (ordem crescente)
+function sortRoom(salas) {
+  salas.sort((a, b) => {
+    // extrai apenas os números do nome (ex: sala-01 -> 1)
+    const numA = parseInt(a.room.replace(/\D/g, ''), 10);
+    const numB = parseInt(b.room.replace(/\D/g, ''), 10);
 
-      return numA - numB;
-    });
+    return numA - numB;
+  });
 }
 
 
 //eventListener de logout
-document.getElementById("logoutBtn").addEventListener("click", async function() {
-    localStorage.removeItem("token");
-    window.location.href = "login.html";
+document.getElementById("logoutBtn").addEventListener("click", async function () {
+  localStorage.removeItem("token");
+  window.location.href = "login.html";
 });

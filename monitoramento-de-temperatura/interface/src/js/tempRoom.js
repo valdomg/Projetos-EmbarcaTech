@@ -8,6 +8,13 @@ import { createGauge } from './gauge.js';
 
 //carrega e atualiza a temperatura da sala a partir do id
 async function roomUpdate() {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    alert("Sessão expirou, Faça login novamente");
+    window.location.href = "login.html";
+    return;
+  }
   try {
     const dados = await buscarTemperaturaSala(salaAtual);
 
@@ -51,8 +58,14 @@ async function roomUpdate() {
 
     createGauge(tempGaugeId, humGaugeId, ultimaLeitura);
 
-  } catch (err) {
-    console.error("Erro ao carregar sala:", err);
+  } catch (error) {
+    console.error("Erro ao carregar sala:", error);
+
+    if (error.message.includes("401") || error.message.includes("403")) {
+      alert("Acesso não autorizado. Faça login novamente.");
+      localStorage.removeItem("token");
+      window.location.href = "login.html";
+    }
   }
 }
 
@@ -77,6 +90,14 @@ function calcularIntervalo() {
 
 // Função que busca e exibe a temperatura das últimas 24 horas
 async function tempIntervalRoom() {
+
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    alert("Sessão expirou, Faça login novamente");
+    window.location.href = "login.html";
+    return;
+  }
   try {
     const { start, end } = calcularIntervalo(); // Calcula o intervalo de 24 horas
 
@@ -109,6 +130,12 @@ async function tempIntervalRoom() {
 
   } catch (error) {
     console.error("Erro ao carregar salas:", error);
+
+    if (error.message.includes("401") || error.message.includes("403")) {
+      alert("Acesso não autorizado. Faça login novamente.");
+      localStorage.removeItem("token");
+      window.location.href = "login.html";
+    }
   }
 }
 
