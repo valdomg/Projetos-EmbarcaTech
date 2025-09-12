@@ -1,5 +1,5 @@
 
-from application.controller.mqtt_client_connection import MqttClientConnection
+from Mqtt.application.controller.mqtt_client_connection import MqttClientConnection
 import os
 from dotenv import load_dotenv
 
