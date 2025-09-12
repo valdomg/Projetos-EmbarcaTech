@@ -16,13 +16,13 @@ describe("AuthService", () => {
         it("should throw error if user not found", async () => {
             userModelMock.findOne.mockResolvedValue(null);
             await expect(authService.signIn("test@test.com", "Password1!"))
-                .rejects.toThrow("User not found");
+                .rejects.toThrow("Credenciais inválidas");
         });
 
         it("should throw error if password is invalid", async () => {
             userModelMock.findOne.mockResolvedValue({ email: "test@test.com", password: "hashedPassword" });
             await expect(authService.signIn("test@test.com", "WrongPassword"))
-                .rejects.toThrow("Invalid password");
+                .rejects.toThrow("Credenciais inválidas");
         });
 
         it("should return user and token if credentials are valid", async () => {

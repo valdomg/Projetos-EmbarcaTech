@@ -1,146 +1,80 @@
 
+import { buscarTemperaturas } from './api.js';
+import { createGauge } from './gauge.js';
 
+
+//carrega dados de temperatura de todas as salas cadastradas no sistema.
 async function carregarTemperaturas() {
   try {
-    const response = await fetch("https://api.thingspeak.com/channels/2922648/feeds.json?api_key=E29GDPTCKLB578Q8&results=1");
-    const data = await response.json();
+    const dados = await buscarTemperaturas();
 
-
-    const temperatura = data.feeds[0].field3;
-    const umidade = data.feeds[0].field1;
-    const date = new Date(data.feeds[0].created_at).toLocaleString('pt-BR');
-
-    document.getElementById('temperatura').textContent = `Última atualização: ${date}`;
-
-    console.log(temperatura);
-    console.log(umidade);
-    if (!isNaN(temperatura)) {
-      gauge1.refresh(temperatura);
+    if (!dados.length) {
+      console.error("Nenhum dado encontrado.");
+      return;
     }
 
-    if (!isNaN(umidade)) {
-      gauge2.refresh(umidade);
-    }
-  } catch (error) {
-    console.error('Erro ao buscar dados:', error);
-    document.getElementById('temperatura').textContent = 'Erro ao carregar!';
-  }
-};
-
-
-// Atualiza a cada 5s
-setInterval(carregarTemperaturas, 5000);
-
-
-
-
-var gauge1 = new JustGage({
-  id: "gauge", // the id of the html element
-  value: 50,
-  min: 0,
-  max: 100,
-  decimals: 0,
-  symbol: '°c',
-  gaugeWidthScale: 0.9,
-  title: "Lone Ranger",
-  // label: "Temperatura",
-  pointer: "true",
-  pointerOptions: {
-    toplength: 0,
-    bottomlength: 15,
-    bottomwidth: 3,
-    stroke: 'none',
-    stroke_width: 0,
-    stroke_linecap: 'square',
-    color: 'dark'
-  }
-});
-
-// // update the value randomly
-// setInterval(() => {
-//   gauge.refresh(Math.random() * 100);
-// }, 5000)
-
-var gauge2 = new JustGage({
-  id: "gauge2", // the id of the html element
-  value: 50,
-  min: 0,
-  max: 100,
-  decimals: 0,
-  gaugeWidthScale: 0.9,
-  symbol: '%',
-  // label: "Umidade",
-  pointer: "true",
-  pointerOptions: {
-    toplength: 0,
-    bottomlength: 15,
-    bottomwidth: 3,
-    stroke: 'none',
-    stroke_width: 0,
-    stroke_linecap: 'square',
-    color: 'dark'
-  },
-  levelColors: ["#9bd4faff", "#008cffff", "#0400ffff"]
-});
-
-// // update the value randomly
-// setInterval(() => {
-//   gauge2.refresh(Math.random() * 100);
-// }, 5000)
-
-
-document.getElementById('emitirRelatorio').addEventListener('click',
-  async () => {
-    const dias = parseInt(document.getElementById('periodo').value);
-
-    const dataFim = new Date(); // agora
-    const dataInicio = new Date();
-    dataInicio.setDate(dataFim.getDate() - dias);
-
-    const start = dataInicio.toISOString(); // formato UTC
-    const end = dataFim.toISOString();
-
-    const url = `https://api.thingspeak.com/channels/2922648/feeds.json?api_key=E29GDPTCKLB578Q8&start=${start}&end=${end}`;
-
-    try {
-      const response = await fetch(url);
-      const data = await response.json();
-
-      const feeds = data.feeds;
-
-      if (!feeds.length) {
-        alert("Sem dados para este período.");
-        return;
+    // Agrupa por sala e pega a última leitura
+    const ultimasPorSala = {};
+    dados.forEach(dado => {
+      const sala = dado.room; // certifique-se que o campo no JSON se chama "room"
+      if (!ultimasPorSala[sala] || new Date(dado.timestamp) > new Date(ultimasPorSala[sala].timestamp)) {
+        ultimasPorSala[sala] = dado;
       }
+    });
 
-      const csvHeader = 'Data;Temperatura;Umidade\n';
-      const csvRows = feeds.map(feed => {
-        const data = new Date(feed.created_at).toLocaleString();
-        const temp = feed.field3 || '';
-        const umid = feed.field2 || '';
-        return `${data};${temp};${umid}`;
-      });
+    // Transforma em array
+    const salas = Object.values(ultimasPorSala);
 
-      const csvContent = csvHeader + csvRows.join('\n');
-      downloadCSV(csvContent, `relatorio_${dias}dias.csv`);
+    sortRoom(salas);
 
-    } catch (error) {
-      console.error('Erro ao gerar relatório:', error);
-      alert("Erro ao gerar relatório.");
-    }
-  });
-  
+    // Renderiza grid
+    const grid = document.getElementById("salasGrid");
+    grid.innerHTML = "";
 
-//funcao para baixar arquivo csv
-function downloadCSV(content, filename) {
-  const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement("a");
-  if (link.download !== undefined) {
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", filename);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    salas.forEach(sala => {
+      const card = document.createElement("div");
+      card.className = "temp-sala";
+      card.onclick = () => abrirSala(sala.room);
+
+      // ids únicos para cada gauge
+      const tempGaugeId = `gauge-temp-${sala.room}`;
+      const humGaugeId = `gauge-hum-${sala.room}`;
+
+      card.innerHTML = `
+    <h3>${sala.room.toUpperCase()}</h3>
+    <div id="${tempGaugeId}" style="width:200px; height:200px;"></div>
+    
+    <p><em>Última atualização: ${new Date(sala.timestamp).toLocaleString("pt-BR")}</em></p>
+  `;
+
+      grid.appendChild(card);
+
+      // cria o gauge de temperatura
+      createGauge(tempGaugeId, humGaugeId, sala);
+    });
+
+  } catch (error) {
+    console.error("Erro ao carregar salas:", error);
   }
+}
+
+
+carregarTemperaturas();
+setInterval(carregarTemperaturas, 60000); // atualiza a cada 1min
+
+
+//redirecionamento para pagina de uma sala apartir do id
+function abrirSala(salaId) {
+  window.location.href = `room.html?sala=${salaId}`;
+}
+
+ // Ordena pelo nome da sala (ordem crescente)
+function sortRoom(salas){ 
+    salas.sort((a, b) => {
+      // extrai apenas os números do nome (ex: sala-01 -> 1)
+      const numA = parseInt(a.room.replace(/\D/g, ''), 10);
+      const numB = parseInt(b.room.replace(/\D/g, ''), 10);
+
+      return numA - numB;
+    });
 }

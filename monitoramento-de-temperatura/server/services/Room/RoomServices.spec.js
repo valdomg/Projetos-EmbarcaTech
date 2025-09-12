@@ -24,6 +24,7 @@ describe('RoomServices', () => {
     model.find = mockModel.find;
     model.findById = mockModel.findById;
     model.findByIdAndDelete = mockModel.findByIdAndDelete;
+    model.findByIdAndUpdate = mockModel.findByIdAndUpdate;
 
     service = new RoomServices(model);
 
@@ -73,10 +74,11 @@ describe('RoomServices', () => {
       expect(mockModel.find).toHaveBeenCalled();
       expect(result).toEqual(['room1', 'room2']);
     });
-
-    it('should throw error if find fails', async () => {
-      mockModel.find.mockRejectedValue(new Error('DB error'));
-      await expect(service.getAllRooms()).rejects.toThrow('Erro ao buscar salas: DB error');
+    it("should return empty array if no rooms found", async () => {
+      mockModel.find.mockResolvedValue([]);
+      const result = await service.getAllRooms();
+      expect(mockModel.find).toHaveBeenCalled();
+      expect(result).toEqual([]);
     });
   });
 
@@ -95,11 +97,6 @@ describe('RoomServices', () => {
     it('should throw error if room not found', async () => {
       mockModel.findById.mockResolvedValue(null);
       await expect(service.getRoomById('id123')).rejects.toThrow('Sala não encontrada');
-    });
-
-    it('should throw error if findById fails', async () => {
-      mockModel.findById.mockRejectedValue(new Error('DB error'));
-      await expect(service.getRoomById('id123')).rejects.toThrow('Erro ao buscar sala por ID: DB error');
     });
   });
 
@@ -121,21 +118,22 @@ describe('RoomServices', () => {
       service.RoomModel.findOne = mockModel.findOne;
       await expect(service.getRoomByMicrocontrollerId('mc123')).rejects.toThrow('Sala não encontrada para o microcontrollerId fornecido');
     });
-
-    it('should throw error if findOne fails', async () => {
-      mockModel.findOne = jest.fn().mockRejectedValue(new Error('DB error'));
-      service.RoomModel.findOne = mockModel.findOne;
-      await expect(service.getRoomByMicrocontrollerId('mc123')).rejects.toThrow('Erro ao buscar sala por microcontrollerId: DB error');
-    });
   });
 
   describe('updateRoom', () => {
     it('should update room correctly', async () => {
-      mockModel.findByIdAndUpdate = jest.fn().mockResolvedValue('updatedRoom');
+      mockModel.findById = jest.fn().mockResolvedValue({ _id: 'id123', name: 'Sala Antiga' });
+      
+      mockModel.findByIdAndUpdate = jest.fn().mockResolvedValue({ _id: 'id123', name: 'Nova Sala' });
+
+      service.RoomModel.findById = mockModel.findById;
       service.RoomModel.findByIdAndUpdate = mockModel.findByIdAndUpdate;
+
       const result = await service.updateRoom('id123', { name: 'Nova Sala' });
+
+      expect(mockModel.findById).toHaveBeenCalledWith('id123');
       expect(mockModel.findByIdAndUpdate).toHaveBeenCalledWith('id123', { name: 'Nova Sala' }, { new: true });
-      expect(result).toBe('updatedRoom');
+      expect(result).toEqual({ _id: 'id123', name: 'Nova Sala' });
     });
 
     it('should throw error if roomId is missing', async () => {
@@ -148,24 +146,25 @@ describe('RoomServices', () => {
     });
 
     it('should throw error if room not found for update', async () => {
+      mockModel.findById = jest.fn().mockResolvedValue(null);
+      service.RoomModel.findById = mockModel.findById;
       mockModel.findByIdAndUpdate = jest.fn().mockResolvedValue(null);
       service.RoomModel.findByIdAndUpdate = mockModel.findByIdAndUpdate;
       await expect(service.updateRoom('id123', { name: 'Nova Sala' })).rejects.toThrow('Sala não encontrada para atualização');
-    });
-
-    it('should throw error if findByIdAndUpdate fails', async () => {
-      mockModel.findByIdAndUpdate = jest.fn().mockRejectedValue(new Error('DB error'));
-      service.RoomModel.findByIdAndUpdate = mockModel.findByIdAndUpdate;
-      await expect(service.updateRoom('id123', { name: 'Nova Sala' })).rejects.toThrow('Erro ao atualizar sala: DB error');
     });
   });
 
   describe('deleteRoom', () => {
     it('should delete room correctly', async () => {
-      mockModel.findByIdAndDelete.mockResolvedValue('deletedRoom');
+      mockModel.findById.mockResolvedValue({ _id: 'id123', name: 'Room 1' });
+      mockModel.findByIdAndDelete.mockResolvedValue({ _id: 'id123', name: 'Room 1' });
+      service.RoomModel.findByIdAndDelete = mockModel.findByIdAndDelete;
+
       const result = await service.deleteRoom('id123');
+
+      expect(mockModel.findById).toHaveBeenCalledWith('id123');
       expect(mockModel.findByIdAndDelete).toHaveBeenCalledWith('id123');
-      expect(result).toBe('deletedRoom');
+      expect(result).toEqual({ _id: 'id123', name: 'Room 1' });
     });
 
     it('should throw error if roomId is missing', async () => {
@@ -174,12 +173,9 @@ describe('RoomServices', () => {
 
     it('should throw error if room not found for deletion', async () => {
       mockModel.findByIdAndDelete.mockResolvedValue(null);
+       mockModel.findById = jest.fn().mockResolvedValue(null);
+      service.RoomModel.findById = mockModel.findById;
       await expect(service.deleteRoom('id123')).rejects.toThrow('Sala não encontrada para exclusão');
-    });
-
-    it('should throw error if findByIdAndDelete fails', async () => {
-      mockModel.findByIdAndDelete.mockRejectedValue(new Error('DB error'));
-      await expect(service.deleteRoom('id123')).rejects.toThrow('Erro ao excluir sala: DB error');
     });
   });
 

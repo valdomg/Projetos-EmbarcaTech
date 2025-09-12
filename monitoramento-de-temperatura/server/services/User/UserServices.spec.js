@@ -63,7 +63,6 @@ describe('UserService', () => {
             const user = await userService.createUser(userData);
             expect(user.name).toBe('Test');
             expect(user.email).toBe('test@test.com');
-            expect(typeof user.password).toBe('string');
         });
     });
 

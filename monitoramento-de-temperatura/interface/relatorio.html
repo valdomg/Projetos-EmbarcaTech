@@ -9,7 +9,7 @@
     <title>Monitoramento de Temperatura</title>
 </head>
 
-<body>
+<body class="body-page">
     <!-- <header>
         <nav>
             <a href=""><img src="src/img/logo1.png" alt=""></a>
@@ -32,15 +32,18 @@
 
 
         <div class="relatorio">
-            <h3>Gerar Relatório</h3>
-            <label for="periodo">Escolha o período:</label>
-            <select id="periodo">
-                <option value="1">Últimas 24h</option>
-                <option value="2">Últimos 2 dias</option>
-                <option value="7">Últimos 7 dias</option>
-                <option value="30">Últimos 30 dias</option>
-            </select>
-            <button id="emitirRelatorio">Emitir Relatório (CSV)</button>
+            <div>
+                <h3>Emitir Relatório</h3>
+            </div>
+            
+            <div>
+                <label for="periodo">Escolha o período:</label>
+                <input id="start" class="date" type="date">
+                <label>à </label>
+                <input id="end" class="date" type="date">
+            </div>
+
+            <button id="emitirRelatorio">Baixar</button>
         </div>
 
 
@@ -48,7 +51,7 @@
 
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.4/raphael-min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/justgage/1.2.9/justgage.min.js"></script>
-    <script src="src/js/main.js"></script>
+    <script src="src/js/report.js"></script>
 
 </body>
 
