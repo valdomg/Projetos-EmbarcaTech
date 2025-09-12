@@ -24,8 +24,8 @@ async function carregarTemperaturas() {
     const ultimasPorSala = {};
     dados.forEach(dado => {
       const sala = dado.room; // certifique-se que o campo no JSON se chama "room"
-      if (!ultimasPorSala[sala] || new Date(dado.timestamp) > new Date(ultimasPorSala[sala].timestamp)) {
-        ultimasPorSala[sala] = dado;
+      if (!ultimasPorSala[sala._id] || new Date(dado.timestamp) > new Date(ultimasPorSala[sala._id].timestamp)) {
+        ultimasPorSala[sala._id] = dado;
       }
     });
 
@@ -41,14 +41,14 @@ async function carregarTemperaturas() {
     salas.forEach(sala => {
       const card = document.createElement("div");
       card.className = "temp-sala";
-      card.onclick = () => abrirSala(sala.room);
+      card.onclick = () => abrirSala(sala.room._id);
 
       // ids únicos para cada gauge
-      const tempGaugeId = `gauge-temp-${sala.room}`;
-      const humGaugeId = `gauge-hum-${sala.room}`;
+      const tempGaugeId = `gauge-temp-${sala.room._id}`;
+      const humGaugeId = `gauge-hum-${sala.room._id}`;
 
       card.innerHTML = `
-    <h3>${sala.room.toUpperCase()}</h3>
+    <h3>${sala.room.name.toUpperCase()}</h3>
     <div id="${tempGaugeId}" style="width:200px; height:200px;"></div>
     
     <p><em>Última atualização: ${new Date(sala.timestamp).toLocaleString("pt-BR")}</em></p>
@@ -85,8 +85,8 @@ function abrirSala(salaId) {
 function sortRoom(salas) {
   salas.sort((a, b) => {
     // extrai apenas os números do nome (ex: sala-01 -> 1)
-    const numA = parseInt(a.room.replace(/\D/g, ''), 10);
-    const numB = parseInt(b.room.replace(/\D/g, ''), 10);
+    const numA = parseInt(a.room.name.replace(/\D/g, ''), 10);
+    const numB = parseInt(b.room.name.replace(/\D/g, ''), 10);
 
     return numA - numB;
   });

@@ -35,7 +35,7 @@ async function roomUpdate() {
     card.className = "room"; // container principal
 
     card.innerHTML = `
-     <h3>${ultimaLeitura.room.toUpperCase()}</h3>
+     <h3>${ultimaLeitura.room.name.toUpperCase()}</h3>
      <div class="monitor">
       <div class="temp">
         <div id="${tempGaugeId}" style="width:320px; height:240px;"></div>
@@ -118,7 +118,7 @@ async function tempIntervalRoom() {
       list.className = "temp-sala";
 
       list.innerHTML = `
-    <h3>${sala.room.toUpperCase()}</h3>
+    <h3>${sala.room.name.toUpperCase()}</h3>
     <h3>Temperatura: ${sala.temperature}</h3>
     <h3>Umidade: ${sala.humidity}</h3>    
     <p><em>Última atualização: ${new Date(sala.timestamp).toLocaleString("pt-BR")}</em></p>
