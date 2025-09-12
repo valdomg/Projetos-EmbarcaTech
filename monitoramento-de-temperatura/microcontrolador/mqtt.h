@@ -7,7 +7,7 @@ extern PubSubClient client;
 
 void setupMQTT();
 void checkMQTTConnected();
-void publishFloat(const char* topic, float value);
 void publishSensorData(float temperature, float humidity);
+void publishAlert(const char* alert);
 
 #endif

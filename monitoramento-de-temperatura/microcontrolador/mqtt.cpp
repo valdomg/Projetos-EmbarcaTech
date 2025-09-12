@@ -1,10 +1,14 @@
 #include "mqtt.h"
 #include <WiFiClientSecure.h>
+#include <ArduinoJson.h>
 #include "log.h"
 
 const char* MQTT_SERVER = "xxxxxxxxxxx";
 const char* MQTT_USER = "xxxxxxxxxxxx";
 const char* MQTT_PASS = "xxxxxxxxxxxx";
+const char* MQTT_TOPIC_PUBLICATION_DATA = "xxxxxxxxxxxx/xxxxxxxxxxxx";
+const char* MQTT_TOPIC_PUBLICATION_ALERT = "xxxxxxxxxxxx/xxxxxxxxxxxx";
+const char* MQTT_DEVICE_ID = "xxxxxxxxxxxx";
 
 WiFiClientSecure espClient;
 PubSubClient client(espClient);
@@ -24,7 +28,7 @@ void setupMQTT() {
 void checkMQTTConnected() {
   if (!client.connected()) {
     while (!client.connected()) {
-      if (client.connect("ESP8266Client", MQTT_USER, MQTT_PASS)) {
+      if (client.connect(MQTT_DEVICE_ID, MQTT_USER, MQTT_PASS)) {
         log(LOG_INFO, "Conectado ao Broker MQTT");
       } else {
         log(LOG_ERROR, "Erro ao conectar com Broker MQTT, numero do erro: %d", client.state());
@@ -34,17 +38,6 @@ void checkMQTTConnected() {
   }
 }
 
-/**
- * Publica um valor float formatado para duas casas decimais em um tópico MQTT.
- * 
- * @param topic - Tópico MQTT para publicação.
- * @param value - Valor numérico a ser enviado.
- */
-void publishFloat(const char* topic, float value) {
-  char payload[10];
-  snprintf(payload, sizeof(payload), "%.2f", value);
-  client.publish(topic, payload);
-}
 
 /** 
  * Realiza a leitura do sensor e publica os dados via MQTT.
@@ -53,6 +46,26 @@ void publishFloat(const char* topic, float value) {
  * @param humidity -  valor da umidade.
  */
 void publishSensorData(float temperature, float humidity) {
-  publishFloat("laboratorio/temperatura", temperature);
-  publishFloat("laboratorio/humidade", humidity);
+
+  StaticJsonDocument<128> doc;
+  doc["Microcontrollerid"] = MQTT_DEVICE_ID;
+  doc["temperature"] = temperature;
+  doc["humidity"] = humidity;
+
+  char buffer[128];
+
+  serializeJson(doc, buffer);
+  client.publish(MQTT_TOPIC_PUBLICATION_DATA, buffer);
+}
+
+void publishAlert(const char* alert) {
+
+  StaticJsonDocument<96> doc;
+  doc["Microcontrollerid"] = MQTT_DEVICE_ID;
+  doc["alert"] = alert;
+
+  char buffer[96];
+
+  serializeJson(doc, buffer);
+  client.publish(MQTT_TOPIC_PUBLICATION_ALERT, buffer);
 }
