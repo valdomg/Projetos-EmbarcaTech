@@ -4,6 +4,7 @@ const salaAtual = params.get("sala");
 
 import { buscarTemperaturaSala, buscarTempIntervalo } from './api.js';
 import { createGauge } from './gauge.js';
+import { tempChart, umidChart } from './charts.js';
 
 
 //carrega e atualiza a temperatura da sala a partir do id
@@ -142,3 +143,54 @@ async function tempIntervalRoom() {
 // Chama a função intervalo
 tempIntervalRoom();
 setInterval(tempIntervalRoom, 60000); // Atualiza a cada 1 minuto
+
+
+
+//Atualiza dados do grafico
+async function atualizarGraficos() {
+  try {
+    const { start, end } = calcularIntervalo();
+    const dados = await buscarTempIntervalo(salaAtual, start, end);
+
+    if (!dados || dados.length === 0) {
+      console.warn("Nenhum dado retornado para o gráfico.");
+      return;
+    }
+
+    // Ordenar por timestamp
+    dados.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+    console.log(dados);
+
+    const labels = [];
+    const temperaturas = [];
+    const umidades = [];
+
+    dados.forEach(item => {
+      const hora = new Date(item.timestamp).getHours();
+      const horaFormatada = `${hora.toString().padStart(2, "0")}h`;
+
+      labels.push(horaFormatada);
+      temperaturas.push(item.temperature);
+      umidades.push(item.humidity);
+    });
+
+    // Atualiza gráfico de temperatura
+    tempChart.data.labels = labels;
+    tempChart.data.datasets[0].data = temperaturas;
+    tempChart.update();
+
+    // Atualiza gráfico de umidade
+    umidChart.data.labels = labels;
+    umidChart.data.datasets[0].data = umidades;
+    umidChart.update();
+
+  } catch (err) {
+    console.error("Erro ao atualizar gráficos:", err);
+  }
+}
+
+// Inicializa e atualiza a cada minuto
+atualizarGraficos();
+setInterval(atualizarGraficos, 60000);
+
