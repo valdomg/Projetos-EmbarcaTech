@@ -105,7 +105,7 @@ void maybeHandleAlerts(const ErrorStatus& errors, unsigned long now) {
 
 void setup() {
 
-  logInit(LOG_DEBUG);
+  logInit(LOG_INFO);
 
   buttonInit();
   log(LOG_INFO, "Botao iniciado");
@@ -132,11 +132,13 @@ void setup() {
 }
 
 void loop() {
+
+  reconnectWifi();
   client.loop();
   checkMQTTConnected();
 
   unsigned long now = millis();
-  
+
   if (now - lastSensorReadTime >= SENSOR_INTERVAL_MS) {
     lastSensorReadTime = now;
     EnvironmentData data = readSensorData();
