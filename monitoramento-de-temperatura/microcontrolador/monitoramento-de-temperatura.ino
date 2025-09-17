@@ -20,8 +20,6 @@ constexpr uint8_t HUMIDITY_MAX = 60;
 unsigned long lastMQTTPublishTime = 0;
 unsigned long lastSensorReadTime = 0;
 
-bool isSoundMuted = 0;
-
 struct ErrorStatus {
   bool humidityError;
   bool temperatureError;
@@ -86,12 +84,9 @@ void handleSensorData(EnvironmentData& data, unsigned long now) {
 void maybeHandleAlerts(const ErrorStatus& errors, unsigned long now) {
   if (errors.humidityError || errors.temperatureError) {
 
-    if (buttonWasPressed()) {
-      log(LOG_INFO,"Botao pressionado");
-      isSoundMuted = !isSoundMuted;
-    }
+    enableButtonInterrupt();
 
-    if (isSoundMuted) {
+    if (buttonWasPressed()) {
       disableSoundAlert();
 
     } else {
@@ -100,6 +95,7 @@ void maybeHandleAlerts(const ErrorStatus& errors, unsigned long now) {
     toggleLed(now);
   } else {
 
+    disableButtonInterrupt();
     resetButtonState();
     disableSoundAlert();
     turnOffLed();

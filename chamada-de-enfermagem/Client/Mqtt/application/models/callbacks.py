@@ -1,7 +1,7 @@
 import json
 import os
 from dotenv import load_dotenv
-from application.models.MongoDBConnection import MongoDBConnection
+from Mqtt.application.models.MongoDBConnection import MongoDBConnection
 
 load_dotenv()
 
@@ -51,7 +51,6 @@ def on_disconnect(client, userdata, rc):
         'comando': 'ligar/desligar'
     }
 '''
-
 
 def on_message(client, userdata, message):
     payload = json.loads(message.payload.decode())
