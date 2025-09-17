@@ -2,7 +2,7 @@
 const params = new URLSearchParams(window.location.search);
 const salaAtual = params.get("sala");
 
-import { buscarTemperaturaSala, buscarTempIntervalo } from './api.js';
+import { buscarTemperaturaSala, roomTempInterval } from './api.js';
 import { createGauge } from './gauge.js';
 import { tempChart, umidChart } from './charts.js';
 
@@ -97,7 +97,7 @@ async function tempIntervalRoom() {
   try {
     const { start, end } = calcularIntervalo(); // Calcula o intervalo de 24 horas
 
-    const dados = await buscarTempIntervalo(salaAtual, start, end);
+    const dados = await roomTempInterval(salaAtual, start, end);
     console.log(dados);
 
     if (!dados.length) {
@@ -145,7 +145,7 @@ setInterval(tempIntervalRoom, 60000); // Atualiza a cada 1 minuto
 async function atualizarGraficos() {
   try {
     const { start, end } = calcularIntervalo();
-    const dados = await buscarTempIntervalo(salaAtual, start, end);
+    const dados = await roomTempInterval(salaAtual, start, end);
 
     if (!dados || dados.length === 0) {
       console.warn("Nenhum dado retornado para o gráfico.");
