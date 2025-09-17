@@ -108,20 +108,20 @@ void setup() {
   logInit(LOG_INFO);
 
   buttonInit();
-  log(LOG_INFO, "Botao iniciado");
+  log(LOG_DEBUG, "Botao iniciado");
 
   initializeSensor();
-  log(LOG_INFO, "Sensor iniciado");
+  log(LOG_DEBUG, "Sensor iniciado");
 
   // Chama a função para iniciar o display
   lcd1602_init();
-  log(LOG_INFO, "LCD iniciada");
+  log(LOG_DEBUG, "LCD iniciada");
 
   buzzerInit();
-  log(LOG_INFO, "Buzzer iniciado iniciado");
+  log(LOG_DEBUG, "Buzzer iniciado iniciado");
 
   ledInit();
-  log(LOG_INFO, "LED iniciado");
+  log(LOG_DEBUG, "LED iniciado");
 
 
   if (!connectWiFi()) {
@@ -133,9 +133,9 @@ void setup() {
 
 void loop() {
 
-  reconnectWifi();
-  client.loop();
-  checkMQTTConnected();
+  if (reconnectWifi()){
+    checkMQTTConnected();
+  }
 
   unsigned long now = millis();
 
