@@ -1,4 +1,5 @@
 #include "button.h"
+#include "log.h"
 
 // -----------------------------------------------------------------------------
 // Variáveis globais
@@ -13,6 +14,15 @@
  */
 volatile bool buttonPressed = false;
 
+/**
+ * @brief Estado lógico do botão.
+ * 
+ * Essa variável é usada para armazenar o estado lógico do botão após o
+ * tratamento da flag `buttonPressed`. Ela alterna (toggle) entre `true` e 
+ * `false` a cada clique válido.
+ */
+bool stateButton = false;
+
 
 // -----------------------------------------------------------------------------
 // Rotina de interrupção (ISR)
@@ -25,16 +35,17 @@ volatile bool buttonPressed = false;
  * Implementa um mecanismo de debounce por software para evitar múltiplas 
  * detecções de um único clique.
  * 
- * - O estado de `buttonPressed` é alternado (toggle) a cada acionamento válido.
+ * - Ativa a flag `buttonPressed` quando um acionamento válido é detectado.
  * - O tempo mínimo entre interrupções aceitas é de 500 ms.
  */
 void IRAM_ATTR buttonISR() {
-  static unsigned long lastInterruptTime = 0;  // Armazena o último instante da interrupção
+  static unsigned long lastInterruptTime = 0;  ///< Marca o instante da última interrupção
   unsigned long currentTime = millis();
 
   // Verifica se passou tempo suficiente desde a última interrupção (debounce)
   if (currentTime - lastInterruptTime > 500) {
-    buttonPressed = true;  // Alterna o estado da flag
+    buttonPressed = true;  // Marca que o botão foi pressionado
+    log(LOG_INFO, "botao foi pressionado");
   }
 
   lastInterruptTime = currentTime;
@@ -46,35 +57,58 @@ void IRAM_ATTR buttonISR() {
 // -----------------------------------------------------------------------------
 
 /**
- * @brief Inicializa o botão configurando o pino e a interrupção.
+ * @brief Inicializa o botão configurando o pino como entrada com pull-up interno.
  * 
- * - O pino é configurado como entrada com pull-up interno.
- * - A interrupção é configurada para disparar na borda de subida (RISING).
- * - Essa função deve ser chamada no setup() antes de usar o botao.
+ * Esta função apenas prepara o pino, mas **não ativa a interrupção**. 
+ * A ativação deve ser feita separadamente usando `enableButtonInterrupt()`.
  */
 void buttonInit() {
   pinMode(PIN_BUTTON, INPUT_PULLUP);
+}
+
+/**
+ * @brief Habilita a interrupção associada ao botão.
+ * 
+ * A ISR (`buttonISR`) será chamada sempre que o botão gerar um evento de
+ * borda de subida (RISING). 
+ */
+void enableButtonInterrupt() {
   attachInterrupt(digitalPinToInterrupt(PIN_BUTTON), buttonISR, RISING);
 }
 
 /**
- * @brief Retorna o estado atual da flag do botão.
+ * @brief Desabilita a interrupção associada ao botão.
  * 
- * @return true se o botão foi pressionado (flag ativa).
- * @return false caso contrário.
+ * Impede que a ISR seja chamada, útil em cenários em que não se deseja
+ * que cliques do botão sejam processados temporariamente.
  */
-bool buttonWasPressed() {
-    if (buttonPressed) {
-    buttonPressed = false;
-    return true;
-  }
-  return false;
-  
+void disableButtonInterrupt() {
+  detachInterrupt(digitalPinToInterrupt(PIN_BUTTON));
 }
 
 /**
- * @brief Reseta o estado do botão, limpando a flag de pressionado.
+ * @brief Retorna o estado lógico atual do botão.
+ * 
+ * - Se a flag `buttonPressed` estiver ativa, ela é resetada.
+ * - O estado lógico `stateButton` é alternado (toggle) para refletir a mudança.
+ * 
+ * @return true se o botão está no estado ativo.
+ * @return false caso contrário.
+ */
+bool buttonWasPressed() {
+  if (buttonPressed) {
+    buttonPressed = false;
+    stateButton = !stateButton;
+  }
+  return stateButton;
+}
+
+/**
+ * @brief Reseta o estado lógico do botão.
+ * 
+ * Força `stateButton` para `false`, independentemente de cliques anteriores.
+ * Útil para reiniciar o estado do botão em cenários de inicialização ou reset.
  */
 void resetButtonState() {
-  buttonPressed = false;
+  stateButton = false;
 }
