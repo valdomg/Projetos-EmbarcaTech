@@ -67,12 +67,10 @@ void setupMQTT() {
 }
 
 /**
- * @brief Verifica e garante a conexão com o broker MQTT.
- *
- * Caso a conexão seja perdida, a função tenta reconectar
- * de forma contínua até obter sucesso.
- * Em caso de falha, o erro é exibido via log e a função
- * aguarda 5 segundos antes de tentar novamente.
+ * @brief Verifica a conexão com o broker MQTT e reconecta se necessário.
+ * 
+ * A cada chamada, mantém a conexão ativa (client.loop()).
+ * Se a conexão caiu, tenta reconectar dentro do intervalo definido em reconnectIntervalMQTT.
  */
 void checkMQTTConnected() {
   client.loop();                         // Mantém a comunicação ativa e processa mensagens recebidas.
