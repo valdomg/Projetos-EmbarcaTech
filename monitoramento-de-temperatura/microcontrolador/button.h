@@ -24,25 +24,47 @@ constexpr uint8_t PIN_BUTTON = 13;
  * @brief Inicializa o botão.
  * 
  * - Configura o pino como entrada com pull-up interno.
- * - Associa a interrupção ao pino para capturar eventos de pressionamento.
+ * - **Não ativa a interrupção automaticamente**. 
+ *   Para habilitar a interrupção deve-se chamar `enableButtonInterrupt()`.
  */
 void buttonInit();
 
 /**
  * @brief Verifica se o botão foi pressionado.
  * 
- * Esta função retorna o valor da flag atualizada na interrupção.
+ * Essa função retorna o estado lógico do botão, atualizado 
+ * pela rotina de interrupção (`buttonISR`).
  * 
- * @return true  se o botão foi pressionado.
- * @return false se o botão não foi pressionado.
+ * - Se o botão foi pressionado, o estado lógico alterna (toggle).
+ * - A flag de pressionamento é resetada internamente após a leitura.
+ * 
+ * @return true  se o botão está em estado ativo.
+ * @return false se o botão está em estado inativo.
  */
 bool buttonWasPressed();
 
 /**
- * @brief Reseta o estado do botão.
+ * @brief Reseta o estado lógico do botão.
  * 
- * Usado para limpar a flag de "pressionado" depois que o evento já foi tratado.
+ * Define o estado do botão como `false`, 
+ * independente de cliques anteriores.
  */
 void resetButtonState();
+
+/**
+ * @brief Desabilita a interrupção associada ao botão.
+ * 
+ * Após essa chamada, o botão não gerará mais eventos de interrupção
+ * até que `enableButtonInterrupt()` seja chamado novamente.
+ */
+void disableButtonInterrupt();
+
+/**
+ * @brief Habilita a interrupção associada ao botão.
+ * 
+ * Configura o microcontrolador para chamar a rotina de interrupção
+ * (`buttonISR`) quando o botão for pressionado (borda de subida - RISING).
+ */
+void enableButtonInterrupt();
 
 #endif
