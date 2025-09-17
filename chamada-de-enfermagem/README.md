@@ -65,7 +65,7 @@ sudo systemctl restart mosquitto    #Arch Linux
 
 ```bash
 git clone https://github.com/Embarcatech-Residencia-CAPEDII/Projetos
-cd ./chamada-de-enfermagem/server
+cd ./chamada-de-enfermagem
 ```
 
 ### **2. Criar o Ambiente Virtual**
@@ -83,13 +83,11 @@ source .venv/bin/activate   # Linux/MacOS
 
 ### **3. Instalar o Flask e dependências**
 ```bash
-pip install Flask
-pip install flask-mqtt
 pip install flask-pymongo
 pip install dotenv
 pip install paho-mqtt
 ```
-### **4. No arquivo .env coloque as credenciais para conexão com seu Banco de dados e do broker 
+### **4. No arquivo .env coloque as credenciais para conexão com seu Banco de dados e do broker**
 ```
 MONGO_URI = ''
 MONGO_DATABASE = ''
@@ -104,33 +102,24 @@ CLIENT_PASS = ''
 
 ```
 
-### **4. Conectar o Client MQTT ao Broker 
-```bash
-cd ./chamada-de-enfermagem/server/Mqtt/
-```
-```bash
-py main.py        #Windows
-```
-```bash
-python main.py    #Linux
-```
-### **5. Abrir o Client Flask para visualizar a tabela de chamadas
+### **5. Conectar o Client MQTT ao Broker**
 ```bash
 cd ./chamada-de-enfermagem/Client
 ```
 ```bash
-python -m Flask.app        #Windows
+python -m Mqtt.main        #Windows/Linux
+```
+### **6. Abrir o Client Flask para visualizar a tabela de chamadas**
+```bash
+cd ./chamada-de-enfermagem/Client
 ```
 ```bash
-python -m Flask.app   #Linux
+python -m Flask.app        #Windows/Linux
 ```
 
-### **6. Realizar um teste
+### **7. Realizar um teste**
 Em outro terminal execute o arquivo pub_test.py e veja a nova chamada dentro do app 
 ```bash
-py pub_test.py  #Windows
-```
-```bash
-python pub_test.py  #Linux
+python pub_test.py  #Windows/Linux
 ```
 
