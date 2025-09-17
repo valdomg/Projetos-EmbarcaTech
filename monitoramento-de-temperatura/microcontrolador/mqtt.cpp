@@ -44,6 +44,12 @@ WiFiClientSecure espClient;
 PubSubClient client(espClient);
 
 // -----------------------------------------------------------------------------
+// Variáveis de controle
+// -----------------------------------------------------------------------------
+static unsigned long lastAttempConnectMQTT = 0;         // Guarda o tempo da última tentativa de conexão com o broker.
+static const unsigned long reconnectIntervalMQTT = 3000; // Intervalo (ms) entre tentativas de reconexão ao broker.
+
+// -----------------------------------------------------------------------------
 // Funções de inicialização e conexão
 // -----------------------------------------------------------------------------
 
@@ -57,7 +63,7 @@ PubSubClient client(espClient);
 void setupMQTT() {
   espClient.setInsecure();  // Não verifica certificado
   client.setServer(MQTT_SERVER, 8883);
-  log(LOG_INFO, "MQTT inicializado");
+  log(LOG_DEBUG, "MQTT inicializado");
 }
 
 /**
@@ -69,14 +75,21 @@ void setupMQTT() {
  * aguarda 5 segundos antes de tentar novamente.
  */
 void checkMQTTConnected() {
-  if (!client.connected()) {
-    while (!client.connected()) {
-      if (client.connect(MQTT_DEVICE_ID, MQTT_USER, MQTT_PASS)) {
-        log(LOG_INFO, "Conectado ao Broker MQTT");
-      } else {
-        log(LOG_ERROR, "Erro ao conectar com Broker MQTT, numero do erro: %d", client.state());
-        delay(5000);
-      }
+  client.loop();                         // Mantém a comunicação ativa e processa mensagens recebidas.
+  if (client.connected()) return;        // Se já está conectado, sai da função.
+
+  unsigned long now = millis();          // Captura o tempo atual (ms desde o boot).
+
+  // Só tenta reconectar se já passou o intervalo configurado
+  if (now - lastAttempConnectMQTT >= reconnectIntervalMQTT){
+    lastAttempConnectMQTT = now;         // Atualiza o tempo da última tentativa
+
+    log(LOG_DEBUG,"Tentando conectar ao MQTT...");
+    // Tenta conectar ao broker usando credenciais do config.h
+    if (client.connect(MQTT_DEVICE_ID, MQTT_USER, MQTT_PASS)) {
+      log(LOG_DEBUG,"Conectado ou Broker");
+    } else {
+      log(LOG_ERROR,"Erro ao conectar com Broker rc= %d",client.state()); // Mostra o código de erro da conexão
     }
   }
 }
