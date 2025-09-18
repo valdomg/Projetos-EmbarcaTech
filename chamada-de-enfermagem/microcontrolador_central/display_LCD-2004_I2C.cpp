@@ -30,20 +30,23 @@ void clearLine(uint8_t column, uint8_t line, uint8_t count) {
 
 
 // Função que mostra os dados no display
-void show_infirmary_numberCalls(List_NursingCall &listCalls) {
+void show_infirmary_numberCalls(int infirmary, bool hasNursingCall, int total_items) {
   // Limpa 8 espaços na coluna/linha escolhida - ENFERMARIA
   clearLine(12, 2, 8);
-
   // Limpa 3 espaços na coluna/linha escolhida - QUANT. CHAMADAS
   clearLine(17, 3, 3);
 
-
   // Linha 3 - mostrando o número da enfermaria
   lcd.setCursor(12, 2);
-  if (listCalls.hasNursingCall()) {
-    lcd.print(F("< "));
-    lcd.print(listCalls.getInfirmaryCurrent());
-    lcd.print(F(" >"));
+  if (hasNursingCall) {
+    // Se tiver mais de um chamado não resolvido, mostra "< num >"
+    if (total_items > 1){
+      lcd.print(F("< "));
+      lcd.print(infirmary);
+      lcd.print(F(" >"));
+    } else{
+      lcd.print(infirmary);
+    }
 
   } else {
     lcd.print(F(" X"));
@@ -51,10 +54,11 @@ void show_infirmary_numberCalls(List_NursingCall &listCalls) {
 
   // Linha 4 - mostrando a quantidade de chamados não resolvidos
   lcd.setCursor(17, 3);
-  lcd.print(listCalls.getTotal());
+  lcd.print(total_items);
 }
 
 
+// Dados fixos do Display
 void fixed_data() {
   lcd.setCursor(1, 0);  // Posiciona o cursor na coluna 1, linha 0
   lcd.print(F("Chamada Enfermagem"));

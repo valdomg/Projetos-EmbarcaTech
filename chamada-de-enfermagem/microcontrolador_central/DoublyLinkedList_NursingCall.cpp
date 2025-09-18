@@ -50,12 +50,12 @@ void List_NursingCall::add(int infirmary) { // Adicionar um nó ao final da list
         tail->next = new_node;
     } else { // senão (lista vazia) ajusta head
         head = new_node;
+        // define current como o novo nó
+        current = new_node;
     }
 
     // Atualiza tail com o novo nó
     tail = new_node;
-    // define current como o novo nó
-    current = new_node;
     // Incrementa total
     total++;
 }
