@@ -105,23 +105,23 @@ void maybeHandleAlerts(const ErrorStatus& errors, unsigned long now) {
 
 void setup() {
 
-  logInit(LOG_DEBUG);
+  logInit(LOG_INFO);
 
   buttonInit();
-  log(LOG_INFO, "Botao iniciado");
+  log(LOG_DEBUG, "Botao iniciado");
 
   initializeSensor();
-  log(LOG_INFO, "Sensor iniciado");
+  log(LOG_DEBUG, "Sensor iniciado");
 
   // Chama a função para iniciar o display
   lcd1602_init();
-  log(LOG_INFO, "LCD iniciada");
+  log(LOG_DEBUG, "LCD iniciada");
 
   buzzerInit();
-  log(LOG_INFO, "Buzzer iniciado iniciado");
+  log(LOG_DEBUG, "Buzzer iniciado iniciado");
 
   ledInit();
-  log(LOG_INFO, "LED iniciado");
+  log(LOG_DEBUG, "LED iniciado");
 
 
   if (!connectWiFi()) {
@@ -132,11 +132,13 @@ void setup() {
 }
 
 void loop() {
-  client.loop();
-  checkMQTTConnected();
+
+  if (reconnectWifi()){
+    checkMQTTConnected();
+  }
 
   unsigned long now = millis();
-  
+
   if (now - lastSensorReadTime >= SENSOR_INTERVAL_MS) {
     lastSensorReadTime = now;
     EnvironmentData data = readSensorData();
