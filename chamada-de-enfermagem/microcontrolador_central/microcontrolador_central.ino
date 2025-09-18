@@ -5,10 +5,21 @@
 #include "DoublyLinkedList_NursingCall.h"
 #include "buttons.h"
 
+
 // Lista de chamadas de enfermagem 
 List_NursingCall listCalls;
 // flag que indica se o botão de deletar foi pressionado uma vez e está aguardando confirmação
 bool deletionConfirmation = false;
+// flag que indica que houve atualização na lista e o display precisa ser atualizado
+bool listUpdated = false;
+
+
+
+// ===== Função para adicionar nova chamada =====
+void addNewCall(int value) {
+  listCalls.add(value);
+  listUpdated = true; // marca que a lista foi alterada
+}
 
 
 // ===== Funções de navegação =====
@@ -85,12 +96,30 @@ void setup() {
       listCalls.getInfirmaryCurrent(),
       listCalls.hasNursingCall(),
       listCalls.getTotal());  // Mostra os dados no display
+
+  listUpdated = false;
+
 }
 
 void loop() {
 
   checkAndReconnectWifi();
   delay(1000);
+
+
+  // Atualiza se tiver novos dados, mas se nenhum botão estiver pressionado
+  if (listUpdated
+      && button_next.state == HIGH
+      && button_prev.state == HIGH
+      && button_delete.state == HIGH
+      && !deletionConfirmation) {
+
+    showInfirmaryNumber(
+      listCalls.getInfirmaryCurrent(),
+      listCalls.hasNursingCall(),
+      listCalls.getTotal());
+    listUpdated = false;  // reseta a flag
+  }
 
   // Habilita os botões somente se houver dados na lista
   if (listCalls.hasNursingCall()) {
