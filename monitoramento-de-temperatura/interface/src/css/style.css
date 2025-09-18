@@ -7,6 +7,10 @@
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 }
 
+html, body {
+  height: 100%;
+}
+
 body {
     background-color: black;
 }
@@ -28,7 +32,7 @@ img {
     height: 100px;
 }
 
-i, button, .btn{
+i, a, button, .btn{
     cursor: pointer;
 }
 
@@ -172,6 +176,60 @@ button {
     padding: 20px;
     height: 100%;
 }
+
+.dashboard-admin {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    height: calc(100vh - 5rem);
+    width: 100%;
+}
+
+.menu-lateral{
+    display: flex;
+    flex-direction: column;
+    justify-content:start;
+    align-items: center;
+    /* padding-top: 40px; */
+    width: 17%;
+    height: 100%;
+    gap: 30px;
+    background-color: rgb(255, 255, 255);
+    border-right: 1px solid rgb(219, 218, 218);
+}
+
+.menu-lateral a{
+    color: black;
+    text-align: left;
+    padding-top: 40px;
+    padding-left: 40px;
+    width: 100%;
+}
+
+.menu-lateral .btn{
+    width: 300px;
+}
+
+hr {
+  border: none; 
+  height: 2px;  
+  background-color: #e6e6e6;
+  width: 80%; 
+  margin: 0;
+}
+
+.menu-principal{
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+    width: 83%;
+    height: 100%;
+    gap: 20px;
+    background-color: rgb(255, 255, 255);
+}
+
 
 .relatorio {
     display: flex;
