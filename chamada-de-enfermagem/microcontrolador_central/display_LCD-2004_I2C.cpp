@@ -49,7 +49,7 @@ void showExclusionConfirm(int infirmary) {
 
 
 // Função que mostra os dados no display
-void show_infirmary_numberCalls(int infirmary, bool hasNursingCall, int total_items) {
+void showInfirmaryNumber(int infirmary, bool hasNursingCall, int total_items) {
   // Limpa 8 espaços na coluna/linha escolhida - ENFERMARIA
   clearLine(12, 2, 8);
   // Limpa 3 espaços na coluna/linha escolhida - QUANT. CHAMADAS
