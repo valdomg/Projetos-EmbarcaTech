@@ -16,3 +16,29 @@ void initButtons() {
   pinMode(button_prev.pin, INPUT_PULLUP);
   pinMode(button_delete.pin, INPUT_PULLUP);
 }
+
+
+// ===== Debounce =====
+bool checkButton(Button &btn) {
+  uint8_t reading = digitalRead(btn.pin);
+
+  if (reading != btn.lastRawReading) { // Reinicia o timer se a leitura muda
+    btn.lastDebounceTime = millis();
+  }
+
+  // Atualiza o estado debounced somente se permaneceu estável por DEBOUNCE_DELAY ms
+  if ((millis() - btn.lastDebounceTime) >= DEBOUNCE_DELAY) {
+    if (reading != btn.state) {
+      btn.state = reading;
+
+      // Retorna true apenas quando detecta pressão do botão (LOW)
+      if (btn.state == LOW) {
+        btn.lastRawReading = reading;
+        return true;
+      }
+    }
+  }
+
+  btn.lastRawReading = reading;
+  return false;
+}

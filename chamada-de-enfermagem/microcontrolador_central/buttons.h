@@ -18,5 +18,6 @@ extern Button button_prev;
 extern Button button_delete;
 
 extern void initButtons();
+extern bool checkButton(Button &btn);
 
 #endif
