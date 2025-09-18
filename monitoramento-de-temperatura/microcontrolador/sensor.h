@@ -11,7 +11,6 @@ struct EnvironmentData {
 
 void initializeSensor();
 EnvironmentData readSensorData();
-void printSensorData(const EnvironmentData& data);
 
 extern Adafruit_AHTX0 aht;
 

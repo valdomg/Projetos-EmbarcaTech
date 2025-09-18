@@ -11,8 +11,9 @@ void initializeSensor() {
   Wire.begin(4, 5);  // Pinos fixos aqui ou passados por parâmetro depois
 
   if (!aht.begin()) {
-    log(LOG_ERROR,"Sensor AHT10 não inicializado");
-    while (1) delay(10);
+    log(LOG_ERROR, "Sensor AHT10 não inicializado");
+  } else {
+    log(LOG_DEBUG, "Sensor iniciado");
   }
 }
 
@@ -27,15 +28,15 @@ EnvironmentData readSensorData() {
   aht.getEvent(&hum, &temp);
 
   EnvironmentData data;
-  if (isnan(temp.temperature) || isnan(hum.relative_humidity)) {
+  data.temperature = temp.temperature;
+  data.humidity = hum.relative_humidity;
+
+  if (isnan(temp.temperature) || isnan(hum.relative_humidity) || temp.temperature <= 0.5 || hum.relative_humidity <= 0.5 ) {
     data.valid = false;
     return data;
   }
 
-  data.temperature = temp.temperature;
-  data.humidity = hum.relative_humidity;
   data.valid = true;
 
   return data;
 }
-
