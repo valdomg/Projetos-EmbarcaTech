@@ -11,29 +11,34 @@ body {
     background-color: black;
 }
 
+.default {
+    background-color: white;
+}
+
+.hide{
+    display: none;
+}
+
+.show{
+    display: block;
+}
 
 img {
     width: 280px;
     height: 100px;
 }
 
-i{
+i, button, .btn{
     cursor: pointer;
 }
 
-h1,
-h4,
-a {
+h1, h4, a {
     color: white;
     text-decoration: none;
 }
 
 p {
     color: rgb(148, 147, 147);
-}
-
-.body-page {
-    background-color: white;
 }
 
 .container {
@@ -81,7 +86,14 @@ button {
     padding: 6px;
 }
 
-.divider {
+.btn {
+    background-color: brown;
+    color: white;
+    font-size: 18px;
+    width: auto;
+}
+
+.dashboard-user {
     display: flex;
     gap: 20px;
     flex-direction: row;
@@ -91,29 +103,12 @@ button {
 
 }
 
-.btn {
-    background-color: brown;
-    color: white;
-    cursor: pointer;
-    font-size: 18px;
-    width: auto;
-}
-
-.dashboard {
+.gauge {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
     gap: 20px;
-}
-
-.monitor {
-    width: inherit;
-    gap: 20px;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
 }
 
 .chart {
@@ -129,35 +124,10 @@ button {
 
 .chart-background {
     background-color: rgba(68, 67, 67, 0.6);
-    /* cor do fundo */
     border-radius: 8px;
-    /* opcional: cantos arredondados */
 }
 
-.temp {
-    /* background-color: rgb(68, 67, 67);
-    border-radius: 10px; */
-    background-color: rgba(68, 67, 67, .6);
-    align-items: center;
-    justify-items: center;
-    cursor: pointer;
-    padding: 20px;
-    height: 100%;
-}
-
-
-.umid {
-    /* background-color: rgb(68, 67, 67);
-    border-radius: 10px; */
-    background-color: rgba(68, 67, 67, .6);
-    align-items: center;
-    justify-items: center;
-    cursor: pointer;
-    padding: 20px;
-    height: 100%;
-}
-
-.dashboard-grid {
+.room-grid {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     margin: 100px 100px 10px 100px;
@@ -167,7 +137,7 @@ button {
     border-radius: 8px;
 }
 
-.temp-sala {
+.room-card {
     background-color: rgba(68, 67, 67, .6);
     border-radius: 3px;
     color: white;
@@ -179,16 +149,28 @@ button {
     transition: transform 0.2 ease, box-shadow 0.2s ease;
 }
 
-.temp-sala:hover {
+.room-card:hover {
     transform: scale(1.02);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.room {
-    display: flex;
-    flex-direction: column;
+.temp {
+    background-color: rgba(68, 67, 67, .6);
     align-items: center;
-    color: white;
+    justify-items: center;
+    cursor: pointer;
+    padding: 20px;
+    height: 100%;
+}
+
+
+.umid {
+    background-color: rgba(68, 67, 67, .6);
+    align-items: center;
+    justify-items: center;
+    cursor: pointer;
+    padding: 20px;
+    height: 100%;
 }
 
 .relatorio {
@@ -216,7 +198,6 @@ button {
     color: white;
     border: none;
     border-radius: 5px;
-    cursor: pointer;
     width: 200px;
     font-size: 18px;
 }
@@ -224,7 +205,7 @@ button {
 
 /*  BREAKPOINTS */
 @media (max-width: 767px) {
-    .dashbord {
+    .gauge {
         margin-top: 3rem;
         gap: 2rem;
     }
@@ -240,7 +221,7 @@ button {
         padding: 5px;
     }
 
-    .dashboard-grid {
+    .room-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
         margin: 100px 100px 10px 100px;

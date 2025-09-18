@@ -1,6 +1,6 @@
 
 import { buscarTemperaturas } from './api.js';
-import { createGauge } from './gauge.js';
+import { createGauge } from './components/gauge.js';
 
 
 //carrega dados de temperatura de todas as salas cadastradas no sistema.
@@ -34,13 +34,15 @@ async function carregarTemperaturas() {
 
     sortRoom(salas);
 
+
+
     // Renderiza grid
-    const grid = document.getElementById("salasGrid");
+    const grid = document.getElementById("roomsGrid");
     grid.innerHTML = "";
 
     salas.forEach(sala => {
       const card = document.createElement("div");
-      card.className = "temp-sala";
+      card.className = "room-card";
       card.onclick = () => abrirSala(sala.room._id);
 
       // ids únicos para cada gauge
@@ -55,6 +57,10 @@ async function carregarTemperaturas() {
   `;
 
       grid.appendChild(card);
+
+      const body = document.body;
+      body.classList.remove('hide');
+      body.classList.add('show');
 
       // cria o gauge de temperatura
       createGauge(tempGaugeId, humGaugeId, sala);
@@ -121,7 +127,7 @@ export function checkAcess(permissao = null) {
       return false;
     }
 
-    document.getElementById("conteudo").style.display = "block"; 
+    document.getElementById("conteudo").style.display = "block";
     return true; // acesso liberado
 
   } catch (e) {
