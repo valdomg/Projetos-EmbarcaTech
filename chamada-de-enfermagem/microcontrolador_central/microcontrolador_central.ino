@@ -12,32 +12,53 @@ bool deletionConfirmation = false;
 
 
 // ===== Funções de navegação =====
-void handleNext() { // ===== Botão Next (>)
+void handleNext() {  // ===== Botão Next (>)
+  // Se estava em modo confirmação de deleção, atualiza o display, mostrando que a ação foi cancelada
   if (deletionConfirmation) {
-    deletionConfirmation = false; // cancela exclusão ao navegar
+    fixed_data();                  // Atualiza o display com os dados fixos
+    deletionConfirmation = false;  // reset caso usuário navegue (cancela a exclusão)
   } else {
+    // Avança para o próximo item da lista
     listCalls.next();
-    Serial.printf("Clicou next %d \n", listCalls.getInfirmaryCurrent());
   }
+  // Mostra o item atual
+  showInfirmaryNumber(
+    listCalls.getInfirmaryCurrent(),
+    listCalls.hasNursingCall(),
+    listCalls.getTotal());
 }
 
-void handlePrev() { // ===== Botão Prev (<)
+void handlePrev() {  // ===== Botão Prev (<)
+  // Se estava em modo confirmação de deleção, atualiza o display, mostrando que a ação foi cancelada
   if (deletionConfirmation) {
-    deletionConfirmation = false; // cancela exclusão ao navegar
+    fixed_data();                  // Atualiza o display com os dados fixos
+    deletionConfirmation = false;  // reset caso usuário navegue (cancela a exclusão)
   } else {
+    // Avança para o item anteriot da lista
     listCalls.prev();
-    Serial.printf("Clicou prev %d \n", listCalls.getInfirmaryCurrent());
   }
+  // Mostra o item atual
+  showInfirmaryNumber(
+    listCalls.getInfirmaryCurrent(),
+    listCalls.hasNursingCall(),
+    listCalls.getTotal());
 }
+
 
 void handleDelete() {  // ===== Botão Delete
   // Primeiro clique: apenas exibe a mensagem de confirmação
   if (!deletionConfirmation) {
+    showExclusionConfirm(listCalls.getInfirmaryCurrent());
     deletionConfirmation = true;
-  } else { // Segundo clique: executa deleção
-    // Segundo clique: executa deleção
-    listCalls.removeCurrent();
-    deletionConfirmation = false;
+  } else {                      // Segundo clique: executa deleção
+    listCalls.removeCurrent();  // Apaga o item selecionado
+    fixed_data();               // Atualiza o display com os dados fixos
+    showInfirmaryNumber(
+      listCalls.getInfirmaryCurrent(),
+      listCalls.hasNursingCall(),
+      listCalls.getTotal());  // Mostra os dados no display
+      // reseta o flag
+      deletionConfirmation = false;
   }
 }
 
