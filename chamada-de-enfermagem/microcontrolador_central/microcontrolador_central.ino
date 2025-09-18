@@ -1,22 +1,44 @@
 #include "wifi_utils.h"
 
 #include "display_LCD-2004_I2C.h"
+// implementa a lista duplamente ligada para armazenar as chamadas de enfermagem
 #include "DoublyLinkedList_NursingCall.h"
 #include "buttons.h"
 
-
+// Lista de chamadas de enfermagem 
 List_NursingCall listCalls;
+// flag que indica se o botão de deletar foi pressionado uma vez e está aguardando confirmação
+bool deletionConfirmation = false;
 
 
 // ===== Funções de navegação =====
-void handleNext() {
-  listCalls.next();
-  Serial.printf("Clicou next %d \n", listCalls.getInfirmaryCurrent());
+void handleNext() { // ===== Botão Next (>)
+  if (deletionConfirmation) {
+    deletionConfirmation = false; // cancela exclusão ao navegar
+  } else {
+    listCalls.next();
+    Serial.printf("Clicou next %d \n", listCalls.getInfirmaryCurrent());
+  }
 }
 
-void handlePrev() {
-  listCalls.prev();
-  Serial.printf("Clicou prev %d \n", listCalls.getInfirmaryCurrent());
+void handlePrev() { // ===== Botão Prev (<)
+  if (deletionConfirmation) {
+    deletionConfirmation = false; // cancela exclusão ao navegar
+  } else {
+    listCalls.prev();
+    Serial.printf("Clicou prev %d \n", listCalls.getInfirmaryCurrent());
+  }
+}
+
+void handleDelete() {  // ===== Botão Delete
+  // Primeiro clique: apenas exibe a mensagem de confirmação
+  if (!deletionConfirmation) {
+    deletionConfirmation = true;
+  } else { // Segundo clique: executa deleção
+    // Segundo clique: executa deleção
+    listCalls.removeCurrent();
+    deletionConfirmation = false;
+  }
 }
 
 
@@ -53,5 +75,6 @@ void loop() {
   if (listCalls.hasNursingCall()) {
     if (checkButton(button_next)) handleNext();
     if (checkButton(button_prev)) handlePrev();
+    if (checkButton(button_delete)) handleDelete();
   }
 }
