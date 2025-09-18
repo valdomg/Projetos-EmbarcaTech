@@ -149,3 +149,36 @@ export async function userLogin(email, senha) {
         console.log(data.token);
     }
   }
+
+
+  //Cadastrar usuarios no sistema
+export async function userRegister(usuario, email, senha) {
+
+  const token = localStorage.getItem("token");
+  const body = {
+    name: usuario,
+    email: email,
+    password: senha
+  };
+  try {
+    const response = await fetch(`http://localhost:3000/api/user`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(body),
+      });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(error.message || "Erro ao cadastrar usuário");
+    }
+    return data;
+
+  } catch (err) {
+    console.error("Falha no cadastro:", err.message);
+    throw err;
+  }
+}
