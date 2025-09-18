@@ -29,6 +29,25 @@ void clearLine(uint8_t column, uint8_t line, uint8_t count) {
 }
 
 
+// Mostra a mensagem de confirmação da exclusão dos dados
+void showExclusionConfirm(int infirmary) {
+  lcd.clear();
+  lcd.setCursor(1, 0);  
+  lcd.print(F("Finalizar Chamada"));
+
+  lcd.setCursor(2, 1);
+  lcd.print(F("Enfermaria "));
+  lcd.print(infirmary);
+  lcd.print(F("?"));
+
+  lcd.setCursor(0, 2);
+  lcd.print(F("DEL = confirmar"));
+
+  lcd.setCursor(0, 3);
+  lcd.print(F("< > = voltar"));
+}
+
+
 // Função que mostra os dados no display
 void show_infirmary_numberCalls(int infirmary, bool hasNursingCall, int total_items) {
   // Limpa 8 espaços na coluna/linha escolhida - ENFERMARIA
