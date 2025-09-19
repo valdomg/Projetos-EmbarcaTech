@@ -33,6 +33,7 @@ checkErrors(const EnvironmentData& data) {
   if (!data.valid) {
     status.sensorError = true;
     log(LOG_WARN, "Erro na leitura do sensor");
+    return status;
   }
 
   if (data.temperature > TEMPERATURE_MAX || data.temperature < TEMPERATURE_MIN) {
@@ -72,17 +73,12 @@ void handleSensorData(EnvironmentData& data, unsigned long now) {
 
   updateDisplay(data, errors);
 
-  if (errors.sensorError) {
-    log(LOG_ERROR, "Erro no sensor de temperatura");
-    return;
-  }
-
   maybeHandleAlerts(errors, now);
   maybePublishMQTT(data, now);
 }
 
 void maybeHandleAlerts(const ErrorStatus& errors, unsigned long now) {
-  if (errors.humidityError || errors.temperatureError) {
+  if (errors.humidityError || errors.temperatureError || errors.sensorError) {
 
     enableButtonInterrupt();
 
@@ -105,13 +101,12 @@ void maybeHandleAlerts(const ErrorStatus& errors, unsigned long now) {
 
 void setup() {
 
-  logInit(LOG_INFO);
+  logInit(LOG_WARN);
 
   buttonInit();
   log(LOG_DEBUG, "Botao iniciado");
 
   initializeSensor();
-  log(LOG_DEBUG, "Sensor iniciado");
 
   // Chama a função para iniciar o display
   lcd1602_init();
@@ -133,7 +128,7 @@ void setup() {
 
 void loop() {
 
-  if (reconnectWifi()){
+  if (reconnectWifi()) {
     checkMQTTConnected();
   }
 
