@@ -132,6 +132,7 @@ links.forEach(link => {
         });
         grid.appendChild(table);
 
+        // Alterar a classe do botão para mostrar o conteúdo
         const button = document.getElementById('btn-click');
         button.classList.remove('hide');
         button.classList.add('show');
@@ -181,7 +182,8 @@ links.forEach(link => {
                         `;
 
         grid.appendChild(relatorio);
-        // Alterar a classe do <body> para mostrar o conteúdo
+
+        // Alterar a classe do botão para mostrar o conteúdo
         const button = document.getElementById('btn-click');
         button.classList.remove('show');
         button.classList.add('hide');
@@ -203,6 +205,65 @@ links.forEach(link => {
     }
   });
 });
+
+
+// Evento para cadastrar
+document.getElementById('btn-click').addEventListener('click', () => {
+
+  // Mostrar o modal
+  const modal = (document.getElementById('userInsert'));
+  modal.showModal();
+
+  //Fechar modal
+  const btn_close = modal.querySelector("#userCloseBtn");
+  btn_close.onclick = function () {
+    modal.close();
+  }
+
+  const cadastrar = document.getElementById("userInsertBtn");
+  cadastrar.onclick = async () => {
+    const usuario = document.getElementById("name").value;
+    const email = document.getElementById("email").value;
+    const senha = document.getElementById("senha").value;
+    const senha2 = document.getElementById("senha2").value;
+
+    if (senha !== senha2) {
+        const alerta = document.getElementById("response");
+        alerta.innerText = "As senhas devem ser iguais!";
+        
+        // Limpa o texto de alerta depois de 3 segundos
+        setTimeout(() => {alerta.innerText = "";}, 3000);
+      return;
+    }
+
+    try {
+      //requisicao da API para cadastrar usuario
+      const data = await userRegister(usuario, email, senha) ;
+      console.log(data);
+
+      if (data && data.id) {
+        const alerta = document.getElementById("response");
+        alerta.innerText = `Usuário ${data.name} cadastrado com sucesso!`;
+
+        // Limpa o texto de alerta depois de 3 segundos
+        setTimeout(() => {alerta.innerText = "";}, 3000);
+
+        //Limpa o formulário
+        document.getElementById("userForm").reset();
+      } else {
+
+        // alerta de erro;
+        const alerta = document.getElementById("response");
+        alerta.innerText = data.erro || data.message || "Erro desconhecido no cadastro";
+        // Limpa o texto depois de 3 segundos
+        setTimeout(() => {alerta.innerText = "";}, 3000);
+      }
+    } catch (error) {
+      alert(`Erro: ${error.message}`);
+    }
+  };
+});
+
 
 
 
