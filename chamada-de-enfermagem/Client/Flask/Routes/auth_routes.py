@@ -28,6 +28,13 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 Rota de registro
 POST para verificar se o usuário existe e registrá-lo no banco de dados
 
+FORMATO DO JSON
+{
+    "username":"email@dominio.com",
+    "password":"",
+    "role":"admin/user"
+}
+
 retorna um json com mensagem de sucesso/falha na inserção
 '''
 @auth_bp.route('/register', methods=['POST'])
