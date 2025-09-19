@@ -265,6 +265,64 @@ document.getElementById('btn-click').addEventListener('click', () => {
 });
 
 
+// Função para excluir sala ou usuário
+document.addEventListener('click', function (e) {
+  if (e.target && e.target.classList.contains('excluir')) {
+    const id = e.target.getAttribute('data-id');
+    excluirSala(id);
+  }
+});
+
+async function excluirSala(id) {
+  // Confirmar exclusão
+  const confirmacao = confirm("Tem certeza que deseja excluir?");
+  if (!confirmacao) return; // Se o usuário não confirmar, a função é encerrada
+
+  try {
+    const token = localStorage.getItem("token");
+
+    // Requisição para excluir o item 
+    const response = await fetch(`http://localhost:3000/api/user/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+
+
+    if (response.status === 204) {
+      alert(`Item com ID ${id} excluído com sucesso!`);
+
+      // Atualiza a tabela sem recarregar a página
+      removerLinhaTabela(id);
+      return;
+    }
+
+    const data = await response.json();
+
+    if (response.ok) {
+      alert(`Item com ID ${id} excluído com sucesso!`);
+
+      // Atualiza a tabela sem recarregar a página
+      removerLinhaTabela(id);
+    } else {
+      alert(data.erro || data.message || "Erro desconhecido ao excluir o item");
+    }
+  } catch (error) {
+    alert(`Erro: ${error.message}`);
+  }
+}
+
+// Função para remover a linha da tabela
+function removerLinhaTabela(id) {
+  const linha = document.querySelector(`tr[data-id='${id}']`);
+  if (linha) {
+    linha.remove();
+  } else {
+    console.error("Linha não encontrada!");
+  }
+}
 
 
 //Evento para logout
