@@ -23,19 +23,19 @@
     <div class="dashboard-admin">
 
         <div class="menu-lateral">
-            <a id="dashboard" class="username">
+            <a data-section="dashboard" class="username active">
                 <i class="fa fa-dashboard"></i> Dashboard
             </a>
-            <a id="user" type="submit">
+            <a data-section="user" type="submit">
                 <i class="fa fa-users"></i> Usuários
             </a>
-            <a id="room" type="submit">
+            <a data-section="room" type="submit">
                 <i class="fa fa-building"></i> Salas
             </a>
             <!-- <a id="temp" type="submit">
                 <i class="fa fa-sun-o"></i> Temperaturas
             </a> -->
-            <a id="reports" type="submit">
+            <a data-section="reports" type="submit">
                 <i class="fa fa-file-text-o"></i> Relatórios
             </a>
             <hr>
@@ -45,12 +45,55 @@
         </div>
 
         <div class="menu-principal">
-            <!-- <div id="roomsGrid" class="room-grid"></div> -->
+            <div id="roomsGrid" class="show room-grid"></div>
+            <div id="dashboard" class="hide admin-content"></div>
+            <button type="button" id="btn-click" class="hide btn-primary">Cadastrar Novo</button>
         </div>
+
+
+        <!-- Modal Cadastrar Usuário-->
+        <dialog id="userInsert" tabindex="-1">
+            <h1>Editar</h1>
+            <form id="userForm">
+                <label for="username">Nome</label>
+                <input type="text" id="name" name="name" required>
+
+                <label for="email">E-mail</label>
+                <input type="email" id="email" name="email" required>
+
+                <label for="password1">Senha</label>
+                <input type="password" id="senha" name="senha" required>
+
+                <label for="password2">Confirmar Senha</label>
+                <input type="password" id="senha2" name="senha2" required>
+
+                <p id="response" class="alert"></p>
+
+                <button type="button" id="userInsertBtn" class="btn-primary">Cadastrar</button>
+                <button type="button" id="userCloseBtn" class="btn">Fechar</button>
+            </form>
+        </dialog>
+
+        <!-- Modal Excluir-->
+        <dialog id="userDelete" tabindex="-1">
+            <h3>Confirmar exclusão?</h3>
+            <form id="roomForm">
+
+                <p id="deleteMessage" class="alert"></p>
+
+                <button type="button" id="userDeleteBtn" class="btn">Excluir</button>
+                <button type="button" id="userCancelBtn" class="btn-primary">Fechar</button>
+            </form>
+        </dialog>
+
 
     </div>
 
-<script type="module" src="src/js/main.js"></script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.4/raphael-min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/justgage/1.2.9/justgage.min.js"></script>
+    <script type="module" src="src/js/admin.js"></script>
+    <script type="module" src="src/js/main.js"></script>
 </body>
 
 </html>
