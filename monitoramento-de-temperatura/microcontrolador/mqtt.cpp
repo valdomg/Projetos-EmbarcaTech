@@ -1,7 +1,8 @@
+#include "config.h"
 #include "mqtt.h"
+#include "log.h"
 #include <WiFiClientSecure.h>
 #include <ArduinoJson.h>
-#include "log.h"
 
 /**
  * @file mqtt.cpp
@@ -11,27 +12,6 @@
  * de dados em tópicos MQTT utilizando comunicação segura (TLS/SSL).
  */
 
-// -----------------------------------------------------------------------------
-// Constantes de configuração do MQTT
-// -----------------------------------------------------------------------------
-
-/// Endereço do broker MQTT.
-const char* MQTT_SERVER = "xxxxxxxxxxx";
-
-/// Usuário para autenticação no broker MQTT.
-const char* MQTT_USER = "xxxxxxxxxxxx";
-
-/// Senha para autenticação no broker MQTT.
-const char* MQTT_PASS = "xxxxxxxxxxxx";
-
-/// Tópico para publicação de dados de sensores (temperatura/umidade).
-const char* MQTT_TOPIC_PUBLICATION_DATA = "xxxxxxxxxxxx/xxxxxxxxxxxx";
-
-/// Tópico para publicação de alertas.
-const char* MQTT_TOPIC_PUBLICATION_ALERT = "xxxxxxxxxxxx/xxxxxxxxxxxx";
-
-/// Identificação única do dispositivo no broker MQTT.
-const char* MQTT_DEVICE_ID = "xxxxxxxxxxxx";
 
 // -----------------------------------------------------------------------------
 // Objetos MQTT
@@ -70,7 +50,7 @@ void setupMQTT() {
  * @brief Verifica a conexão com o broker MQTT e reconecta se necessário.
  * 
  * A cada chamada, mantém a conexão ativa (client.loop()).
- * Se a conexão caiu, tenta reconectar dentro do intervalo definido em reconnectIntervalMQTT.
+ * Se a conexão caiu, tenta reconectar dentro do intervalo definido.
  */
 void checkMQTTConnected() {
   client.loop();                         // Mantém a comunicação ativa e processa mensagens recebidas.
@@ -112,6 +92,7 @@ void publishSensorData(float temperature, float humidity) {
   doc["Microcontrollerid"] = MQTT_DEVICE_ID;
   doc["temperature"] = temperature;
   doc["humidity"] = humidity;
+
 
   char buffer[128];
   serializeJson(doc, buffer);
