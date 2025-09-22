@@ -17,7 +17,7 @@ body {
 }
 
 .default {
-    background-color: white;
+    background-color: #ffffff;
 }
 
 .hide {
@@ -33,6 +33,11 @@ img {
     height: 100px;
 }
 
+a img{
+    border: none;
+    outline: none;
+}
+
 i,
 a,
 button,
@@ -43,7 +48,7 @@ button,
 h1,
 h4,
 a {
-    color: white;
+    color: #ffffff;
     text-decoration: none;
 }
 
@@ -90,31 +95,49 @@ input {
 }
 
 button {
-    border-radius: 8px;
+    border-radius: 4px;
     border: 1px transparent;
     height: 40px;
-    padding: 6px;
+    padding: 10px;
 }
 
 .btn {
-    background-color: brown;
-    color: white;
-    font-size: 18px;
+    background-color: #a52a2a;
+    color: #ffffff;
+    font-size: 16px;
     width: auto;
+    padding: 5px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+}
+
+.btn:hover {
+    background-color: #882424;
 }
 
 .btn-primary {
     background-color: #007bff;
-    color: white;
-    font-size: 18px;
+    color: #ffffff;
+    font-size: 16px;
     width: auto;
+    align-items: center;
+}
+
+.btn-primary:hover {
+    background-color: #0168d6;
 }
 
 .btn-warning {
-    background-color:#fce040;
-    color: #000000;
-    font-size: 18px;
+    background-color: #ffc107;
+    color: #212529;
+    font-size: 16px;
     width: auto;
+}
+
+.btn-warning:hover {
+    background-color: #dba605;
 }
 
 .dashboard-user {
@@ -164,7 +187,7 @@ button {
 .room-card {
     background-color: rgba(68, 67, 67, .6);
     border-radius: 3px;
-    color: white;
+    color: #ffffff;
     align-items: center;
     justify-items: center;
     cursor: pointer;
@@ -246,9 +269,9 @@ hr {
     margin: 0;
 }
 
-/* .fa{
+.menu-lateral .fa{
     border: none;
-} */
+}
 
 .menu-principal {
     display: flex;
@@ -261,12 +284,32 @@ hr {
     background-color: rgb(255, 255, 255);
 }
 
-table{
+.menu-principal .room-card{
+    background-color: rgba(221, 217, 217, 0.6);
+    border: 1px solid rgba(197, 197, 197, 0.6);
+    border-radius: 3px;
+    color: #747373;
+    align-items: center;
+    justify-items: center;
+    cursor: pointer;
+    padding: 10px;
+    gap: 20px;
+    transition: transform 0.2 ease, box-shadow 0.2s ease;
+
+}
+
+table {
     text-align: center;
 }
 
 table tr:nth-child(even) {
-  background-color: #e2e1e1;
+    background-color: #e2e1e1;
+}
+
+table th,
+table td {
+    padding: 12px 16px;
+    line-height: 1.5;
 }
 
 caption {
@@ -284,11 +327,11 @@ caption {
     gap: 20px;
 }
 
-dialog::backdrop{
-    background-color: rgba(0,0,0,0.3);
+dialog::backdrop {
+    background-color: rgba(0, 0, 0, 0.3);
 }
 
-dialog{
+dialog {
     margin: auto;
     padding: 20px;
     width: 500px;
@@ -297,25 +340,26 @@ dialog{
     align-items: center;
     border: none;
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.3);;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    ;
 }
 
 dialog form {
     display: flex;
     justify-content: center;
-    align-items:left;
+    align-items: left;
     padding: 20px;
     gap: 15px;
     width: 100%;
 }
 
-dialog form input{
+dialog form input {
     border: 1px solid rgba(128, 128, 128, .5);
     border-radius: 8px;
     max-width: 80vw;
 }
 
-dialog h3{
+dialog h3 {
     color: #000000;
     text-align: center;
 }
@@ -334,17 +378,19 @@ dialog h3{
 }
 
 
-#response, #deleteMessage{
-  color: red;
-  font-weight: bold;
-  margin-top: 5px;
-  opacity: 1;
-  transition: opacity 1s ease; 
+#response,
+#deleteMessage {
+    color: red;
+    font-weight: bold;
+    margin-top: 5px;
+    opacity: 1;
+    transition: opacity 1s ease;
 }
 
 .fade-out {
-  opacity: 0; 
+    opacity: 0;
 }
+
 /* .alert{
     color: red;
     text-align: center;
@@ -361,7 +407,7 @@ dialog h3{
 .relatorio button {
     padding: 8px 12px;
     background-color: #007bff;
-    color: white;
+    color: #ffffff;
     border: none;
     border-radius: 5px;
     width: 200px;

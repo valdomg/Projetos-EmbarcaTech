@@ -1,5 +1,5 @@
 // import { checkAcess } from './main.js';
-import { roomsSearch, usersSearch, userRegister } from './api.js';
+import { roomsSearch, usersSearch, userRegister, userDelete, roomDelete } from './api.js';
 
 // --- verifica permissões ---
 // document.addEventListener("DOMContentLoaded", () => {
@@ -38,8 +38,6 @@ links.forEach(link => {
         grid.innerHTML = "";
 
         const table = document.createElement("table");
-        table.classList.add("table", "table-striped", "table-bordered");
-
 
         table.innerHTML = `
                             <caption>Salas</caption>
@@ -59,13 +57,14 @@ links.forEach(link => {
 
         dados.forEach(sala => {
           const row = document.createElement("tr");
+          row.setAttribute("data-id", sala._id);
           row.innerHTML = `
                             <td>${sala.name.toUpperCase()}</td>
                             <td>${sala.microcontroller}</td>
                             <td>${sala._id}</td>
                             <td>
                             <button class="btn-warning onclick="editarSala('${sala._id}')">Editar</button>
-                            <button  data-id="${sala._id}" class="btn excluir">Excluir</button>
+                            <button  data-id="${sala._id}" class="btn excluirSala">Excluir</button>
                             </td>
                             `;
           tbody.appendChild(row);
@@ -99,7 +98,7 @@ links.forEach(link => {
         grid.innerHTML = "";
 
         const table = document.createElement("table");
-        table.classList.add("table", "table-striped", "table-bordered");
+
         table.innerHTML = `
                             <caption>Usuários</caption>
                             <thead>
@@ -265,54 +264,74 @@ document.getElementById('btn-click').addEventListener('click', () => {
 });
 
 
-// Função para excluir sala ou usuário
+// Evento para excluir usuário
 document.addEventListener('click', function (e) {
   if (e.target && e.target.classList.contains('excluir')) {
+    const id = e.target.getAttribute('data-id');
+    excluirUsuario(id);
+  }
+});
+
+// Evento para excluir sala
+document.addEventListener('click', function (e) {
+  if (e.target && e.target.classList.contains('excluirSala')) {
     const id = e.target.getAttribute('data-id');
     excluirSala(id);
   }
 });
 
+
+
+//Função excluir usuário
+async function excluirUsuario(id) {
+  // Confirmar exclusão
+  const confirmacao = confirm("Tem certeza que deseja excluir?");
+  if (!confirmacao) return; // Se o usuário não confirmar, a função é encerrada
+
+  try {
+    const data = await userDelete(id);
+
+
+    if (data.ok) {
+      alert(`Item com ID ${id} excluído com sucesso!`);
+      removerLinhaTabela(id);
+      return;
+
+    }
+    alert(data.erro || data.message || "Erro desconhecido ao excluir o item");
+    
+  }
+   catch (error) {
+    alert(`Erro: ${error.message}`);
+  }
+}
+
+
+//Função excluir usuário
 async function excluirSala(id) {
   // Confirmar exclusão
   const confirmacao = confirm("Tem certeza que deseja excluir?");
   if (!confirmacao) return; // Se o usuário não confirmar, a função é encerrada
 
   try {
-    const token = localStorage.getItem("token");
-
-    // Requisição para excluir o item 
-    const response = await fetch(`http://localhost:3000/api/user/${id}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
-    });
+    const data = await roomDelete(id);
 
 
-    if (response.status === 204) {
+    if (data.ok) {
       alert(`Item com ID ${id} excluído com sucesso!`);
-
-      // Atualiza a tabela sem recarregar a página
       removerLinhaTabela(id);
       return;
+
     }
-
-    const data = await response.json();
-
-    if (response.ok) {
-      alert(`Item com ID ${id} excluído com sucesso!`);
-
-      // Atualiza a tabela sem recarregar a página
-      removerLinhaTabela(id);
-    } else {
-      alert(data.erro || data.message || "Erro desconhecido ao excluir o item");
-    }
-  } catch (error) {
+    alert(data.erro || data.message || "Erro desconhecido ao excluir o item");
+    
+  }
+   catch (error) {
     alert(`Erro: ${error.message}`);
   }
 }
+
+
 
 // Função para remover a linha da tabela
 function removerLinhaTabela(id) {

@@ -95,6 +95,38 @@ export async function roomsSearch() {
 }
 
 
+//Deletar sala
+export async function roomDelete(roomId) {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(`http://localhost:3000/api/room/${roomId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+
+
+    if (response.status === 204) {
+      return {ok: true};
+    }
+
+    let dados = {};
+    try{
+      dados = await response.json();
+    }catch(_){
+
+    }
+    
+    return {
+      ok: response.ok,
+      ...dados,
+  };
+}
+
+
+
 //----------------------USUARIOS--------------------
 //Listar usuários do sistema
 export async function usersSearch() {
@@ -140,6 +172,7 @@ export async function userLogin(email, senha) {
             localStorage.setItem("token", data.token);
             window.location.href = "index.html";
 
+
         } else {
             alert(data.message || "Usuário ou senha inválida.");
         }
@@ -181,4 +214,35 @@ export async function userRegister(usuario, email, senha) {
     console.error("Falha no cadastro:", err.message);
     throw err;
   }
+}
+
+
+//Deletar usuário 
+export async function userDelete(userId) {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(`http://localhost:3000/api/user/${userId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+
+
+    if (response.status === 204) {
+      return {ok: true};
+    }
+
+    let dados = {};
+    try{
+      dados = await response.json();
+    }catch(_){
+
+    }
+    
+    return {
+      ok: response.ok,
+      ...dados,
+  };
 }
