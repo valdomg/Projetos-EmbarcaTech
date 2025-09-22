@@ -60,11 +60,11 @@ links.forEach(link => {
           row.setAttribute("data-id", sala._id);
           row.innerHTML = `
                             <td>${sala.name.toUpperCase()}</td>
-                            <td>${sala.microcontroller}</td>
+                            <td>${sala.microcontrollerId}</td>
                             <td>${sala._id}</td>
                             <td>
-                            <button class="btn-warning onclick="editarSala('${sala._id}')">Editar</button>
-                            <button  data-id="${sala._id}" class="btn excluirSala">Excluir</button>
+                            <button data-id="${sala._id}" class="btn-warning editarSala" >Editar</button>
+                            <button data-id="${sala._id}" class="btn excluirSala">Excluir</button>
                             </td>
                             `;
           tbody.appendChild(row);
@@ -75,6 +75,8 @@ links.forEach(link => {
         const button = document.getElementById('btn-click');
         button.classList.remove('hide');
         button.classList.add('show');
+        button.classList.remove('userInsert');
+        button.classList.add('roomInsert')
       } catch (error) {
         console.error("Erro ao carregar salas:", error);
 
@@ -123,8 +125,8 @@ links.forEach(link => {
           <td>${sala.email}</td>
           <td>${sala._id}</td>
           <td>
-          <button type="button" class="btn-warning onclick="editarSala('${sala._id}')">Editar</button>
-          <button class="btn excluir" data-id="${sala._id}">Excluir</button>
+          <button data-id="${sala._id}" class="btn-warning editarUsuario" >Editar</button>
+          <button data-id="${sala._id}" class="btn excluirUsuario">Excluir</button>
         </td>
         `;
           tbody.appendChild(row);
@@ -135,6 +137,8 @@ links.forEach(link => {
         const button = document.getElementById('btn-click');
         button.classList.remove('hide');
         button.classList.add('show');
+        button.classList.remove('rromInsert');
+        button.classList.add('userInsert')
 
       } catch (error) {
         console.error("Erro ao carregar salas:", error);
@@ -229,7 +233,7 @@ document.getElementById('btn-click').addEventListener('click', () => {
     if (senha !== senha2) {
         const alerta = document.getElementById("response");
         alerta.innerText = "As senhas devem ser iguais!";
-        
+
         // Limpa o texto de alerta depois de 3 segundos
         setTimeout(() => {alerta.innerText = "";}, 3000);
       return;
@@ -258,7 +262,7 @@ document.getElementById('btn-click').addEventListener('click', () => {
         setTimeout(() => {alerta.innerText = "";}, 3000);
       }
     } catch (error) {
-      alert(`Erro: ${error.message}`);
+      alert(`${error.message}`);
     }
   };
 });
@@ -299,9 +303,9 @@ async function excluirUsuario(id) {
 
     }
     alert(data.erro || data.message || "Erro desconhecido ao excluir o item");
-    
+
   }
-   catch (error) {
+  catch (error) {
     alert(`Erro: ${error.message}`);
   }
 }
@@ -324,9 +328,9 @@ async function excluirSala(id) {
 
     }
     alert(data.erro || data.message || "Erro desconhecido ao excluir o item");
-    
+
   }
-   catch (error) {
+  catch (error) {
     alert(`Erro: ${error.message}`);
   }
 }

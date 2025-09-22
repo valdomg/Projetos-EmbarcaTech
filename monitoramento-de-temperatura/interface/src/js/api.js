@@ -94,6 +94,78 @@ export async function roomsSearch() {
   return dados;
 }
 
+  //Cadastrar sala no sistema
+export async function roomRegister(nome, microcontrolador) {
+
+  const token = localStorage.getItem("token");
+  const body = {
+    name: nome,
+    microcontrollerId: microcontrolador
+  };
+  try {
+    const response = await fetch(`http://localhost:3000/api/room`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(body),
+      });
+
+
+    if (!response.ok) {
+      const erroData = await response.json();
+      console.log(erroData);
+      throw new Error(erroData.message || "Erro ao cadastrar ambiente");
+    }
+
+    const data = await response.json();
+    return data;
+
+  } catch (err) {
+    console.error("Falha no cadastro:", err.message);
+    throw err;
+  }
+}
+
+
+  //Editar dados da sala no sistema
+export async function roomEdit(id, nome, microcontrolador) {
+
+  const token = localStorage.getItem("token");
+  const body = {
+    id: id,
+    name: nome,
+    microcontrollerId: microcontrolador
+  };
+  try {
+    const response = await fetch(`http://localhost:3000/api/room/${id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(body),
+      });
+
+
+    if (!response.ok) {
+      const erroData = await response.json();
+      console.log(erroData);
+      throw new Error(erroData.message || "Erro ao editar ambiente");
+    }
+
+    const data = await response.json();
+    return data;
+
+  } catch (err) {
+    console.error("Falha no cadastro:", err.message);
+    throw err;
+  }
+}
+
 
 //Deletar sala
 export async function roomDelete(roomId) {
@@ -179,7 +251,6 @@ export async function userLogin(email, senha) {
     } catch (error) {
         console.error("Erro ao fazer login:", error);
         alert("Erro ao tentar fazer login. Tente novamente.");
-        console.log(data.token);
     }
   }
 
@@ -204,10 +275,13 @@ export async function userRegister(usuario, email, senha) {
         body: JSON.stringify(body),
       });
 
-    const data = await response.json();
+
     if (!response.ok) {
-      throw new Error(error.message || "Erro ao cadastrar usuário");
+      const erroData = await response.json();
+      throw new Error(erroData.message || "Erro ao cadastrar usuário");
     }
+
+    const data = await response.json();
     return data;
 
   } catch (err) {
