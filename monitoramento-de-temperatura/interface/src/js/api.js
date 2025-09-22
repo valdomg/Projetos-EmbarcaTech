@@ -291,6 +291,43 @@ export async function userRegister(usuario, email, senha) {
 }
 
 
+  //Editar dados do usuario
+export async function userEdit(id, usuario, email, senha) {
+
+  const token = localStorage.getItem("token");
+  const body = {
+    name: usuario,
+    email: email,
+    password: senha,
+    userId: id
+  };
+  try {
+    const response = await fetch(`http://localhost:3000/api/user/${id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(body),
+      });
+
+
+    if (!response.ok) {
+      const erroData = await response.json();
+      throw new Error(erroData.message || "Erro ao cadastrar usuário");
+    }
+
+    const data = await response.json();
+    return data;
+
+  } catch (err) {
+    console.error("Falha no cadastro:", err.message);
+    throw err;
+  }
+}
+
+
 //Deletar usuário 
 export async function userDelete(userId) {
     const token = localStorage.getItem("token");
