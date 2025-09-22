@@ -74,8 +74,28 @@
             </form>
         </dialog>
 
+
+        <!-- Modal Cadastrar Ambiente-->
+        <dialog id="roomInsert" tabindex="-1">
+            <h1>Editar</h1>
+            <form id="roomForm">
+                <label for="username">Nome da Sala</label>
+                <input type="text" id="roomName" name="name" required>
+
+                <label for="email">Microcontrolador</label>
+                <input type="email" id="roomMicro" name="email" required>
+
+
+                <p id="response2" class="alert"></p>
+
+                <button type="button" id="roomInsertBtn" class="btn-primary">Cadastrar</button>
+                <button type="button" id="roomCloseBtn" class="btn">Fechar</button>
+            </form>
+        </dialog>
+
+
         <!-- Modal Excluir-->
-        <dialog id="userDelete" tabindex="-1">
+        <!-- <dialog id="userDelete" tabindex="-1">
             <h3>Confirmar exclusão?</h3>
             <form id="roomForm">
 
@@ -84,7 +104,7 @@
                 <button type="button" id="userDeleteBtn" class="btn">Excluir</button>
                 <button type="button" id="userCancelBtn" class="btn-primary">Fechar</button>
             </form>
-        </dialog>
+        </dialog> -->
 
 
     </div>

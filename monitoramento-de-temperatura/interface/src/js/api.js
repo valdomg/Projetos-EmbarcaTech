@@ -315,14 +315,14 @@ export async function userEdit(id, usuario, email, senha) {
 
     if (!response.ok) {
       const erroData = await response.json();
-      throw new Error(erroData.message || "Erro ao cadastrar usuário");
+      throw new Error(erroData.message || "Erro ao editar usuário");
     }
 
     const data = await response.json();
     return data;
 
   } catch (err) {
-    console.error("Falha no cadastro:", err.message);
+    console.error("Falha na edição:", err.message);
     throw err;
   }
 }

@@ -1,5 +1,5 @@
 // import { checkAcess } from './main.js';
-import { roomsSearch, usersSearch, userRegister, userDelete, roomDelete } from './api.js';
+import { roomsSearch, roomDelete, roomRegister, usersSearch, userRegister, userDelete } from './api.js';
 
 // --- verifica permissões ---
 // document.addEventListener("DOMContentLoaded", () => {
@@ -210,62 +210,167 @@ links.forEach(link => {
 });
 
 
-// Evento para cadastrar
-document.getElementById('btn-click').addEventListener('click', () => {
+// Evento para cadastrar usuáro ou sala
+document.addEventListener('click', (e) => {
+  if (e.target.classList.contains('userInsert')) {
+    // Mostrar o modal
+    const modal = (document.getElementById('userInsert'));
+    modal.showModal();
 
-  // Mostrar o modal
-  const modal = (document.getElementById('userInsert'));
-  modal.showModal();
+    //Fechar modal
+    const btn_close = modal.querySelector("#userCloseBtn");
+    btn_close.onclick = function () {
+      modal.close();
+    }
 
-  //Fechar modal
-  const btn_close = modal.querySelector("#userCloseBtn");
-  btn_close.onclick = function () {
-    modal.close();
-  }
+    const cadastrar = document.getElementById("userInsertBtn");
+    cadastrar.onclick = async () => {
+      const usuario = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+      const senha = document.getElementById("senha").value;
+      const senha2 = document.getElementById("senha2").value;
 
-  const cadastrar = document.getElementById("userInsertBtn");
-  cadastrar.onclick = async () => {
-    const usuario = document.getElementById("name").value;
-    const email = document.getElementById("email").value;
-    const senha = document.getElementById("senha").value;
-    const senha2 = document.getElementById("senha2").value;
-
-    if (senha !== senha2) {
+      if (senha !== senha2) {
         const alerta = document.getElementById("response");
         alerta.innerText = "As senhas devem ser iguais!";
 
         // Limpa o texto de alerta depois de 3 segundos
-        setTimeout(() => {alerta.innerText = "";}, 3000);
-      return;
-    }
-
-    try {
-      //requisicao da API para cadastrar usuario
-      const data = await userRegister(usuario, email, senha) ;
-      console.log(data);
-
-      if (data && data.id) {
-        const alerta = document.getElementById("response");
-        alerta.innerText = `Usuário ${data.name} cadastrado com sucesso!`;
-
-        // Limpa o texto de alerta depois de 3 segundos
-        setTimeout(() => {alerta.innerText = "";}, 3000);
-
-        //Limpa o formulário
-        document.getElementById("userForm").reset();
-      } else {
-
-        // alerta de erro;
-        const alerta = document.getElementById("response");
-        alerta.innerText = data.erro || data.message || "Erro desconhecido no cadastro";
-        // Limpa o texto depois de 3 segundos
-        setTimeout(() => {alerta.innerText = "";}, 3000);
+        setTimeout(() => { alerta.innerText = ""; }, 3000);
+        return;
       }
-    } catch (error) {
-      alert(`${error.message}`);
+
+      try {
+        //requisicao da API para cadastrar usuario
+        const data = await userRegister(usuario, email, senha);
+        console.log(data);
+
+        if (data && data._id) {
+          const alerta = document.getElementById("response");
+          alerta.innerText = `Usuário ${data.name} cadastrado com sucesso!`;
+
+          // Limpa o texto de alerta depois de 3 segundos
+          setTimeout(() => { alerta.innerText = ""; }, 3000);
+
+          //Limpa o formulário
+          document.getElementById("userForm").reset();
+        } else {
+
+          // alerta de erro;
+          const alerta = document.getElementById("response");
+          alerta.innerText = data.erro || data.message || "Erro desconhecido no cadastro";
+          // Limpa o texto depois de 3 segundos
+          setTimeout(() => { alerta.innerText = ""; }, 3000);
+        }
+      } catch (error) {
+        alert(`${error.message}`);
+      }
+    };
+
+  } else if (e.target.classList.contains('roomInsert')) {
+
+    // Mostrar o modal
+    const modal = (document.getElementById('roomInsert'));
+    modal.showModal();
+
+    //Fechar modal
+    const btn_close = modal.querySelector("#roomCloseBtn");
+    btn_close.onclick = function () {
+      modal.close();
     }
-  };
+
+    const cadastrar = document.getElementById("roomInsertBtn");
+    cadastrar.onclick = async () => {
+      const roomName = document.getElementById("roomName").value;
+      const microName = document.getElementById("roomMicro").value;
+
+      try {
+        //requisicao da API para cadastrar usuario
+        const data = await roomRegister(roomName, microName);
+        console.log(data);
+
+        if (data && data._id) {
+          const alerta = document.getElementById("response2");
+          alerta.innerText = `Ambiente ${data.name} cadastrado com sucesso!`;
+
+          // Limpa o texto de alerta depois de 3 segundos
+          setTimeout(() => { alerta.innerText = ""; }, 3000);
+
+          //Limpa o formulário
+          document.getElementById("roomForm").reset();
+        } else {
+
+          // alerta de erro;
+          const alerta = document.getElementById("response2");
+          alerta.innerText = data.erro || data.message || "Erro desconhecido no cadastro";
+          // Limpa o texto depois de 3 segundos
+          setTimeout(() => { alerta.innerText = ""; }, 3000);
+        }
+      } catch (error) {
+        alert(`${error.message}`);
+      }
+    };
+  }
+
 });
+
+
+
+// // Evento para cadastrar
+// document.getElementById('btn-click').addEventListener('click', () => {
+
+//   // Mostrar o modal
+//   const modal = (document.getElementById('userInsert'));
+//   modal.showModal();
+
+//   //Fechar modal
+//   const btn_close = modal.querySelector("#userCloseBtn");
+//   btn_close.onclick = function () {
+//     modal.close();
+//   }
+
+//   const cadastrar = document.getElementById("userInsertBtn");
+//   cadastrar.onclick = async () => {
+//     const usuario = document.getElementById("name").value;
+//     const email = document.getElementById("email").value;
+//     const senha = document.getElementById("senha").value;
+//     const senha2 = document.getElementById("senha2").value;
+
+//     if (senha !== senha2) {
+//         const alerta = document.getElementById("response");
+//         alerta.innerText = "As senhas devem ser iguais!";
+
+//         // Limpa o texto de alerta depois de 3 segundos
+//         setTimeout(() => {alerta.innerText = "";}, 3000);
+//       return;
+//     }
+
+//     try {
+//       //requisicao da API para cadastrar usuario
+//       const data = await userRegister(usuario, email, senha) ;
+//       console.log(data);
+
+//       if (data && data.id) {
+//         const alerta = document.getElementById("response");
+//         alerta.innerText = `Usuário ${data.name} cadastrado com sucesso!`;
+
+//         // Limpa o texto de alerta depois de 3 segundos
+//         setTimeout(() => {alerta.innerText = "";}, 3000);
+
+//         //Limpa o formulário
+//         document.getElementById("userForm").reset();
+//       } else {
+
+//         // alerta de erro;
+//         const alerta = document.getElementById("response");
+//         alerta.innerText = data.erro || data.message || "Erro desconhecido no cadastro";
+//         // Limpa o texto depois de 3 segundos
+//         setTimeout(() => {alerta.innerText = "";}, 3000);
+//       }
+//     } catch (error) {
+//       alert(`${error.message}`);
+//     }
+//   };
+// });
 
 
 // Evento para excluir usuário
