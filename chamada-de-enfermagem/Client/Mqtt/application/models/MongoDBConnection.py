@@ -38,32 +38,6 @@ class MongoDBConnection:
             return False
         
     '''
-    Insere um novo documento na coleção
-    '''
-    def insert_document_collection(self,collection:str,id_device:int, local:str, room_number:int):
-
-        try:
-            if self.client is not None:
-                document = {
-                    'id_dispositivo': id_device,        #id do arduino
-                    'Local': local,                     #Onde foi a chamada (Enfermaria ou outra sala)
-                    'Enfermaria': room_number,          #Número da enfermaria
-                    'data': datetime.now()              #Hora da chamada
-                }
-
-                collection = self.db[collection]
-                result = collection.insert_one(document)
-
-                print(result)
-
-            else:
-                print('Client not connected')
-
-        except PyMongoError as e:
-            print('Error on insert document...')
-            print(e) 
-
-    '''
     Lista os documentos na coleção
     '''
     def list_documents(self, collection:str):
@@ -96,9 +70,45 @@ class MongoDBConnection:
         return False
     
     '''
+    Insere um novo documento na coleção
+    '''
+    def insert_document_collection(self,collection:str, document: dict):
+        try:
+            if self.client is not None:
+                document_to_save = document 
+
+                collection = self.db[collection]
+                result = collection.insert_one(document_to_save)
+
+                print(result)
+
+            else:
+                print('Client not connected')
+
+        except PyMongoError as e:
+            print('Error on insert document...')
+            print(e) 
+
+
+    '''
     Função para fechar a conexão com o banco de dados
     '''
     def close_connection(self):
         if self.client:
             self.client.close()
             print("Conexão fechada.")
+
+'''
+if __name__ == '__main__':
+    mongo_conn = MongoDBConnection('mongodb://localhost:27017/', 'chamada-enfermagem')
+    mongo_conn.start_connection()
+
+    document= {
+
+        'device': 'Enfermagem2',
+        'createdAt': datetime.now()
+
+    }
+
+    mongo_conn.insert_document_collection('devices', document)
+'''
