@@ -1,5 +1,5 @@
 // import { checkAcess } from './main.js';
-import { roomsSearch, roomDelete, roomRegister, usersSearch, userRegister, userDelete } from './api.js';
+import { roomsSearch, usersSearch, userRegister, userDelete, roomDelete, roomRegister } from './api.js';
 
 // --- verifica permissões ---
 // document.addEventListener("DOMContentLoaded", () => {
@@ -73,8 +73,10 @@ links.forEach(link => {
         grid.appendChild(table);
 
         const button = document.getElementById('btn-click');
+
         button.classList.remove('hide');
         button.classList.add('show');
+
         button.classList.remove('userInsert');
         button.classList.add('roomInsert')
       } catch (error) {
@@ -135,9 +137,11 @@ links.forEach(link => {
 
         // Alterar a classe do botão para mostrar o conteúdo
         const button = document.getElementById('btn-click');
+
         button.classList.remove('hide');
         button.classList.add('show');
-        button.classList.remove('rromInsert');
+
+        button.classList.remove('roomInsert');
         button.classList.add('userInsert')
 
       } catch (error) {
@@ -210,21 +214,16 @@ links.forEach(link => {
 });
 
 
-// Evento para cadastrar usuáro ou sala
+// Evento para cadastrar
 document.addEventListener('click', (e) => {
   if (e.target.classList.contains('userInsert')) {
+    
     // Mostrar o modal
-    const modal = (document.getElementById('userInsert'));
-    modal.showModal();
-
-    //Fechar modal
-    const btn_close = modal.querySelector("#userCloseBtn");
-    btn_close.onclick = function () {
-      modal.close();
-    }
+    abrirModal('modalUserInsert', '#userCloseBtn');
 
     const cadastrar = document.getElementById("userInsertBtn");
     cadastrar.onclick = async () => {
+
       const usuario = document.getElementById("name").value;
       const email = document.getElementById("email").value;
       const senha = document.getElementById("senha").value;
@@ -244,7 +243,7 @@ document.addEventListener('click', (e) => {
         const data = await userRegister(usuario, email, senha);
         console.log(data);
 
-        if (data && data._id) {
+        if (data && data.id) {
           const alerta = document.getElementById("response");
           alerta.innerText = `Usuário ${data.name} cadastrado com sucesso!`;
 
@@ -269,14 +268,8 @@ document.addEventListener('click', (e) => {
   } else if (e.target.classList.contains('roomInsert')) {
 
     // Mostrar o modal
-    const modal = (document.getElementById('roomInsert'));
-    modal.showModal();
-
-    //Fechar modal
-    const btn_close = modal.querySelector("#roomCloseBtn");
-    btn_close.onclick = function () {
-      modal.close();
-    }
+    abrirModal('modalRoomInsert', '#roomCloseBtn');
+    
 
     const cadastrar = document.getElementById("roomInsertBtn");
     cadastrar.onclick = async () => {
@@ -312,6 +305,27 @@ document.addEventListener('click', (e) => {
   }
 
 });
+
+
+
+//função abrir e fechar modal
+function abrirModal(modalId, closeBtnSelector){
+    // Mostrar o modal
+    const modal = document.getElementById(modalId);
+    if(!modal){
+      console.log(`Modal com ID "${modalId}" não encontrado.`);
+      return;
+    }
+    modal.showModal();
+
+    //Fechar modal
+    const btnClose = modal.querySelector(closeBtnSelector);
+    if (!btnClose){
+      console.log(`Modal com ID "${closeBtnSelector}" nao encontrado`)
+      return;
+    }
+    btnClose.onclick = () =>  modal.close();
+  }
 
 
 
@@ -373,22 +387,17 @@ document.addEventListener('click', (e) => {
 // });
 
 
-// Evento para excluir usuário
+// Evento para excluir usuário ou sala
 document.addEventListener('click', function (e) {
-  if (e.target && e.target.classList.contains('excluir')) {
+  if (e.target && e.target.classList.contains('excluirUsuario')) {
     const id = e.target.getAttribute('data-id');
     excluirUsuario(id);
-  }
-});
 
-// Evento para excluir sala
-document.addEventListener('click', function (e) {
-  if (e.target && e.target.classList.contains('excluirSala')) {
+  } else if (e.target && e.target.classList.contains('excluirSala')) {
     const id = e.target.getAttribute('data-id');
     excluirSala(id);
   }
 });
-
 
 
 //Função excluir usuário

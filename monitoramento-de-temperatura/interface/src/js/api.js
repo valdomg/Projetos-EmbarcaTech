@@ -94,7 +94,7 @@ export async function roomsSearch() {
   return dados;
 }
 
-  //Cadastrar sala no sistema
+  //Cadastrar sala
 export async function roomRegister(nome, microcontrolador) {
 
   const token = localStorage.getItem("token");
@@ -130,7 +130,7 @@ export async function roomRegister(nome, microcontrolador) {
 }
 
 
-  //Editar dados da sala no sistema
+  //Editar sala
 export async function roomEdit(id, nome, microcontrolador) {
 
   const token = localStorage.getItem("token");
@@ -265,7 +265,7 @@ export async function userRegister(usuario, email, senha) {
     password: senha
   };
   try {
-    const response = await fetch(`http://localhost:3000/api/user`,
+    const response = await fetch(`http://localhost:3000/api/user/`,
       {
         method: "POST",
         headers: {
@@ -275,13 +275,14 @@ export async function userRegister(usuario, email, senha) {
         body: JSON.stringify(body),
       });
 
+    const data = await response.json();
 
     if (!response.ok) {
-      const erroData = await response.json();
-      throw new Error(erroData.message || "Erro ao cadastrar usuário");
+      console.log(data);
+      throw new Error(data.erro || data.message || "Erro ao cadastrar usuário");
     }
 
-    const data = await response.json();
+
     return data;
 
   } catch (err) {

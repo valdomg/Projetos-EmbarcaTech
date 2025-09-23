@@ -23,7 +23,10 @@ async function carregarTemperaturas() {
     // Agrupa por sala e pega a última leitura
     const ultimasPorSala = {};
     dados.forEach(dado => {
-      const sala = dado.room; // certifique-se que o campo no JSON se chama "room"
+      const sala = dado.room; 
+      if (!sala){
+        return;
+      }
       if (!ultimasPorSala[sala._id] || new Date(dado.timestamp) > new Date(ultimasPorSala[sala._id].timestamp)) {
         ultimasPorSala[sala._id] = dado;
       }
