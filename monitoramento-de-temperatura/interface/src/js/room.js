@@ -2,20 +2,19 @@
 const params = new URLSearchParams(window.location.search);
 const salaAtual = params.get("sala");
 
+import { checkAcess } from './auth.js';
 import { buscarTemperaturaSala, roomTempInterval } from './api.js';
 import { createGauge } from './components/gauge.js';
 import { tempChart, umidChart } from './components/charts.js';
 
 
+document.addEventListener("DOMContentLoaded", () => {
+  checkAcess();
+});
+
 //carrega e atualiza a temperatura da sala a partir do id
 async function roomUpdate() {
-  const token = localStorage.getItem("token");
 
-  if (!token) {
-    alert("Sessão expirou, Faça login novamente");
-    window.location.href = "login.html";
-    return;
-  }
   try {
     const dados = await buscarTemperaturaSala(salaAtual);
 
@@ -23,6 +22,9 @@ async function roomUpdate() {
       console.error(`Nenhum dado encontrado para ${salaAtual}`);
       return;
     }
+    const body = document.body;
+    body.classList.remove('hide');
+    body.classList.add('show');
 
     const ultimaLeitura = dados[dados.length - 1];
 

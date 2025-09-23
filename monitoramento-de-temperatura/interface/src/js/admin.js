@@ -1,11 +1,13 @@
-// import { checkAcess } from './main.js';
+import { checkAcess } from './auth.js';
 import { roomsSearch, usersSearch, userRegister, userDelete, roomDelete, roomRegister } from './api.js';
+import {carregarTemperaturas} from './main.js'
 
 // --- verifica permissões ---
-// document.addEventListener("DOMContentLoaded", () => {
-//   checkAcess("admin");
-// });
+document.addEventListener("DOMContentLoaded", () => {
+  checkAcess("admin");
+});
 
+// carregarTemperaturas();
 const links = document.querySelectorAll('.menu-lateral a[data-section]');
 
 

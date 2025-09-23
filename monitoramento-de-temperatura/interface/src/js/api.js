@@ -242,11 +242,18 @@ export async function userLogin(email, senha) {
 
         if (response.ok) {
             localStorage.setItem("token", data.token);
-            window.location.href = "index.html";
+
+            const decode = jwt_decode(data.token);
+
+            if (decode.role == "admin"){
+              window.location.href = "admin.html";  
+            }else{
+              window.location.href = "index.html";
+            }
 
 
         } else {
-            alert(data.message || "Usuário ou senha inválida.");
+            alert(data.message || data.erro || "Usuário ou senha inválida.");
         }
     } catch (error) {
         console.error("Erro ao fazer login:", error);

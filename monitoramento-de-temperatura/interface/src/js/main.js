@@ -1,17 +1,15 @@
-
+import { checkAcess } from './auth.js';
 import { buscarTemperaturas } from './api.js';
 import { createGauge } from './components/gauge.js';
 
 
-//carrega dados de temperatura de todas as salas cadastradas no sistema.
-async function carregarTemperaturas() {
-  const token = localStorage.getItem("token");
+document.addEventListener("DOMContentLoaded", () => {
+  checkAcess();
+});
 
-  if (!token) {
-    alert("Sessão expirou, Faça login novamente");
-    window.location.href = "login.html";
-    return;
-  }
+//carrega dados de temperatura de todas as salas cadastradas no sistema.
+export async function carregarTemperaturas() {
+
   try {
     const dados = await buscarTemperaturas();
 
@@ -99,47 +97,6 @@ function sortRoom(salas) {
 
     return numA - numB;
   });
-}
-
-
-//verificar acesso
-export function checkAcess(permissao = null) {
-  const token = localStorage.getItem("token");
-
-  if (!token) {
-    alert("Sessão expirada, faça login novamente.");
-    window.location.href = "login.html";
-    return false;
-  }
-
-  try {
-    const decoded = jwt_decode(token);
-    const now = Date.now() / 1000;
-    console.log("Token decodificado:", decoded);
-
-    if (permissao && decoded.role !== permissao) {
-      alert("Acesso negado! Apenas " + permissao + "s podem acessar esta página.");
-      window.location.href = "index.html";
-      return false;
-    }
-
-    if (decoded.exp && decoded.exp < now) {
-      alert("Sessão expirada, faça login novamente.");
-      localStorage.removeItem("token");
-      window.location.href = "login.html";
-      return false;
-    }
-
-    document.getElementById("conteudo").style.display = "block";
-    return true; // acesso liberado
-
-  } catch (e) {
-    console.error("Erro ao decodificar token:", e);
-    alert(`Erro: ${e}`);
-    localStorage.removeItem("token");
-    window.location.href = "login.html";
-    return false;
-  }
 }
 
 
