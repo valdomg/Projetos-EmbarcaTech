@@ -24,7 +24,7 @@ export function createGauge(tempId, umidId, dado) {
         },
         levelColors: ["#069625ff", "#d9ff00ff", "#ff0000ff"],
         gaugeColor: "rgba(219, 216, 216, 1)",
-        valueFontColor: 'white'
+        valueFontColor: "rgba(172, 169, 169, 1)"
     });
 
     // // update the value randomly

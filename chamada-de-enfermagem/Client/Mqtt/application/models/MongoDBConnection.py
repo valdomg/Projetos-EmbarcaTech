@@ -36,7 +36,7 @@ class MongoDBConnection:
         else:
             print('Database não definida')
             return False
-        
+
     '''
     Lista os documentos na coleção
     '''
@@ -53,13 +53,13 @@ class MongoDBConnection:
     '''
     Verifica a existência de algum dado no banco de dados
     '''
-    def check_if_document_exists(self, collection:str, label:str, id_device:str):
+    def check_if_document_exists(self, collection:str, label:str, value:str):
 
         try:
             if self.client is not None:
                 collection_to_search = self.db[collection]
 
-                result = collection_to_search.find_one({label:id_device})
+                result = collection_to_search.find_one({label:value})
 
                 if result is not None:
                     return True                
@@ -69,6 +69,21 @@ class MongoDBConnection:
             
         return False
     
+    def return_document(self,collection:str, label_to_search:str, value_to_match:str):
+         
+        try:
+            if self.client is not None:
+                collection_to_search = self.db[collection]
+
+                result = collection_to_search.find_one({label_to_search:value_to_match})
+        
+                return result
+
+        except PyMongoError as e:
+            print('Error in check values...')
+            print(e)
+            
+        return False
     '''
     Insere um novo documento na coleção
     '''
@@ -97,18 +112,3 @@ class MongoDBConnection:
         if self.client:
             self.client.close()
             print("Conexão fechada.")
-
-'''
-if __name__ == '__main__':
-    mongo_conn = MongoDBConnection('mongodb://localhost:27017/', 'chamada-enfermagem')
-    mongo_conn.start_connection()
-
-    document= {
-
-        'device': 'Enfermagem2',
-        'createdAt': datetime.now()
-
-    }
-
-    mongo_conn.insert_document_collection('devices', document)
-'''
