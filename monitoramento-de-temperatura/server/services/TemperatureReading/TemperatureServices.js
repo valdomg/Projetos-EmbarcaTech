@@ -44,10 +44,14 @@ class TemperatureService {
   getTemperatureReadingsByInterval = async (startDate, endDate) => {
     await this.validateInterval(startDate, endDate);
 
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    console.log(start, end);
+
     return await this.temperatureModel.find({
       timestamp: {
-        $gte: new Date(startDate),
-        $lte: new Date(endDate)
+        $gte: start,
+        $lte: end
       }
     }).populate('room');
   }
@@ -72,12 +76,16 @@ class TemperatureService {
     }
 
     await this.validateInterval(startDate, endDate);
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
 
     const readings = await this.temperatureModel.find({
       room: roomId,
       timestamp: {
-        $gte: new Date(startDate),
-        $lte: new Date(endDate)
+        $gte: start,
+        $lte: end
       }
     }).populate('room');
 

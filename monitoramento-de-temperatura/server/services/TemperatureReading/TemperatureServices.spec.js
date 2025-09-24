@@ -227,12 +227,15 @@ describe('TemperatureService', () => {
       });
 
       const result = await service.getRoomTemperatureReadingsByInterval('Sala', startDate, endDate);
-
+      const expectedStart = new Date(startDate);
+      expectedStart.setHours(0, 0, 0, 0);
+      const expectedEnd = new Date(endDate);
+      expectedEnd.setHours(23, 59, 59, 999);
       expect(mockModel.find).toHaveBeenCalledWith({
         room: 'Sala',
         timestamp: {
-          $gte: new Date(startDate),
-          $lte: new Date(endDate)
+          $gte: expectedStart,
+          $lte: expectedEnd
         }
       });
       expect(result).toBe(mockResult);
