@@ -2,7 +2,7 @@ import json
 import os
 from dotenv import load_dotenv
 from Mqtt.application.models.MongoDBConnection import MongoDBConnection
-
+from datetime import datetime
 load_dotenv()
 
 topic = os.getenv('BROKER_TOPIC')
@@ -88,7 +88,15 @@ def on_message(client, userdata, message):
                     '''
                     Laço condicional para registrar chamada no banco de dados
                     '''
-                    print(mongo.insert_document_collection('chamadas', dispositivo_id, local_emergencia, room_number))
+
+                    document= {
+                        'dispositivo_id': dispositivo_id,
+                        'Local': local_emergencia,
+                        'Enfermaria': room_number,
+                        'Data': datetime.now()
+                    }
+
+                    print(mongo.insert_document_collection('chamadas', document))
 
             if local_topic == 'enfermagem':
                 print(f'Mensagem enviada para: {dispositivo_id} para a {local_emergencia}: {room_number}, com o comando de: {comando}')
