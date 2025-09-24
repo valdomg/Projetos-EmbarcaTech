@@ -1,17 +1,15 @@
-
+import { checkAcess } from './auth.js';
 import { buscarTemperaturas } from './api.js';
-import { createGauge } from './gauge.js';
+import { createGauge } from './components/gauge.js';
 
+
+document.addEventListener("DOMContentLoaded", () => {
+  checkAcess();
+});
 
 //carrega dados de temperatura de todas as salas cadastradas no sistema.
-async function carregarTemperaturas() {
-  const token = localStorage.getItem("token");
+export async function carregarTemperaturas() {
 
-  if (!token) {
-    alert("Sessão expirou, Faça login novamente");
-    window.location.href = "login.html";
-    return;
-  }
   try {
     const dados = await buscarTemperaturas();
 
@@ -23,7 +21,10 @@ async function carregarTemperaturas() {
     // Agrupa por sala e pega a última leitura
     const ultimasPorSala = {};
     dados.forEach(dado => {
-      const sala = dado.room; // certifique-se que o campo no JSON se chama "room"
+      const sala = dado.room; 
+      if (!sala){
+        return;
+      }
       if (!ultimasPorSala[sala._id] || new Date(dado.timestamp) > new Date(ultimasPorSala[sala._id].timestamp)) {
         ultimasPorSala[sala._id] = dado;
       }
@@ -34,13 +35,15 @@ async function carregarTemperaturas() {
 
     sortRoom(salas);
 
+
+
     // Renderiza grid
-    const grid = document.getElementById("salasGrid");
+    const grid = document.getElementById("roomsGrid");
     grid.innerHTML = "";
 
     salas.forEach(sala => {
       const card = document.createElement("div");
-      card.className = "temp-sala";
+      card.className = "room-card";
       card.onclick = () => abrirSala(sala.room._id);
 
       // ids únicos para cada gauge
@@ -55,6 +58,10 @@ async function carregarTemperaturas() {
   `;
 
       grid.appendChild(card);
+
+      const body = document.body;
+      body.classList.remove('hide');
+      body.classList.add('show');
 
       // cria o gauge de temperatura
       createGauge(tempGaugeId, humGaugeId, sala);
@@ -81,7 +88,7 @@ function abrirSala(salaId) {
   window.location.href = `room.html?sala=${salaId}`;
 }
 
-// Ordena pelo nome da sala (ordem crescente)
+// ordenar em ordem crescente pelo nome da sala 
 function sortRoom(salas) {
   salas.sort((a, b) => {
     // extrai apenas os números do nome (ex: sala-01 -> 1)

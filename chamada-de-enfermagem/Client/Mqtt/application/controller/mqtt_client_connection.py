@@ -33,7 +33,7 @@ class MqttClientConnection:
     def start_connection(self) -> bool:
 
         try:
-            mqtt_client = mqtt.Client(self.client_name)
+            mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, self.client_name)
 
             if self.user_name and self.password:
                 mqtt_client.username_pw_set(self.user_name, self.password)
@@ -56,7 +56,6 @@ class MqttClientConnection:
     '''
     def start(self):
         self.start_connection()
-        self.publish_on_topic('dispositivos/teste/client', 'olá broker')
         while True: sleep(0.001)
 
     '''
