@@ -49,12 +49,6 @@ async function roomUpdate() {
 
   } catch (error) {
     console.error("Erro ao carregar sala:", error);
-
-    if (error.message.includes("401") || error.message.includes("403")) {
-      alert("Acesso não autorizado. Faça login novamente.");
-      localStorage.removeItem("token");
-      window.location.href = "login.html";
-    }
   }
 }
 

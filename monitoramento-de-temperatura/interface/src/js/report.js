@@ -1,5 +1,5 @@
 
-import { roomTempInterval } from "./api.js";
+import { roomTempInterval, roomsSearch } from "./api.js";
 
 //gerar opções do menu relario dinamicamente
 async function gerarOptions() {
@@ -16,11 +16,15 @@ async function gerarOptions() {
   }
 }
 
-gerarOptions();
+//so gera as opções do menu se houver o id no html
+if (document.getElementById('room-select')) {
+  gerarOptions();
+}
+
 
 
 const emitir = document.getElementById('emitirRelatorio');
-
+// evento clique chamando a funcao gerar relatorio
 if (emitir){
   emitir.addEventListener('click', async ()=>{
 
