@@ -63,8 +63,11 @@ async function atualizarGraficos() {
     const { start, end } = calcularIntervalo();
     const dados = await roomTempInterval(salaAtual, start, end);
 
+    const grafico = document.querySelector(".chart"); 
+
     if (!Array.isArray(dados) || !dados || dados.length === 0) {
-      console.warn("Nenhum dado retornado para o gráfico.");
+      console.log("Nenhum dado retornado para o gráfico.");
+      grafico.innerHTML = '<h4>Sem dados nas últimas 24 horas!</h4>'
       return;
     }
 
