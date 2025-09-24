@@ -1,6 +1,23 @@
 
 import { roomTempInterval } from "./api.js";
 
+//gerar opções do menu relario dinamicamente
+async function gerarOptions() {
+
+  try {
+      const dados = await roomsSearch();
+      
+      const select = document.getElementById('room-select');
+      dados.forEach(sala => {
+      select.innerHTML += `<option value="${sala._id}">${sala.name}</option>`;
+    });
+  }catch(erro){
+    console.error("Erro ao carregar opções do menu:", erro);
+  }
+}
+
+gerarOptions();
+
 
 const emitir = document.getElementById('emitirRelatorio');
 
