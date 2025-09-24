@@ -1,21 +1,26 @@
 
-import { TempIntervalo } from "./api.js";
+import { roomTempInterval } from "./api.js";
 
-document.getElementById('emitirRelatorio').addEventListener('click', async () => {
-  const token = localStorage.getItem("token");
 
-  if (!token) {
-    alert("Sessão expirou, Faça login novamente");
-    window.location.href = "login.html";
-    return;
-  }
+const emitir = document.getElementById('emitirRelatorio');
 
-  // Converte os valores dos inputs em ISO
-  const  start = new Date(document.getElementById('start').value).toISOString();
-  const  end = new Date(document.getElementById('end').value).toISOString();
+if (emitir){
+  emitir.addEventListener('click', async ()=>{
+
+    gerarRelatorio();
+  })
+}
+
+
+export async function gerarRelatorio() {
+
+    // Converte os valores dos inputs em ISO
+  const idRoom = document.querySelector('select').value;
+  const start = new Date(document.getElementById('start').value).toISOString();
+  const end = new Date(document.getElementById('end').value).toISOString();
 
   try {
-    const dados = await TempIntervalo(start, end);
+    const dados = await roomTempInterval(idRoom, start, end);
     console.log(dados);
 
     if (!dados.length) {
@@ -36,16 +41,10 @@ document.getElementById('emitirRelatorio').addEventListener('click', async () =>
     const csvContent = csvHeader + csvRows.join('\n');
     downloadCSV(csvContent, `relatorio_${start}_${Date.now()}.csv`);
 
-  } catch (error) {
-    console.error("Erro ao carregar sala:", error);
-
-    if (error.message.includes("401") || error.message.includes("403")) {
-      alert("Acesso não autorizado. Faça login novamente.");
-      localStorage.removeItem("token");
-      window.location.href = "login.html";
-    }
+  } catch (erro){
+    console.error("Erro ao carregar sala:", erro);
   }
-});
+};
 
 
 //funcao para baixar arquivo csv

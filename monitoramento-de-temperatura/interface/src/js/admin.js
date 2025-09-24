@@ -1,6 +1,7 @@
 import { checkAcess } from './auth.js';
 import { roomsSearch, usersSearch, userRegister, userDelete, roomDelete, roomRegister } from './api.js';
 import {carregarTemperaturas} from './main.js'
+import {gerarRelatorio} from './report.js'
 
 // --- verifica permissões ---
 document.addEventListener("DOMContentLoaded", () => {
@@ -184,7 +185,7 @@ links.forEach(link => {
                     <input id="start" class="date" type="date">
                     <label>à </label>
                     <input id="end" class="date" type="date">
-                    <button  type="button" class="btn" id="emitirRelatorio">Baixar</button>
+                    <button  type="button" class="btn emitirRelatorio">Baixar</button>
                 </div>
                 `;
 
@@ -309,6 +310,8 @@ document.addEventListener('click', (e) => {
         alert(`${error.message}`);
       }
     };
+  } else if(e.target.classList.contains('emitirRelatorio')){
+      gerarRelatorio();
   }
 
 });
