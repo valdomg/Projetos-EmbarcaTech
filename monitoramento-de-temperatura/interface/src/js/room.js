@@ -69,7 +69,7 @@ async function atualizarGraficos() {
     const { start, end } = calcularIntervalo();
     const dados = await roomTempInterval(salaAtual, start, end);
 
-    if (!dados || dados.length === 0) {
+    if (!Array.isArray(dados) || !dados || dados.length === 0) {
       console.warn("Nenhum dado retornado para o gráfico.");
       return;
     }

@@ -60,7 +60,7 @@ export async function buscarTemperaturaSala(salaId) {
 //buscar intervalo registrado de temperatura de uma sala especifica
 export async function roomTempInterval(salaId, start, end) {
   const token = localStorage.getItem("token");
-  const response = await fetch(`http://localhost:3000/api/room/${salaId}/temperatures/?startDate=${start}&endDate=${end}`,
+  const response = await fetch(`http://localhost:3000/api/room/${salaId}/temperatures/interval/?startDate=${start}&endDate=${end}`,
     {
       headers: {
         "Content-Type": "application/json",
@@ -87,7 +87,7 @@ export async function roomsSearch() {
     });
 
   if (!response) {
-    throw new Error("Erro ao buscar temperaturas");
+    throw new Error("Erro ao buscar salas");
   }
   const dados = await response.json();
   console.log(dados);
