@@ -45,7 +45,6 @@ export async function gerarRelatorio() {
     console.log(dados);
 
     if (!dados.length) {
-      console.error(`Nenhum dado encontrado para o período`);
       window.alert("Sem dados para o período");
       return;
     }
@@ -63,7 +62,7 @@ export async function gerarRelatorio() {
     downloadCSV(csvContent, `relatorio_${start}_${Date.now()}.csv`);
 
   } catch (erro){
-    console.error("Erro ao carregar sala:", erro);
+    window.alert(` ${erro.message}`);
   }
 };
 
