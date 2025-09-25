@@ -1,5 +1,6 @@
 from werkzeug.security import generate_password_hash, check_password_hash
-from Flask.Models.user_model import UserModel
+from Flask.Models.user_db_model import UserDBModel
+from datetime import datetime
 
 '''
 Classe de utilitário de autenticação
@@ -9,9 +10,8 @@ class AuthService:
     '''
     Utiliza um user_model para realizar as operações de registro e login
     '''
-    def __init__(self, user_model:UserModel):
-        self.user_model = user_model
-
+    def __init__(self, user_db_model:UserDBModel):
+        self.user_db_model = user_db_model
 
     '''
     Registra um usuário com seu username e converte sua senha em um
@@ -19,12 +19,19 @@ class AuthService:
 
     retorna um json com o status da inserção
     '''
-    def register(self, username:str, password:str):
-        if self.user_model.find_by_username(username):
+    def register(self, username:str, password:str, role:str, createdAt: datetime):
+        if self.user_db_model.find_by_username(username):
             return {'error': 'Usuário já existente'}, 400
         
         hashed_pw = generate_password_hash(password)
-        if self.user_model.insert_user({'username': username, 'password': hashed_pw}) is False:
+
+        if self.user_db_model.insert_user({
+            'username': username,
+            'password': hashed_pw,
+            'role': role, 
+            'createdAt': createdAt
+            }) is False:
+
             return {'message': 'Usuário não inserido no banco de dados'}, 400
 
         return {'message': 'Usuário cadastrado com sucesso'}, 201
@@ -36,10 +43,12 @@ class AuthService:
     retorna um json com o status da operação
     '''
     def login(self, username:str, password:str):
-        user = self.user_model.find_by_username(username)
+        user = self.user_db_model.find_by_username(username)
 
         if not user or not check_password_hash(user['password'], password):
             return None
 
         return user
+    
+
 
