@@ -1,34 +1,36 @@
-from Mqtt.application.models.MongoDBConnection import MongoDBConnection
-
+from datetime import datetime
 
 '''
-Classe para realizer a conexão com o banco de dados MongoDB
+Classe para instanciar usuário
 '''
-class UserModel():
 
-    '''
-    Injeção de depêndencias da classe
-    '''
-    def __init__(self, db:MongoDBConnection):
-        self.db = db
+class User():
+    def __init__(self, username:str, password:str, role:str):
+        
+        self.username = username
+        self.password = password
+        self.role = role
+        self.createdAt = datetime.now()
+        
 
+    def isValid(self):
+        if not self.username or self.username.split() == '':
+            print('Error in username')
+            return False
+        if not self.password or self.password.split() == '':
+            print('Error in password')
+            return False
+        
+        return True
 
-    '''
-    Realiza uma procura por um documenento na database
-    username = nome do usuário 
-
-    retorna um dict com as informações do usuário
-    '''
-    def find_by_username(self, username:str):
-        return self.db.return_document('users','username',username)
+    def getUsername(self):
+        return self.username
     
-    '''
-    Insere um novo usuário na database
-    user_data = dicionário com as informações do novo usuário
-
-    retorna um valor booleano
-    '''
-    def insert_user(self, user_data:dict):
-        return self.db.insert_document("users", user_data)
+    def getPassword(self):
+        return self.password
     
+    def getCreateAt(self):
+        return self.createdAt
 
+    def getRole(self):
+        return self.role

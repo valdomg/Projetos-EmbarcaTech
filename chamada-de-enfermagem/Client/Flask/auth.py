@@ -40,7 +40,7 @@ def token_required(f):
         except jwt.InvalidTokenError:
             return ({'error': 'Token inválido!'}), 401
             
-        return f(current_user, role, *args, **kwargs)
+        return f(*args, **kwargs)
     
     return decorated
 

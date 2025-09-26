@@ -27,9 +27,9 @@ def home():
 '''
 Rota para o template de relatório apenas quando o usuário estiver logado
 '''
-@pages_bp.route('/relatorio', methods=['GET'])
+@pages_bp.route('/relatorio')
 @token_required
-def relatorio_page(current_user, role):
+def relatorio_page():
 
     mongo_conn.start_connection()
 
@@ -39,5 +39,4 @@ def relatorio_page(current_user, role):
     mongo_conn.close_connection()
 
     return render_template('relatorio.html', chamadas=chamadas)
-
 
