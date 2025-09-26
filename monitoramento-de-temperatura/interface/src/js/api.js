@@ -71,7 +71,7 @@ export async function roomTempInterval(salaId, start, end) {
 
   const dados = await response.json();
   
-  if (!response.ok) {
+  if (!response) {
     throw new Error(dados.erro || dados.message || "Erro ao buscar temperaturas");
   }
   

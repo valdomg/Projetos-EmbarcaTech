@@ -373,7 +373,7 @@ dialog h3 {
     margin-top: 30px;
     gap: 20px;
     padding: 15px;
-    background: #f3f3f3;
+    /* background: #f3f3f3; */
     border-radius: 8px;
 }
 
