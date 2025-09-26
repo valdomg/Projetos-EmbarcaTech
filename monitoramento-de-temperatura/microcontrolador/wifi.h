@@ -27,6 +27,7 @@ bool connectWiFi();
  * - Se o dispositivo já estiver conectado, não faz nada.
  * - Caso contrário, tenta reconectar em intervalos definidos.
  */
-void reconnectWifi();
+bool reconnectWifi();
+
 
 #endif
