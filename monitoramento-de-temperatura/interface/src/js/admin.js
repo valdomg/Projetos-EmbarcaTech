@@ -1,6 +1,7 @@
 import { checkAcess } from './auth.js';
 import { roomsSearch, usersSearch, userRegister, userDelete, roomDelete, roomRegister } from './api.js';
 import {carregarTemperaturas} from './main.js'
+import {gerarRelatorio} from './report.js'
 
 // --- verifica permissões ---
 document.addEventListener("DOMContentLoaded", () => {
@@ -157,14 +158,14 @@ links.forEach(link => {
       }
     } else if (section === 'reports') {
       try {
-        // const dados = await TempIntervalo(start, end);
-        // console.log(dados);
+        const dados = await roomsSearch();
+        console.log(dados);
 
-        // if (!dados.length) {
-        //   console.error(`Nenhum dado encontrado para o período`);
-        //   window.alert("Sem dados para o período");
-        //   return;
-        // }
+        if (!dados.length) {
+          console.error(`Nenhum dado encontrado para o período`);
+          window.alert("Sem dados para o período");
+          return;
+        }
 
         const grid = document.getElementById("dashboard");
         grid.innerHTML = "";
@@ -176,21 +177,26 @@ links.forEach(link => {
                 <div>
                     <label>Escolha o local</label>
                     <select name="room" id="room-select">
-                      <option value="">--Por favor escolha uma sala--</option>
-                      <option value="0">Todas</option>
-                      <option value="1">Sala-01</option>
-                      <option value="2">Sala-02</option>
-                      <option value="3">Sala-03</option>
+
+                    <option value="" disabled selected>-- Escolha uma sala --</option>
+
                     </select>
                     <label for="periodo">Escolha o período:</label>
                     <input id="start" class="date" type="date">
                     <label>à </label>
                     <input id="end" class="date" type="date">
-                    <button  type="button" class="btn" id="emitirRelatorio">Baixar</button>
+                    <button  type="button" class="btn emitirRelatorio">Baixar</button>
                 </div>
-                        `;
+                `;
 
         grid.appendChild(relatorio);
+
+        const select = document.getElementById('room-select');
+        dados.forEach(sala =>
+          {     
+          select.innerHTML += `<option value="${sala._id}">${sala.name}</option>`;
+        });
+        
 
         // Alterar a classe do botão para mostrar o conteúdo
         const button = document.getElementById('btn-click');
@@ -304,6 +310,8 @@ document.addEventListener('click', (e) => {
         alert(`${error.message}`);
       }
     };
+  } else if(e.target.classList.contains('emitirRelatorio')){
+      gerarRelatorio();
   }
 
 });
