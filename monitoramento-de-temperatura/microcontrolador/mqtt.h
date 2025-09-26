@@ -37,7 +37,7 @@ void setupMQTT();
  * Se a conexão for perdida, tenta reconectar automaticamente
  * utilizando as credenciais configuradas.
  */
-void checkMQTTConnected();
+bool checkMQTTConnected();
 
 /**
  * @brief Publica dados de sensores em formato JSON.
@@ -50,7 +50,13 @@ void checkMQTTConnected();
  * @param temperature Valor da temperatura a ser enviado.
  * @param humidity    Valor da umidade a ser enviado.
  */
-void publishSensorData(float temperature, float humidity);
+bool publishSensorData(float temperature, float humidity);
+
+
+
+void resendMqttData();
+
+
 
 /**
  * @brief Publica uma mensagem de alerta em formato JSON.

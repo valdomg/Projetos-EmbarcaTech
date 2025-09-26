@@ -3,6 +3,7 @@
 #include "log.h"
 #include <WiFiClientSecure.h>
 #include <ArduinoJson.h>
+#include "storage.h"
 
 /**
  * @file mqtt.cpp
@@ -26,8 +27,12 @@ PubSubClient client(espClient);
 // -----------------------------------------------------------------------------
 // Variáveis de controle
 // -----------------------------------------------------------------------------
-static unsigned long lastAttempConnectMQTT = 0;         // Guarda o tempo da última tentativa de conexão com o broker.
-static const unsigned long reconnectIntervalMQTT = 3000; // Intervalo (ms) entre tentativas de reconexão ao broker.
+static unsigned long lastAttempConnectMQTT = 0;           // Guarda o tempo da última tentativa de conexão com o broker.
+static const unsigned long reconnectIntervalMQTT = 3000;  // Intervalo (ms) entre tentativas de reconexão ao broker.
+
+
+static unsigned long lastConnectionDataSent = 0;       // Guarda o tempo da último envio de mensagem do storage.
+static const unsigned long resendIntervalMQTT = 3000;  // Intervalo (ms) entre o envio de cada mensagem ao mqtt do storage.
 
 // -----------------------------------------------------------------------------
 // Funções de inicialização e conexão
@@ -52,24 +57,27 @@ void setupMQTT() {
  * A cada chamada, mantém a conexão ativa (client.loop()).
  * Se a conexão caiu, tenta reconectar dentro do intervalo definido.
  */
-void checkMQTTConnected() {
-  client.loop();                         // Mantém a comunicação ativa e processa mensagens recebidas.
-  if (client.connected()) return;        // Se já está conectado, sai da função.
+bool checkMQTTConnected() {
+  client.loop();                        // Mantém a comunicação ativa e processa mensagens recebidas.
+  if (client.connected()) return true;  // Se já está conectado, sai da função.
 
-  unsigned long now = millis();          // Captura o tempo atual (ms desde o boot).
+  unsigned long now = millis();  // Captura o tempo atual (ms desde o boot).
 
   // Só tenta reconectar se já passou o intervalo configurado
-  if (now - lastAttempConnectMQTT >= reconnectIntervalMQTT){
-    lastAttempConnectMQTT = now;         // Atualiza o tempo da última tentativa
+  if (now - lastAttempConnectMQTT >= reconnectIntervalMQTT) {
+    lastAttempConnectMQTT = now;  // Atualiza o tempo da última tentativa
 
-    log(LOG_DEBUG,"Tentando conectar ao MQTT...");
+    log(LOG_DEBUG, "Tentando conectar ao MQTT...");
     // Tenta conectar ao broker usando credenciais do config.h
     if (client.connect(MQTT_DEVICE_ID, MQTT_USER, MQTT_PASS)) {
-      log(LOG_DEBUG,"Conectado ou Broker");
+      log(LOG_DEBUG, "Conectado ou Broker");
+      return true;
     } else {
-      log(LOG_ERROR,"Erro ao conectar com Broker rc= %d",client.state()); // Mostra o código de erro da conexão
+      log(LOG_ERROR, "Erro ao conectar com Broker rc= %d", client.state());  // Mostra o código de erro da conexão
+      return false;
     }
   }
+  return false;
 }
 
 // -----------------------------------------------------------------------------
@@ -87,7 +95,7 @@ void checkMQTTConnected() {
  * @param temperature Valor da temperatura a ser enviado.
  * @param humidity    Valor da umidade a ser enviado.
  */
-void publishSensorData(float temperature, float humidity) {
+bool publishSensorData(float temperature, float humidity) {
   StaticJsonDocument<128> doc;
   doc["Microcontrollerid"] = MQTT_DEVICE_ID;
   doc["temperature"] = temperature;
@@ -96,7 +104,31 @@ void publishSensorData(float temperature, float humidity) {
 
   char buffer[128];
   serializeJson(doc, buffer);
-  client.publish(MQTT_TOPIC_PUBLICATION_DATA, buffer);
+
+  if (!client.publish(MQTT_TOPIC_PUBLICATION_DATA, buffer)) {
+    log(LOG_WARN, "falha ou enviar dados ao broker");
+    return false;
+  }
+  return true;
+}
+
+
+void resendMqttData() {
+
+  if (!hasDataStorage()) return;
+
+  unsigned long now = millis();
+
+  if (now - lastConnectionDataSent >= resendIntervalMQTT) {
+    lastConnectionDataSent = now;  // Atualiza o tempo da última tentativa
+
+    ObjectStorage obj = getObjectStorage();
+    if (obj.valid) {
+      if (publishSensorData(obj.temperature, obj.humidity)) {
+        deleteOneMessage();
+      }
+    }
+  }
 }
 
 /**
