@@ -86,6 +86,7 @@ source .venv/bin/activate   # Linux/MacOS
 pip install flask-pymongo
 pip install dotenv
 pip install paho-mqtt
+pip install jwt
 ```
 ### **4. No arquivo .env coloque as credenciais para conexão com seu Banco de dados e do broker**
 ```
@@ -99,6 +100,8 @@ BROKER_TOPIC = ''
 CLIENT_NAME = ''
 CLIENT_USERNAME = ''
 CLIENT_PASS = ''
+
+SK = ''
 
 ```
 

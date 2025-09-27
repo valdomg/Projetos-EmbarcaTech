@@ -2,7 +2,8 @@ from flask import Blueprint, request, jsonify, render_template, redirect, make_r
 import jwt
 from datetime import datetime, timedelta, timezone
 from Flask.Services.auth_service import AuthService
-from Flask.Models.user_model import UserModel
+from Flask.Models.user_db_model import UserDBModel
+from Flask.Models.user_model import User
 from Flask.auth import SECRET_KEY
 from Mqtt.application.models.MongoDBConnection import MongoDBConnection
 from dotenv import load_dotenv
@@ -18,8 +19,8 @@ uri = os.getenv('MONGO_URI')
 database = os.getenv('MONGO_DATABASE')
 
 mongo_conn = MongoDBConnection(uri, database)
-user_model = UserModel(mongo_conn)
-auth_service = AuthService(user_model)
+user_db_model = UserDBModel(mongo_conn)
+auth_service = AuthService(user_db_model)
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -43,7 +44,12 @@ def register():
     print(data)
     mongo_conn.start_connection()
 
-    result = auth_service.register(data['username'], data['password'])
+    user = User(data['username'], data['password'], data['role'])
+
+    if user.isValid() == False:
+        return {'Error': 'Valores falstos'}, 401
+        
+    result = auth_service.register(user.getUsername(), user.getPassword(), user.getRole(), user.getCreateAt())
     
     mongo_conn.close_connection()
 
@@ -52,9 +58,9 @@ def register():
 
 '''
 Rota de login
-POST para receber as informações do usuário por meio de um json
+POST para receber as informações do usuário por meio de um formulário
 
-retorna um json com o toker do usuário/error
+retorna um token para acessar o sistema ou uma mensagem de credenciais inválidas
 '''
 @auth_bp.route('/login', methods=['POST'])
 def login():
@@ -82,21 +88,6 @@ def login():
             resp = make_response(redirect(url_for('pages.relatorio_page')))
             resp.set_cookie('jwt', token, httponly=True)
 
-            print(token)
-
             return resp
 
         return render_template('login.html', error='Credenciais Inválidas')
-
-
-    return render_template('login.html')  
-    
-
-
-'''
-    if isinstance(user, tuple):  # erro vindo do service
-        return jsonify(user[0]), user[1]
-
-    access_token = create_access_token(identity=data['username'])
-    return jsonify(access_token=access_token)
-'''

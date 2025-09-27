@@ -6,10 +6,11 @@
 #include "led.h"
 #include "button.h"
 #include "log.h"
+#include "config.h"
+#include "storage.h"
 
-
-constexpr unsigned long MQTT_INTERVAL_MS = 180000;  // 3 minutos
-constexpr unsigned long SENSOR_INTERVAL_MS = 1000;  // 1 segundo
+constexpr unsigned long MQTT_INTERVAL_MS = 180 * 1000;  // 3 minutos
+constexpr unsigned long SENSOR_INTERVAL_MS = 1000;      // 1 segundo
 
 constexpr uint8_t TEMPERATURE_MAX = 23;
 constexpr uint8_t TEMPERATURE_MIN = 14;
@@ -51,7 +52,6 @@ checkErrors(const EnvironmentData& data) {
 
 void updateDisplay(const EnvironmentData& data, const ErrorStatus& errors) {
 
-  // logSensorData("Display", data);
   log(LOG_INFO, "Dados Display Temperatura: %.2f°C Humidade %.2f%%", data.temperature, data.humidity);
   // Passa os dados e os status de alerta para a função de exibição
   lcd1602_showData(data.temperature, data.humidity, errors.temperatureError, errors.humidityError);
@@ -61,9 +61,14 @@ void maybePublishMQTT(const EnvironmentData& data, unsigned long now) {
 
   if (now - lastMQTTPublishTime >= MQTT_INTERVAL_MS) {
     lastMQTTPublishTime = now;
-    publishSensorData(data.temperature, data.humidity);
 
-    log(LOG_INFO, "Dados MQTT Temperatura: %.2f°C Humidade %.2f%%", data.temperature, data.humidity);
+    if (!publishSensorData(data.temperature, data.humidity)) {
+      saveStorage(data.temperature, data.humidity);
+      log(LOG_ERROR, "Dados MQTT Temperatura foram guardados");
+    } else {
+
+      log(LOG_INFO, "Dados enviados ao MQTT Temperatura: %.2f°C Humidade %.2f%%", data.temperature, data.humidity);
+    }
   }
 }
 
@@ -101,12 +106,14 @@ void maybeHandleAlerts(const ErrorStatus& errors, unsigned long now) {
 
 void setup() {
 
-  logInit(LOG_WARN);
+  logInit(LOG_INFO);
 
   buttonInit();
   log(LOG_DEBUG, "Botao iniciado");
 
   initializeSensor();
+
+  initStorage();
 
   // Chama a função para iniciar o display
   lcd1602_init();
@@ -129,10 +136,13 @@ void setup() {
 void loop() {
 
   if (reconnectWifi()) {
-    checkMQTTConnected();
+    if (checkMQTTConnected()) {
+      resendMqttData();
+    }
   }
 
   unsigned long now = millis();
+
 
   if (now - lastSensorReadTime >= SENSOR_INTERVAL_MS) {
     lastSensorReadTime = now;
