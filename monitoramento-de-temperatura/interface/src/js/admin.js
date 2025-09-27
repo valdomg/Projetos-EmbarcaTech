@@ -405,7 +405,68 @@ document.addEventListener('click', function (e) {
   } else if (e.target && e.target.classList.contains('excluirSala')) {
     const id = e.target.getAttribute('data-id');
     excluirSala(id);
-  }});
+  } else if (e.target && e.target.classList.contains('editarSala')) {
+      const id = e.target.getAttribute('data-id');
+      editarSala(id);
+  } 
+});
+
+
+
+// Funcao editar dados da sala
+async function editarSala(id) {
+  // Mostrar o modal
+  abrirModal('modalRoomEdit', '#roomEditCloseBtn');
+
+  const linha = document.querySelector(`tr[data-id='${id}']`);
+
+  const nome = linha.getElementsByTagName('td')[0].innerText;
+  const micro = linha.getElementsByTagName('td')[1].innerText;
+
+  const nomeInput = document.getElementById("roomNameEdit");
+  const microInput = document.getElementById("roomMicroEdit");
+
+  if (nomeInput && microInput) {
+    nomeInput.value = nome;
+    microInput.value = micro;
+  } else {
+    console.error("Campos de entrada não encontrados no modal");
+  }
+
+  const editar = document.getElementById("roomEditBtn");
+  editar.onclick = async (e) => {
+    e.preventDefault();
+
+    try {
+      const nome = document.getElementById("roomNameEdit").value;
+      const micro = document.getElementById("roomMicroEdit").value;
+      //requisicao da API para editar sala
+      const data = await roomEdit(id, nome, micro);
+      console.log(data);
+
+      if (data && data._id) {
+        const alerta = document.getElementById("responseRoomEdit");
+        alerta.innerText = `Ambiente ${data.name} editado com sucesso!`;
+
+        // Limpa o texto de alerta depois de 3 segundos
+        setTimeout(() => { alerta.innerText = ""; }, 3000);
+
+        //Limpa o formulário
+        document.getElementById("roomFormEdit").reset();
+      } else {
+
+        // alerta de erro;
+        const alerta = document.getElementById("responseRoomEdit");
+        alerta.innerText = data.erro || data.message || "Erro desconhecido na edição";
+        // Limpa o texto depois de 3 segundos
+        setTimeout(() => { alerta.innerText = ""; }, 3000);
+      }
+    } catch (error) {
+      alert(`${error.message}`);
+    }
+  };
+}
+
 
 
 //Função excluir usuário
