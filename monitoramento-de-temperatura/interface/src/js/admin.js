@@ -408,7 +408,10 @@ document.addEventListener('click', function (e) {
   } else if (e.target && e.target.classList.contains('editarSala')) {
       const id = e.target.getAttribute('data-id');
       editarSala(id);
-  } 
+  } else if(e.target && e.target.classList.contains('editarUsuario')) {
+      const id = e.target.getAttribute('data-id');
+      editarUsuario(id);
+  }
 });
 
 
@@ -467,6 +470,67 @@ async function editarSala(id) {
   };
 }
 
+
+// Funcao editar dados do usuário
+async function editarUsuario(id) {
+  // Mostrar o modal
+  abrirModal('modalUserEdit', '#editCloseBtn');
+
+  const linha = document.querySelector(`tr[data-id='${id}']`);
+
+  const nome = linha.getElementsByTagName('td')[0].innerText;
+  const email = linha.getElementsByTagName('td')[1].innerText;
+
+  const nomeInput = document.getElementById("nameEdit");
+  const emailInput = document.getElementById("emailEdit");
+
+  if (nomeInput && emailInput) {
+    nomeInput.value = nome;
+    emailInput.value = email;
+  } else {
+    console.error("Campos de entrada não encontrados no modal");
+  }
+
+  const editar = document.getElementById("userEditBtn");
+  editar.onclick = async (e) => {
+    e.preventDefault();
+
+    try {
+      const nome = document.getElementById("nameEdit").value;
+      const micro = document.getElementById("emailEdit").value;
+      const senha = document.getElementById('senhaEdit').value;
+      const senha2 = document.getElementById('senha2Edit').value;
+      //requisicao da API para editar sala
+
+      if (senha != senha2){
+        alerta.innerText = data.erro || data.message || "Erro desconhecido";
+        return;
+      }
+      const data = await userEdit(id, nome, email, senha);
+      console.log(data);
+
+      if (data && data._id) {
+        const alerta = document.getElementById("responseUserEdit");
+        alerta.innerText = `Usuário ${data.name} editado com sucesso!`;
+
+        // Limpa o texto de alerta depois de 3 segundos
+        setTimeout(() => { alerta.innerText = ""; }, 3000);
+
+        //Limpa o formulário
+        document.getElementById("roomFormEdit").reset();
+      } else {
+
+        // alerta de erro;
+        const alerta = document.getElementById("responseRoomEdit");
+        alerta.innerText = data.erro || data.message || "Erro desconhecido na edição";
+        // Limpa o texto depois de 3 segundos
+        setTimeout(() => { alerta.innerText = ""; }, 3000);
+      }
+    } catch (error) {
+      alert(`${error.message}`);
+    }
+  };
+}
 
 
 //Função excluir usuário
