@@ -5,6 +5,7 @@ from Flask.Services.auth_service import AuthService
 from Flask.Models.user_db_model import UserDBModel
 from Flask.Models.user_model import User
 from Flask.auth import SECRET_KEY
+from Flask.auth import token_required 
 from Mqtt.application.models.MongoDBConnection import MongoDBConnection
 from dotenv import load_dotenv
 import os
@@ -62,7 +63,7 @@ POST para receber as informações do usuário por meio de um formulário
 
 retorna um token para acessar o sistema ou uma mensagem de credenciais inválidas
 '''
-@auth_bp.route('/login', methods=['POST'])
+@auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
 
     if request.method == 'POST':
@@ -91,3 +92,5 @@ def login():
             return resp
 
         return render_template('login.html', error='Credenciais Inválidas')
+
+    return render_template('login.html')
