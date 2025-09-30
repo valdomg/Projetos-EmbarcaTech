@@ -161,7 +161,7 @@ describe('TemperatureService', () => {
       });
       const startDate = '2025-07-29T00:00:00Z';
       const endDate = '2025-07-30T00:00:00Z';
-      await expect(service.getRoomTemperatureReadingsByInterval('Sala', startDate, endDate)).rejects.toThrow("Nenhuma leitura encontrada para a sala no intervalo especificado");
+      await expect(service.getRoomTemperatureReadingsByInterval('Sala', startDate, endDate)).resolves.toEqual([]);
     });
 
     it('should throw error if interval is invalid', async () => {
