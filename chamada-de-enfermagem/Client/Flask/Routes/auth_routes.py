@@ -25,6 +25,12 @@ auth_service = AuthService(user_db_model)
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
+'''
+ROTAS
+
+/auth/register 
+/auth/login
+'''
 
 '''
 Rota de registro
@@ -39,10 +45,10 @@ FORMATO DO JSON
 
 retorna um json com mensagem de sucesso/falha na inserção
 '''
+
 @auth_bp.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
-    print(data)
     mongo_conn.start_connection()
 
     user = User(data['username'], data['password'], data['role'])
