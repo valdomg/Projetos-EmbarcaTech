@@ -29,6 +29,12 @@ async function roomUpdate() {
     const ultimaLeitura = dados[dados.length - 1];
 
     const grid = document.getElementById("roomGrid");
+
+    // condição caso o grid tenha sido removido do html
+    if(!grid){
+      console.log('Não encontrou o elemento RoomGrid');
+      return;
+    }
     grid.innerHTML = "";
 
     const tempGaugeId = `gauge-temp-${salaAtual}`;

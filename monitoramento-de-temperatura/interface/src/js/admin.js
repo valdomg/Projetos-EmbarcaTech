@@ -1,7 +1,7 @@
 import { checkAcess } from './auth.js';
-import { roomsSearch, usersSearch, userRegister, userDelete, roomDelete, roomRegister } from './api.js';
-import {carregarTemperaturas} from './main.js'
-import {gerarRelatorio} from './report.js'
+import { roomsSearch, usersSearch, userRegister,userEdit, userDelete, roomDelete, roomRegister, roomEdit } from './api.js';
+import { carregarTemperaturas } from './main.js'
+import { gerarRelatorio } from './report.js'
 
 // --- verifica permissões ---
 document.addEventListener("DOMContentLoaded", () => {
@@ -192,11 +192,10 @@ links.forEach(link => {
         grid.appendChild(relatorio);
 
         const select = document.getElementById('room-select');
-        dados.forEach(sala =>
-          {     
+        dados.forEach(sala => {
           select.innerHTML += `<option value="${sala._id}">${sala.name}</option>`;
         });
-        
+
 
         // Alterar a classe do botão para mostrar o conteúdo
         const button = document.getElementById('btn-click');
@@ -225,7 +224,7 @@ links.forEach(link => {
 // Evento para cadastrar
 document.addEventListener('click', (e) => {
   if (e.target.classList.contains('userInsert')) {
-    
+
     // Mostrar o modal
     abrirModal('modalUserInsert', '#userCloseBtn');
 
@@ -238,7 +237,7 @@ document.addEventListener('click', (e) => {
       const senha2 = document.getElementById("senha2").value;
 
       if (senha !== senha2) {
-        const alerta = document.getElementById("response");
+        const alerta = document.getElementById("responseUser");
         alerta.innerText = "As senhas devem ser iguais!";
 
         // Limpa o texto de alerta depois de 3 segundos
@@ -252,7 +251,7 @@ document.addEventListener('click', (e) => {
         console.log(data);
 
         if (data && data.id) {
-          const alerta = document.getElementById("response");
+          const alerta = document.getElementById("responseUser");
           alerta.innerText = `Usuário ${data.name} cadastrado com sucesso!`;
 
           // Limpa o texto de alerta depois de 3 segundos
@@ -263,7 +262,7 @@ document.addEventListener('click', (e) => {
         } else {
 
           // alerta de erro;
-          const alerta = document.getElementById("response");
+          const alerta = document.getElementById("responseUser");
           alerta.innerText = data.erro || data.message || "Erro desconhecido no cadastro";
           // Limpa o texto depois de 3 segundos
           setTimeout(() => { alerta.innerText = ""; }, 3000);
@@ -277,7 +276,7 @@ document.addEventListener('click', (e) => {
 
     // Mostrar o modal
     abrirModal('modalRoomInsert', '#roomCloseBtn');
-    
+
 
     const cadastrar = document.getElementById("roomInsertBtn");
     cadastrar.onclick = async () => {
@@ -290,7 +289,7 @@ document.addEventListener('click', (e) => {
         console.log(data);
 
         if (data && data._id) {
-          const alerta = document.getElementById("response2");
+          const alerta = document.getElementById("responseRoom");
           alerta.innerText = `Ambiente ${data.name} cadastrado com sucesso!`;
 
           // Limpa o texto de alerta depois de 3 segundos
@@ -301,7 +300,7 @@ document.addEventListener('click', (e) => {
         } else {
 
           // alerta de erro;
-          const alerta = document.getElementById("response2");
+          const alerta = document.getElementById("responseRoom");
           alerta.innerText = data.erro || data.message || "Erro desconhecido no cadastro";
           // Limpa o texto depois de 3 segundos
           setTimeout(() => { alerta.innerText = ""; }, 3000);
@@ -310,8 +309,8 @@ document.addEventListener('click', (e) => {
         alert(`${error.message}`);
       }
     };
-  } else if(e.target.classList.contains('emitirRelatorio')){
-      gerarRelatorio();
+  } else if (e.target.classList.contains('emitirRelatorio')) {
+    gerarRelatorio();
   }
 
 });
@@ -319,23 +318,23 @@ document.addEventListener('click', (e) => {
 
 
 //função abrir e fechar modal
-function abrirModal(modalId, closeBtnSelector){
-    // Mostrar o modal
-    const modal = document.getElementById(modalId);
-    if(!modal){
-      console.log(`Modal com ID "${modalId}" não encontrado.`);
-      return;
-    }
-    modal.showModal();
-
-    //Fechar modal
-    const btnClose = modal.querySelector(closeBtnSelector);
-    if (!btnClose){
-      console.log(`Modal com ID "${closeBtnSelector}" nao encontrado`)
-      return;
-    }
-    btnClose.onclick = () =>  modal.close();
+function abrirModal(modalId, closeBtnSelector) {
+  // Mostrar o modal
+  const modal = document.getElementById(modalId);
+  if (!modal) {
+    console.log(`Modal com ID "${modalId}" não encontrado.`);
+    return;
   }
+  modal.showModal();
+
+  //Fechar modal
+  const btnClose = modal.querySelector(closeBtnSelector);
+  if (!btnClose) {
+    console.log(`Modal com ID "${closeBtnSelector}" nao encontrado`)
+    return;
+  }
+  btnClose.onclick = () => modal.close();
+}
 
 
 
@@ -397,7 +396,7 @@ function abrirModal(modalId, closeBtnSelector){
 // });
 
 
-// Evento para excluir usuário ou sala
+// Evento para excluir e editar usuário ou sala
 document.addEventListener('click', function (e) {
   if (e.target && e.target.classList.contains('excluirUsuario')) {
     const id = e.target.getAttribute('data-id');
@@ -406,8 +405,132 @@ document.addEventListener('click', function (e) {
   } else if (e.target && e.target.classList.contains('excluirSala')) {
     const id = e.target.getAttribute('data-id');
     excluirSala(id);
+  } else if (e.target && e.target.classList.contains('editarSala')) {
+      const id = e.target.getAttribute('data-id');
+      editarSala(id);
+  } else if(e.target && e.target.classList.contains('editarUsuario')) {
+      const id = e.target.getAttribute('data-id');
+      editarUsuario(id);
   }
 });
+
+
+
+// Funcao editar dados da sala
+async function editarSala(id) {
+  // Mostrar o modal
+  abrirModal('modalRoomEdit', '#roomEditCloseBtn');
+
+  const linha = document.querySelector(`tr[data-id='${id}']`);
+
+  const nome = linha.getElementsByTagName('td')[0].innerText;
+  const micro = linha.getElementsByTagName('td')[1].innerText;
+
+  const nomeInput = document.getElementById("roomNameEdit");
+  const microInput = document.getElementById("roomMicroEdit");
+
+  if (nomeInput && microInput) {
+    nomeInput.value = nome;
+    microInput.value = micro;
+  } else {
+    console.error("Campos de entrada não encontrados no modal");
+  }
+
+  const editar = document.getElementById("roomEditBtn");
+  editar.onclick = async (e) => {
+    e.preventDefault();
+
+    try {
+      const nome = document.getElementById("roomNameEdit").value;
+      const micro = document.getElementById("roomMicroEdit").value;
+      //requisicao da API para editar sala
+      const data = await roomEdit(id, nome, micro);
+      console.log(data);
+
+      if (data && data._id) {
+        const alerta = document.getElementById("responseRoomEdit");
+        alerta.innerText = `Ambiente ${data.name} editado com sucesso!`;
+
+        // Limpa o texto de alerta depois de 3 segundos
+        setTimeout(() => { alerta.innerText = ""; }, 3000);
+
+        //Limpa o formulário
+        document.getElementById("roomFormEdit").reset();
+      } else {
+
+        // alerta de erro;
+        const alerta = document.getElementById("responseRoomEdit");
+        alerta.innerText = data.erro || data.message || "Erro desconhecido na edição";
+        // Limpa o texto depois de 3 segundos
+        setTimeout(() => { alerta.innerText = ""; }, 3000);
+      }
+    } catch (error) {
+      alert(`${error.message}`);
+    }
+  };
+}
+
+
+// Funcao editar dados do usuário
+async function editarUsuario(id) {
+  // Mostrar o modal
+  abrirModal('modalUserEdit', '#editCloseBtn');
+
+  const linha = document.querySelector(`tr[data-id='${id}']`);
+
+  const nome = linha.getElementsByTagName('td')[0].innerText;
+  const email = linha.getElementsByTagName('td')[1].innerText;
+
+  const nomeInput = document.getElementById("nameEdit");
+  const emailInput = document.getElementById("emailEdit");
+
+  if (nomeInput && emailInput) {
+    nomeInput.value = nome;
+    emailInput.value = email;
+  } else {
+    console.error("Campos de entrada não encontrados no modal");
+  }
+
+  const editar = document.getElementById("userEditBtn");
+  editar.onclick = async (e) => {
+    e.preventDefault();
+
+    try {
+      const nome = document.getElementById("nameEdit").value;
+      const micro = document.getElementById("emailEdit").value;
+      const senha = document.getElementById('senhaEdit').value;
+      const senha2 = document.getElementById('senha2Edit').value;
+      //requisicao da API para editar sala
+
+      if (senha != senha2){
+        alerta.innerText = data.erro || data.message || "Erro desconhecido";
+        return;
+      }
+      const data = await userEdit(id, nome, email, senha);
+      console.log(data);
+
+      if (data && data._id) {
+        const alerta = document.getElementById("responseUserEdit");
+        alerta.innerText = `Usuário ${data.name} editado com sucesso!`;
+
+        // Limpa o texto de alerta depois de 3 segundos
+        setTimeout(() => { alerta.innerText = ""; }, 3000);
+
+        //Limpa o formulário
+        document.getElementById("roomFormEdit").reset();
+      } else {
+
+        // alerta de erro;
+        const alerta = document.getElementById("responseRoomEdit");
+        alerta.innerText = data.erro || data.message || "Erro desconhecido na edição";
+        // Limpa o texto depois de 3 segundos
+        setTimeout(() => { alerta.innerText = ""; }, 3000);
+      }
+    } catch (error) {
+      alert(`${error.message}`);
+    }
+  };
+}
 
 
 //Função excluir usuário
