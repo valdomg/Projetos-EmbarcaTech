@@ -17,7 +17,7 @@ Arquivo para rotas do client com users
 ROTAS
 
 /api/users 
-/auth/users/register
+/api/users/register
 '''
 
 load_dotenv()
@@ -69,5 +69,5 @@ def register():
 
     mongo_conn.close_connection()
 
-    return {'Error', 'usuário não inseriro'}, 401
+    return {'Error', 'usuário não inserido'}, 401
  
