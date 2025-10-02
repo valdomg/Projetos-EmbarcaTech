@@ -120,6 +120,38 @@ class MongoDBConnection:
             print('Error on insert document...')
             print(e) 
 
+    '''
+    Função para update de um valor de um label em uma collection
+    '''
+    def update_document(self, collection:str, label_to_match:str, value_to_match:str, label_to_update:str, new_value:str) -> bool: 
+
+        try:
+            if self.client is not None:
+
+                if self.check_if_document_exists(collection, label_to_match, value_to_match) == False:
+                    print('No values in DB')
+                    return False
+
+                collection_search = self.db[collection]                
+                result = collection_search.update_one({label_to_match:value_to_match}, {
+                    '$set': {label_to_update: new_value}
+                } )
+
+
+                if result == None:
+                    print(f'Error in update operation: {result}')
+                    return False
+                
+                print(f'Sucefully update operation: {result}')
+                return True
+            
+            else:
+                print('Client not connected')
+
+        except PyMongoError as e:
+            print('Error on update document...')
+            print(e)
+
 
     '''
     Função para fechar a conexão com o banco de dados
