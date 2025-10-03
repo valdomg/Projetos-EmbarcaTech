@@ -18,7 +18,6 @@
  * Neste caso, o botão está ligado ao pino 13 do microcontrolador.
  * O pino é configurado com resistor de pull-up interno.
  */
-constexpr uint8_t PIN_BUTTON = 13;
 
 /**
  * @brief Inicializa o botão.
@@ -27,7 +26,7 @@ constexpr uint8_t PIN_BUTTON = 13;
  * - **Não ativa a interrupção automaticamente**. 
  *   Para habilitar a interrupção deve-se chamar `enableButtonInterrupt()`.
  */
-void buttonInit();
+void buttonInit(uint8_t pin);
 
 /**
  * @brief Verifica se o botão foi pressionado.
@@ -57,7 +56,7 @@ void resetButtonState();
  * Após essa chamada, o botão não gerará mais eventos de interrupção
  * até que `enableButtonInterrupt()` seja chamado novamente.
  */
-void disableButtonInterrupt();
+void disableButtonInterrupt(uint8_t pin);
 
 /**
  * @brief Habilita a interrupção associada ao botão.
@@ -65,6 +64,8 @@ void disableButtonInterrupt();
  * Configura o microcontrolador para chamar a rotina de interrupção
  * (`buttonISR`) quando o botão for pressionado (borda de subida - RISING).
  */
-void enableButtonInterrupt();
+void enableButtonInterrupt(uint8_t pin);
+
+bool wasMuted();
 
 #endif

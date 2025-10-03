@@ -85,9 +85,9 @@ void handleSensorData(EnvironmentData& data, unsigned long now) {
 void maybeHandleAlerts(const ErrorStatus& errors, unsigned long now) {
   if (errors.humidityError || errors.temperatureError || errors.sensorError) {
 
-    enableButtonInterrupt();
+    enableButtonInterrupt(PIN_BUTTON_MUTE);
 
-    if (buttonWasPressed()) {
+    if (wasMuted()) {
       disableSoundAlert();
 
     } else {
@@ -96,7 +96,7 @@ void maybeHandleAlerts(const ErrorStatus& errors, unsigned long now) {
     toggleLed(now);
   } else {
 
-    disableButtonInterrupt();
+    disableButtonInterrupt(PIN_BUTTON_MUTE);
     resetButtonState();
     disableSoundAlert();
     turnOffLed();
@@ -108,7 +108,7 @@ void setup() {
 
   logInit(LOG_INFO);
 
-  buttonInit();
+  buttonInit(PIN_BUTTON_MUTE);
   log(LOG_DEBUG, "Botao iniciado");
 
   initializeSensor();

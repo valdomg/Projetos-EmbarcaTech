@@ -13,12 +13,6 @@
  * anormais detectadas pelo sistema de monitoramento.
  */
 
-/**
- * @brief Pino digital onde o buzzer está conectado.
- * 
- * Este valor pode ser alterado conforme o esquema de ligação do hardware.
- */
-constexpr uint8_t PIN_BUZZER = 14;
 
 /**
  * @brief Intervalo de tempo (em ms) entre as alternâncias do buzzer.

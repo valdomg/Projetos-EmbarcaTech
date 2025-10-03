@@ -1,5 +1,6 @@
 #include "button.h"
 #include "log.h"
+#include "config.h"
 
 // -----------------------------------------------------------------------------
 // Variáveis globais
@@ -21,7 +22,7 @@ volatile bool buttonPressed = false;
  * tratamento da flag `buttonPressed`. Ela alterna (toggle) entre `true` e 
  * `false` a cada clique válido.
  */
-bool stateButton = false;
+bool stateButtonMute = false;
 
 
 // -----------------------------------------------------------------------------
@@ -45,7 +46,6 @@ void IRAM_ATTR buttonISR() {
   // Verifica se passou tempo suficiente desde a última interrupção (debounce)
   if (currentTime - lastInterruptTime > 500) {
     buttonPressed = true;  // Marca que o botão foi pressionado
-    log(LOG_INFO, "botao foi pressionado");
   }
 
   lastInterruptTime = currentTime;
@@ -62,8 +62,8 @@ void IRAM_ATTR buttonISR() {
  * Esta função apenas prepara o pino, mas **não ativa a interrupção**. 
  * A ativação deve ser feita separadamente usando `enableButtonInterrupt()`.
  */
-void buttonInit() {
-  pinMode(PIN_BUTTON, INPUT_PULLUP);
+void buttonInit(uint8_t pin) {
+  pinMode(pin, INPUT_PULLUP);
 }
 
 /**
@@ -72,8 +72,8 @@ void buttonInit() {
  * A ISR (`buttonISR`) será chamada sempre que o botão gerar um evento de
  * borda de subida (RISING). 
  */
-void enableButtonInterrupt() {
-  attachInterrupt(digitalPinToInterrupt(PIN_BUTTON), buttonISR, RISING);
+void enableButtonInterrupt(uint8_t pin) {
+  attachInterrupt(digitalPinToInterrupt(pin), buttonISR, RISING);
 }
 
 /**
@@ -82,33 +82,43 @@ void enableButtonInterrupt() {
  * Impede que a ISR seja chamada, útil em cenários em que não se deseja
  * que cliques do botão sejam processados temporariamente.
  */
-void disableButtonInterrupt() {
-  detachInterrupt(digitalPinToInterrupt(PIN_BUTTON));
+void disableButtonInterrupt(uint8_t pin) {
+  detachInterrupt(digitalPinToInterrupt(pin));
 }
 
 /**
  * @brief Retorna o estado lógico atual do botão.
  * 
  * - Se a flag `buttonPressed` estiver ativa, ela é resetada.
- * - O estado lógico `stateButton` é alternado (toggle) para refletir a mudança.
+ * - O estado lógico `stateButtonMute` é alternado (toggle) para refletir a mudança.
  * 
  * @return true se o botão está no estado ativo.
  * @return false caso contrário.
  */
 bool buttonWasPressed() {
   if (buttonPressed) {
+
     buttonPressed = false;
-    stateButton = !stateButton;
+    return true;  // apenas indica que houve um clique
   }
-  return stateButton;
+  return false;
+}
+
+bool wasMuted() {
+
+  if (buttonWasPressed()) {
+    stateButtonMute = !stateButtonMute;
+  }
+
+  return stateButtonMute;
 }
 
 /**
  * @brief Reseta o estado lógico do botão.
  * 
- * Força `stateButton` para `false`, independentemente de cliques anteriores.
+ * Força `stateButtonMute` para `false`, independentemente de cliques anteriores.
  * Útil para reiniciar o estado do botão em cenários de inicialização ou reset.
  */
 void resetButtonState() {
-  stateButton = false;
+  stateButtonMute = false;
 }
