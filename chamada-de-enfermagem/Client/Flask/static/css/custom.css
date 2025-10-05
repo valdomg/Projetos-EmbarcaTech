@@ -34,7 +34,7 @@
 }
 
 .chamada-exibir {
-    width: 10vw;
+    width: 14vw;
     padding: 6px;
 }
 
@@ -51,7 +51,7 @@
 
 #chamadas-lista {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); /* duas colunas iguais */
+    grid-template-columns: repeat(2, 1fr); /* duas colunas iguais */
     gap: 10px; /* espaço entre os itens */
 }
 
@@ -69,7 +69,6 @@
   border: 1px solid #ccc;
   border-radius: 5px;
   text-decoration: none;
-  transition: background 0.2s;
 }
 
 .paginacao a:hover {
