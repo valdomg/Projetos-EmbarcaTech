@@ -36,32 +36,6 @@ class MongoDBConnection:
         else:
             print('Database não definida')
             return False
-        
-    '''
-    Insere um novo documento na coleção
-    '''
-    def insert_document_collection(self,collection:str,id_device:int, local:str, room_number:int):
-
-        try:
-            if self.client is not None:
-                document = {
-                    'id_dispositivo': id_device,        #id do arduino
-                    'Local': local,                     #Onde foi a chamada (Enfermaria ou outra sala)
-                    'Enfermaria': room_number,          #Número da enfermaria
-                    'data': datetime.now()              #Hora da chamada
-                }
-
-                collection = self.db[collection]
-                result = collection.insert_one(document)
-
-                print(result)
-
-            else:
-                print('Client not connected')
-
-        except PyMongoError as e:
-            print('Error on insert document...')
-            print(e) 
 
     '''
     Lista os documentos na coleção
@@ -79,13 +53,13 @@ class MongoDBConnection:
     '''
     Verifica a existência de algum dado no banco de dados
     '''
-    def check_if_document_exists(self, collection:str, label:str, id_device:str):
+    def check_if_document_exists(self, collection:str, label:str, value:str):
 
         try:
             if self.client is not None:
                 collection_to_search = self.db[collection]
 
-                result = collection_to_search.find_one({label:id_device})
+                result = collection_to_search.find_one({label:value})
 
                 if result is not None:
                     return True                
@@ -95,6 +69,42 @@ class MongoDBConnection:
             
         return False
     
+    def return_document(self,collection:str, label_to_search:str, value_to_match:str):
+         
+        try:
+            if self.client is not None:
+                collection_to_search = self.db[collection]
+
+                result = collection_to_search.find_one({label_to_search:value_to_match})
+        
+                return result
+
+        except PyMongoError as e:
+            print('Error in check values...')
+            print(e)
+            
+        return False
+    '''
+    Insere um novo documento na coleção
+    '''
+    def insert_document_collection(self,collection:str, document: dict):
+        try:
+            if self.client is not None:
+                document_to_save = document 
+
+                collection = self.db[collection]
+                result = collection.insert_one(document_to_save)
+
+                print(result)
+
+            else:
+                print('Client not connected')
+
+        except PyMongoError as e:
+            print('Error on insert document...')
+            print(e) 
+
+
     '''
     Função para fechar a conexão com o banco de dados
     '''

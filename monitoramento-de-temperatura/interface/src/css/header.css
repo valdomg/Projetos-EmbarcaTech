@@ -3,13 +3,10 @@ nav {
     flex-direction: row;
     justify-content: space-evenly;
     align-items: center;
-    background-color: brown;
-    margin-bottom: 2rem;
-    width: 100%;
+    background-color: rgb(94, 94, 94);
     height: 5rem;
     box-sizing: border-box;
     width: 100%;
-    box-sizing: border-box;
 }
 
 nav a img {

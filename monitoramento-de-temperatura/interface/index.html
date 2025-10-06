@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 
 <head>
     <meta charset="UTF-8">
@@ -9,41 +9,26 @@
     <title>Monitoramento de Temperatura</title>
 </head>
 
-<body>
+<body class="hide">
 
 
-        <nav>
-            <a><img src="src/img/logo2.png"></a>
-            <h1>Monitoramento de Temperatura</h1>
-            <div class="icons">
-                <a href="relatorio.html" title="Relatório"><i class="fa fa-file-excel-o"></i></a>
-                <a href="login.html" title="Sair"><i class="fa fa-sign-out"></i></a>
-            </div>
-        </nav>
-
-        <div class="dashboard">
-            <div class="monitor">
-                <div class="temp">
-                    <h4>Temperatura</h4>
-                    <div id="gauge" style="width:400px; height:320px"></div>
-
-                </div>
-                <div class="umid">
-                    <h4>Umidade</h4>
-                    <div id="gauge2" class="gauge" style="width:400px; height:320px"></div>
-
-                </div>
-            </div>
-            <p id="temperatura"></p>
-            <div>
-
-            </div>
+    <nav>
+        <a><img src="src/img/logo2.png"></a>
+        <h1>Monitoramento de Temperatura</h1>
+        <div class="icons">
+            <a href="relatorio.html" title="Relatório"><i class="fa fa-file-excel-o"></i></a>
+            <a id="logoutBtn" title="Sair"><i class="fa fa-sign-out"></i></a>
         </div>
+    </nav>
+    
+
+    <div id="roomsGrid" class="room-grid"></div>
 
 
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.4/raphael-min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/justgage/1.2.9/justgage.min.js"></script>
-    <script src="src/js/main.js"></script>
+    <script type="module" src="src/js/main.js"></script>
 
 </body>
 

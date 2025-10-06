@@ -1,4 +1,5 @@
 #include "wifi_utils.h"
+#include "mqtt.h"
 
 #include "display_LCD-2004_I2C.h"
 // implementa a lista duplamente ligada para armazenar as chamadas de enfermagem
@@ -80,6 +81,7 @@ void setup() {
   if (!connectToWiFi()) {
     Serial.println("WiFi não conectado.");
   }
+  setupMQTT();
 
   // inicializa o display
   lcd2004_init();
@@ -98,13 +100,18 @@ void setup() {
       listCalls.getTotal());  // Mostra os dados no display
 
   listUpdated = false;
-
 }
 
 void loop() {
 
   checkAndReconnectWifi();
+  checkMQTTConnected();
+
   delay(1000);
+  client.disconnect();
+  if (!client.connected()){
+    Serial.println("servidor mqtt desconectado");
+  }
 
 
   // Atualiza se tiver novos dados, mas se nenhum botão estiver pressionado
