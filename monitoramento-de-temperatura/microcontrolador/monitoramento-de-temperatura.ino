@@ -85,7 +85,7 @@ void handleSensorData(EnvironmentData& data, unsigned long now) {
 void maybeHandleAlerts(const ErrorStatus& errors, unsigned long now) {
   if (errors.humidityError || errors.temperatureError || errors.sensorError) {
 
-    enableButtonInterrupt(PIN_BUTTON_MUTE);
+    enableButtonInterruptRising(PIN_BUTTON_MUTE);
 
     if (wasMuted()) {
       disableSoundAlert();
@@ -96,7 +96,7 @@ void maybeHandleAlerts(const ErrorStatus& errors, unsigned long now) {
     toggleLed(now);
   } else {
 
-    disableButtonInterrupt(PIN_BUTTON_MUTE);
+    disableButtonInterruptRising(PIN_BUTTON_MUTE);
     resetButtonState();
     disableSoundAlert();
     turnOffLed();
@@ -110,6 +110,10 @@ void setup() {
 
   buttonInit(PIN_BUTTON_MUTE);
   log(LOG_DEBUG, "Botao iniciado");
+
+  buttonInit(PIN_BUTTON_LONG);
+
+  enableButtonInterruptChange(PIN_BUTTON_LONG);
 
   initializeSensor();
 
@@ -135,18 +139,24 @@ void setup() {
 
 void loop() {
 
-  if (reconnectWifi()) {
-    if (checkMQTTConnected()) {
-      resendMqttData();
+  if (wasButtonLongPressed()) {
+
+    log(LOG_INFO, "BOTAO FOI PRESSIONADO");
+  } else {
+
+    if (reconnectWifi()) {
+      if (checkMQTTConnected()) {
+        resendMqttData();
+      }
     }
-  }
 
-  unsigned long now = millis();
+    unsigned long now = millis();
 
 
-  if (now - lastSensorReadTime >= SENSOR_INTERVAL_MS) {
-    lastSensorReadTime = now;
-    EnvironmentData data = readSensorData();
-    handleSensorData(data, now);
+    if (now - lastSensorReadTime >= SENSOR_INTERVAL_MS) {
+      lastSensorReadTime = now;
+      EnvironmentData data = readSensorData();
+      handleSensorData(data, now);
+    }
   }
 }

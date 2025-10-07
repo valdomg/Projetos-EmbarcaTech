@@ -7,7 +7,7 @@
 // Constantes de configuração dos pinos
 // -----------------------------------------------------------------------------
 const constexpr uint8_t PIN_BUTTON_MUTE = 13;   // botão de mute
-const constexpr uint8_t PIN_BUTTON_LONG = 15;   // botão long press
+const constexpr uint8_t PIN_BUTTON_LONG = 2;   // botão long press
 
 const constexpr uint8_t PIN_SENSOR_SCL = 5;     //pino scl do sensor aht10
 const constexpr uint8_t PIN_SENSOR_SDA = 4;     //pino sda do sensor aht10

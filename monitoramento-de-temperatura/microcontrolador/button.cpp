@@ -1,3 +1,4 @@
+#include "c_types.h"
 #include "button.h"
 #include "log.h"
 #include "config.h"
@@ -6,6 +7,11 @@
 // Variáveis globais
 // -----------------------------------------------------------------------------
 
+volatile unsigned long buttonPressStartTime = 0;
+volatile bool flagLongPress = false;
+volatile bool isButtonPressed = false;
+
+
 /**
  * @brief Flag que indica se o botão foi pressionado.
  * 
@@ -13,7 +19,7 @@
  * (rotina de interrupção), garantindo que o compilador não otimize de forma
  * incorreta o acesso a essa variável.
  */
-volatile bool buttonPressed = false;
+volatile bool flagMutePressed = false;
 
 /**
  * @brief Estado lógico do botão.
@@ -22,7 +28,8 @@ volatile bool buttonPressed = false;
  * tratamento da flag `buttonPressed`. Ela alterna (toggle) entre `true` e 
  * `false` a cada clique válido.
  */
-bool stateButtonMute = false;
+bool isMuted = false;
+
 
 
 // -----------------------------------------------------------------------------
@@ -39,17 +46,38 @@ bool stateButtonMute = false;
  * - Ativa a flag `buttonPressed` quando um acionamento válido é detectado.
  * - O tempo mínimo entre interrupções aceitas é de 500 ms.
  */
-void IRAM_ATTR buttonISR() {
+void IRAM_ATTR muteButtonISR() {
   static unsigned long lastInterruptTime = 0;  ///< Marca o instante da última interrupção
   unsigned long currentTime = millis();
 
   // Verifica se passou tempo suficiente desde a última interrupção (debounce)
   if (currentTime - lastInterruptTime > 500) {
-    buttonPressed = true;  // Marca que o botão foi pressionado
+    flagMutePressed = true;  // Marca que o botão foi pressionado
   }
 
   lastInterruptTime = currentTime;
 }
+
+
+void IRAM_ATTR longPressButtonISR() {  //funçao vai calcular quantos segundos o botao foi pressionado
+
+  bool readButton = digitalRead(PIN_BUTTON_LONG);
+
+
+  if (readButton == LOW && !isButtonPressed) {
+
+    buttonPressStartTime = millis();
+    isButtonPressed = true;
+
+  } else if (readButton == HIGH && isButtonPressed) {
+
+    if (millis() - buttonPressStartTime  > 15 * 1000) {
+      flagLongPress = !flagLongPress;
+    }
+    isButtonPressed = false;
+  }
+}
+
 
 
 // -----------------------------------------------------------------------------
@@ -69,11 +97,11 @@ void buttonInit(uint8_t pin) {
 /**
  * @brief Habilita a interrupção associada ao botão.
  * 
- * A ISR (`buttonISR`) será chamada sempre que o botão gerar um evento de
+ * A ISR (`muteButtonISR`) será chamada sempre que o botão gerar um evento de
  * borda de subida (RISING). 
  */
-void enableButtonInterrupt(uint8_t pin) {
-  attachInterrupt(digitalPinToInterrupt(pin), buttonISR, RISING);
+void enableButtonInterruptRising(uint8_t pin) {
+  attachInterrupt(digitalPinToInterrupt(pin), muteButtonISR, RISING);
 }
 
 /**
@@ -82,7 +110,25 @@ void enableButtonInterrupt(uint8_t pin) {
  * Impede que a ISR seja chamada, útil em cenários em que não se deseja
  * que cliques do botão sejam processados temporariamente.
  */
-void disableButtonInterrupt(uint8_t pin) {
+void disableButtonInterruptRising(uint8_t pin) {
+  detachInterrupt(digitalPinToInterrupt(pin));
+}
+/**
+ * @brief Habilita a interrupção associada ao botão.
+ * 
+ * A ISR (``) será chamada sempre que o botão gerar um evento de mudança (CHANGE). 
+ */
+void enableButtonInterruptChange(uint8_t pin) {
+  attachInterrupt(digitalPinToInterrupt(pin), longPressButtonISR, CHANGE);
+}
+
+/**
+ * @brief Desabilita a interrupção associada ao botão.
+ * 
+ * Impede que a ISR seja chamada, útil em cenários em que não se deseja
+ * que cliques do botão sejam processados temporariamente.
+ */
+void disableButtonInterruptChange(uint8_t pin) {
   detachInterrupt(digitalPinToInterrupt(pin));
 }
 
@@ -90,35 +136,43 @@ void disableButtonInterrupt(uint8_t pin) {
  * @brief Retorna o estado lógico atual do botão.
  * 
  * - Se a flag `buttonPressed` estiver ativa, ela é resetada.
- * - O estado lógico `stateButtonMute` é alternado (toggle) para refletir a mudança.
+ * - O estado lógico `isMuted` é alternado (toggle) para refletir a mudança.
  * 
  * @return true se o botão está no estado ativo.
  * @return false caso contrário.
  */
-bool buttonWasPressed() {
-  if (buttonPressed) {
+bool checkButtonPressed(volatile bool *buttonPressed) {
+  if (*buttonPressed) {
 
-    buttonPressed = false;
+    *buttonPressed = false;
     return true;  // apenas indica que houve um clique
   }
   return false;
 }
 
+
 bool wasMuted() {
 
-  if (buttonWasPressed()) {
-    stateButtonMute = !stateButtonMute;
+  if (checkButtonPressed(&flagMutePressed)) {
+    isMuted = !isMuted;
   }
 
-  return stateButtonMute;
+  return isMuted;
 }
+
+
+bool wasButtonLongPressed() {
+  return flagLongPress;
+}
+
+
 
 /**
  * @brief Reseta o estado lógico do botão.
  * 
- * Força `stateButtonMute` para `false`, independentemente de cliques anteriores.
+ * Força `isMuted` para `false`, independentemente de cliques anteriores.
  * Útil para reiniciar o estado do botão em cenários de inicialização ou reset.
  */
 void resetButtonState() {
-  stateButtonMute = false;
+  isMuted = false;
 }

@@ -32,7 +32,7 @@ void buttonInit(uint8_t pin);
  * @brief Verifica se o botão foi pressionado.
  * 
  * Essa função retorna o estado lógico do botão, atualizado 
- * pela rotina de interrupção (`buttonISR`).
+ * pela rotina de interrupção (`muteButtonISR`).
  * 
  * - Se o botão foi pressionado, o estado lógico alterna (toggle).
  * - A flag de pressionamento é resetada internamente após a leitura.
@@ -40,7 +40,7 @@ void buttonInit(uint8_t pin);
  * @return true  se o botão está em estado ativo.
  * @return false se o botão está em estado inativo.
  */
-bool buttonWasPressed();
+// bool checkButtonPressed(bool *buttonPressed);
 
 /**
  * @brief Reseta o estado lógico do botão.
@@ -56,16 +56,22 @@ void resetButtonState();
  * Após essa chamada, o botão não gerará mais eventos de interrupção
  * até que `enableButtonInterrupt()` seja chamado novamente.
  */
-void disableButtonInterrupt(uint8_t pin);
+void disableButtonInterruptRising(uint8_t pin);
 
 /**
  * @brief Habilita a interrupção associada ao botão.
  * 
  * Configura o microcontrolador para chamar a rotina de interrupção
- * (`buttonISR`) quando o botão for pressionado (borda de subida - RISING).
+ * (`muteButtonISR`) quando o botão for pressionado (borda de subida - RISING).
  */
-void enableButtonInterrupt(uint8_t pin);
+void enableButtonInterruptRising(uint8_t pin);
+
+void enableButtonInterruptChange(uint8_t pin);
+
+void disableButtonInterruptChange(uint8_t pin);
 
 bool wasMuted();
+
+bool wasButtonLongPressed();
 
 #endif
