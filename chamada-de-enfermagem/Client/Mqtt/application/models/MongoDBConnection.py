@@ -84,6 +84,22 @@ class MongoDBConnection:
             print(e)
             
         return False
+    
+    '''
+    Retorna os dados com uma query de data
+    '''
+    def list_documents_by_date(self, collection:str, field_data:str, end_date:str):
+        try:
+            if self.client is not None:
+                collection = self.db[collection]
+                return list(collection.find({
+                                field_data:{'$lt': end_date}}))
+            else:
+                print('Client not connected')
+        except PyMongoError as e:
+            print('Error in list documents...')
+            print(e)
+
     '''
     Insere um novo documento na coleção
     '''
@@ -95,7 +111,7 @@ class MongoDBConnection:
                 collection = self.db[collection]
                 result = collection.insert_one(document_to_save)
 
-                print(result)
+                return result
 
             else:
                 print('Client not connected')
@@ -104,6 +120,67 @@ class MongoDBConnection:
             print('Error on insert document...')
             print(e) 
 
+    '''
+    Função para update de um valor de um label em uma collection
+    '''
+    def update_document(self, collection:str, label_to_match:str, value_to_match:str, label_to_update:str, new_value:str) -> bool: 
+
+        try:
+            if self.client is not None:
+
+                if self.check_if_document_exists(collection, label_to_match, value_to_match) == False:
+                    print('No values in DB')
+                    return False
+
+                collection_search = self.db[collection]                
+                result = collection_search.update_one({label_to_match:value_to_match}, {
+                    '$set': {label_to_update: new_value}
+                } )
+
+
+                if result == None:
+                    print(f'Error in update operation: {result}')
+                    return False
+                
+                print(f'Successfully update operation: {result}')
+                return True
+            
+            else:
+                print('Client not connected')
+
+        except PyMongoError as e:
+            print('Error on update document...')
+            print(e)
+
+    '''
+    Função para deletar um documento da database
+    '''
+    def delete_document(self, collection:str, label_to_match:str, value_to_match:str) -> bool:
+
+        try:
+            if self.client is not None:
+                
+                if self.check_if_document_exists(collection, label_to_match, value_to_match) == False:
+                    print('No values in DB')
+                    return False
+                
+                collection_delete = self.db[collection]
+                result = collection_delete.delete_one({label_to_match: value_to_match})
+
+                if result == False:
+                    print(f'Error in delete value: {result}')
+                    return False
+                
+                print(f'Successfully in delete value: {result}')
+                return True
+            
+            else:
+                print('Client not connected')
+
+        except PyMongoError as e:
+            print('Error in delete value')
+            print(e)
+            return False
 
     '''
     Função para fechar a conexão com o banco de dados
@@ -112,3 +189,4 @@ class MongoDBConnection:
         if self.client:
             self.client.close()
             print("Conexão fechada.")
+
