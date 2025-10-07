@@ -40,4 +40,9 @@ constexpr char* MQTT_TOPIC_PUBLICATION_ALERT = "xxxxxxxxxxxx/xxxxxxxxxxxx";
 constexpr char* MQTT_DEVICE_ID = "xxxxxxxxxxxx";
 
 
+// -----------------------------------------------------------------------------
+constexpr const char* SSID_ACCESS_POINT = "xxxxxxxxxxxxx";
+constexpr const char* PASSWORD_ACCESS_POINT = "xxxxxxxxxxxx";
+
+
 #endif

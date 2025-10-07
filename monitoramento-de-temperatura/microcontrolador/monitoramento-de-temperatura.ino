@@ -140,11 +140,11 @@ void setup() {
 void loop() {
 
   if (wasButtonLongPressed()) {
-
-    log(LOG_INFO, "BOTAO FOI PRESSIONADO");
+    createAccessPoint();
   } else {
 
     if (reconnectWifi()) {
+      
       if (checkMQTTConnected()) {
         resendMqttData();
       }

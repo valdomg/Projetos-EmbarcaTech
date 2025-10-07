@@ -11,9 +11,9 @@ const char* WIFI_PASSWORD = "xxxxxxxx";    ///< Senha da rede Wi-Fi
 // -----------------------------------------------------------------------------
 // Buffer e controle de tempo
 // -----------------------------------------------------------------------------
-char ipBuffer[16];                         ///< Armazena o IP em formato string
+char ipBuffer[16];  ///< Armazena o IP em formato string
 static unsigned long lastConnectionAttemp = 0;
-static const unsigned long reconnectInterval = 1000 * 75; // 1 minuto e 15 segundos
+static const unsigned long reconnectInterval = 1000 * 75;  // 1 minuto e 15 segundos
 
 // -----------------------------------------------------------------------------
 // Funções
@@ -60,19 +60,31 @@ bool connectWiFi() {
  */
 bool reconnectWifi() {
   // Se já está conectado, não faz nada
-  if (WiFi.status() == WL_CONNECTED) return true;
 
+  if (WiFi.status() == WL_CONNECTED) return true;
+  WiFi.softAPdisconnect(true);
+  WiFi.mode(WIFI_STA);
   unsigned long now = millis();
 
   // Verifica se já passou o intervalo de reconexão
   if (now - lastConnectionAttemp >= reconnectInterval) {
     lastConnectionAttemp = now;
 
-    log(LOG_ERROR,"WiFi desconectado");
-    WiFi.disconnect();                       // garante que está desconectado
+    log(LOG_ERROR, "WiFi desconectado");
+    WiFi.disconnect();  // garante que está desconectado
     log(LOG_INFO, "tentando reconectar com wifi...");
     return connectWiFi();
   }
   return false;
 }
 
+void createAccessPoint() {
+
+  WiFiMode_t mode = WiFi.getMode();
+  if (mode != WIFI_AP) {
+
+    WiFi.disconnect();
+    WiFi.mode(WIFI_AP);
+    WiFi.softAP(SSID_ACCESS_POINT, PASSWORD_ACCESS_POINT);
+  }
+}

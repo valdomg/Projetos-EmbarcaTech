@@ -30,4 +30,7 @@ bool connectWiFi();
 bool reconnectWifi();
 
 
+void createAccessPoint();
+
+
 #endif
