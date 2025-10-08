@@ -19,6 +19,7 @@ ROTAS
 /api/devices 
 /api/devices/quantidade
 /api/devices/register
+/api/devices/delete
 '''
 
 load_dotenv()
@@ -69,6 +70,11 @@ def return_count_devices():
 
 '''
 Rota que registra um novo dispositivo no banco de dados
+json = {
+    "device":"nome_device"
+}
+
+APENAS PARA ADMINS
 '''
 @devices_bp.route('/register', methods=['GET', 'POST'])
 def register_device():
@@ -84,5 +90,25 @@ def register_device():
     result = device_service.register(device.getDevice(), device.getCreatedAt())
 
     mongo_conn.close_connection()
+
+    return jsonify(result)
+
+'''
+Rota para deletar um dispositivo com seu nome de dispositivo
+
+json = {
+    "device": "nome_do_dispositivo"
+}
+
+APENA PARA ADMINS
+'''
+@devices_bp.route('/delete', methods=['GET', 'POST'])
+def delete_device():
+
+    data = request.get_json()
+
+    mongo_conn.start_connection()
+
+    result = device_service.delete(data['device'])
 
     return jsonify(result)
