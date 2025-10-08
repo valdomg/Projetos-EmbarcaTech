@@ -11,16 +11,18 @@ fechar.addEventListener('click', () => {
 });
 
 async function carregarUsuarios() {
-  const resposta = await fetch('/usuarios');  // pega JSON do Flask
+  const resposta = await fetch('/api/users');  // pega JSON do Flask
   const usuarios = await resposta.json();
+  console.log(usuarios);
+  console.log(typeof usuarios, usuarios);
 
   const planilha = document.getElementById('planilha');
 
   usuarios.forEach(usuario => {
     planilha.innerHTML += `
-      <div class="celula">${usuario.id}</div>
-      <div class="celula">${usuario.nome}</div>
-      <div class="celula">${usuario.funcao}</div>
+      <div class="celula">0</div>
+      <div class="celula">${usuario.username}</div>
+      <div class="celula">${usuario.role}</div>
       <div class="celula">
         <button class="btn-excluir" data-id="${usuario.id}">Excluir</button>
         <button class="btn-editar" data-id="${usuario.id}">Alterar</button>

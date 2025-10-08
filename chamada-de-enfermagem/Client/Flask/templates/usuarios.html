@@ -74,14 +74,14 @@
 
               <div id="formulario">
                 <h3>Cadastrar Usuário</h3>
-                <form id="form">
+                <form id="form" method="post" action="/api/users/register">
                   <label>Nome:</label>
-                  <input type="text" name="nome" required><br><br>
+                  <input type="text" name="username" required><br><br>
 
                   
                   
                   <label>Senha:</label>
-                  <input type="text" name="funcao" required><br><br>
+                  <input type="text" name="password" required><br><br>
                   
                   <label for="funcao">Função:</label>
                   <select id="funcao" name="funcao">
