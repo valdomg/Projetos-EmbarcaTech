@@ -18,8 +18,8 @@ class DeviceDBModel():
     def update_device(self, label_to_match:str, value_to_match:str,label_to_update:str, new_value:str):
         pass
 
-    def delete_device(self, label_to_match:str, value_to_match:str):
-        pass
+    def delete_device(self, device_id:str):
+        return self.db.delete_document('devices', '_id', device_id)
     
     def return_all_devices(self):
         return self.db.list_documents('devices')
