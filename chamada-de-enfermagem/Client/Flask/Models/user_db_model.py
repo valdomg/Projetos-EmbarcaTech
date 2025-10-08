@@ -33,6 +33,6 @@ class UserDBModel():
     '''
     Deletar um usuários do banco de dados
     '''
-    def delete_user(self, user_id:str):
-        return self.db.delete_document('users', '_id', user_id)
+    def delete_user(self, username:str):
+        return self.db.delete_document('users', 'username', username)
     
