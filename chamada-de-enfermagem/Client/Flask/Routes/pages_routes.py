@@ -39,3 +39,7 @@ def relatorio_page():
 
     return render_template('relatorio.html', chamadas=chamadas)
 
+@pages_bp.route('/usuarios')
+def usuario_page():
+
+    return render_template('usuarios.html')
