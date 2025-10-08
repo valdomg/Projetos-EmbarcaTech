@@ -20,14 +20,11 @@ class AuthServiceDevice:
         if self.device_db_model.find_by_device(device):
             return {'error': 'Device já existente'}, 400
 
-        if self.device_db_model.inser_device({
+        if self.device_db_model.insert_device({
             'device': device,
             'createdAt': createdAt
             }) is False:
 
-            return {'message': 'Usuário não inserido no banco de dados'}, 400
+            return {'message': 'Device não inserido no banco de dados'}, 400
 
-        return {'message': 'Usuário cadastrado com sucesso'}, 201
-
-
-
+        return {'message': 'Device cadastrado com sucesso'}, 201
