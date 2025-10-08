@@ -1,11 +1,11 @@
 from flask import Blueprint, jsonify, request
 from Flask.Services.auth_service import AuthService
+from Flask.Services.convert_objectdID import convert_all_id_to_string, convert_object_id_to_string
 from Flask.Models.user_db_model import UserDBModel
 from Flask.Models.user_model import User
 from Flask.auth import SECRET_KEY
 from Flask.auth import token_required 
 from Mqtt.application.models.MongoDBConnection import MongoDBConnection
-from bson.json_util import dumps
 from dotenv import load_dotenv
 import os
 
@@ -42,7 +42,7 @@ def return_all_users():
     users = mongo_conn.list_documents('users')
 
     if users:
-        json_users = dumps(users)
+        json_users = convert_all_id_to_string(users)
 
         return jsonify(json_users), 201
     

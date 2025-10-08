@@ -1,9 +1,9 @@
 from flask import Blueprint, jsonify, request
 from datetime import datetime
-from bson.json_util import dumps
 from Flask.auth import token_required 
 from Mqtt.application.models.MongoDBConnection import MongoDBConnection
 from Flask.Services.device_service import AuthServiceDevice
+from Flask.Services.convert_objectdID import convert_all_id_to_string, convert_object_id_to_string
 from Flask.Models.device_db_model import DeviceDBModel
 from Flask.Models.device_model import Device
 from dotenv import load_dotenv
@@ -44,7 +44,7 @@ def return_all_devices():
     mongo_conn.close_connection()
     if devices:
 
-        json_devices = dumps(devices)
+        json_devices = convert_all_id_to_string(devices)
 
         return jsonify(json_devices), 201
     
