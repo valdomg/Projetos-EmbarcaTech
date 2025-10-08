@@ -18,6 +18,7 @@ ROTAS
 
 /api/users 
 /api/users/register
+/api/users/delete
 '''
 
 load_dotenv()
@@ -33,6 +34,8 @@ user_bp = Blueprint('user', __name__, url_prefix='/api/users')
 
 '''
 Rota de api para retornar todos os usuários
+
+APENAS PARA ADMINS
 '''
 @user_bp.route('/', methods=['GET'])
 def return_all_users():
@@ -50,6 +53,13 @@ def return_all_users():
 
 '''
 Rota de api para registar usuário
+
+json = {
+    "username": "nome_do_usuario",
+    "password": "senha_do_usuário"
+}
+
+APENAS PARA ADMINS
 '''
 @user_bp.route('/register', methods=['POST'])
 def register():
@@ -71,3 +81,23 @@ def register():
 
     return {'Error', 'usuário não inserido'}, 401
  
+'''
+Rota de remoção de usuário
+
+json = {
+    "username": "nome_do_usuário"
+}
+APENAS PARA ADMINS
+'''
+@user_bp.route('/delete', methods=['POST'])
+def delete_user():
+    data = request.get_json()
+
+    mongo_conn.start_connection()
+
+    result = auth_service.delete(data['username'])
+
+    print(result)
+
+    return jsonify(result)
+
