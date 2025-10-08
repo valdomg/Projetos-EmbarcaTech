@@ -28,3 +28,14 @@ class AuthServiceDevice:
             return {'message': 'Device não inserido no banco de dados'}, 400
 
         return {'message': 'Device cadastrado com sucesso'}, 201
+    
+    def delete(self, device:str):
+
+        if self.device_db_model.find_by_device(device) is False:
+            return {'message': 'Dispositivo não encontrado'}, 400
+
+        if self.device_db_model.delete_device(device) is False:
+            return {'message': 'dispositivo não deletado'}, 400
+        
+        return {'message' : 'Dispositivo deletado!'}
+        
