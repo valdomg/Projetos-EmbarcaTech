@@ -29,5 +29,10 @@ class UserDBModel():
     '''
     def insert_user(self, user_data:dict):
         return self.db.insert_document_collection("users", user_data)
-    
 
+    '''
+    Deletar um usuários do banco de dados
+    '''
+    def delete_user(self, user_id:str):
+        return self.db.delete_document('users', '_id', user_id)
+    
