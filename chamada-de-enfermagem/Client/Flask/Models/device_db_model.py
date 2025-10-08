@@ -2,7 +2,7 @@ from Mqtt.application.models.MongoDBConnection import MongoDBConnection
 
 
 '''
-Classe para procurar e inserir novos dispositivos 
+Classe para crud com devices e inserir novos dispositivos 
 '''
 class DeviceDBModel():
 
@@ -14,6 +14,12 @@ class DeviceDBModel():
     
     def insert_device(self, device_data:dict):
         return self.db.insert_document_collection('devices', device_data)
+    
+    def update_device(self, label_to_match:str, value_to_match:str,label_to_update:str, new_value:str):
+        pass
+
+    def delete_device(self, label_to_match:str, value_to_match:str):
+        pass
     
     def return_all_devices(self):
         return self.db.list_documents('devices')
