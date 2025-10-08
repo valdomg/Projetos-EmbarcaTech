@@ -18,6 +18,7 @@ ROTAS
 
 /api/devices 
 /api/devices/quantidade
+/api/devices/register
 '''
 
 load_dotenv()
