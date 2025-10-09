@@ -223,6 +223,36 @@ class MongoDBConnection:
             print('Error in delete value')
             print(e)
             return False
+        
+    '''
+    Função para deletar um documento da database
+    '''
+    def delete_document_by_id(self, collection:str, document_id:str) -> bool:
+
+        try:
+            if self.client is not None:
+                
+                if self.check_if_document_exists_by_id(collection, document_id) == False:
+                    print('No values in DB')
+                    return False
+                
+                collection_delete = self.db[collection]
+                result = collection_delete.delete_one({'_id': ObjectId(document_id)})
+
+                if result == False:
+                    print(f'Error in delete value: {result}')
+                    return False
+                
+                print(f'Successfully in delete value: {result}')
+                return True
+            
+            else:
+                print('Client not connected')
+
+        except PyMongoError as e:
+            print('Error in delete value')
+            print(e)
+            return False
 
     '''
     Função para fechar a conexão com o banco de dados
