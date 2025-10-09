@@ -1,6 +1,7 @@
  
 from pymongo.mongo_client import MongoClient, PyMongoError, ConnectionFailure
 from pymongo.server_api import ServerApi
+from bson.objectid import ObjectId
 import os
 from datetime import datetime
 
@@ -85,6 +86,21 @@ class MongoDBConnection:
             
         return False
     
+    def return_document_by_id(self, collection:str, id:str):
+
+        try:
+            if self.client is not None:
+
+                collection_to_search = self.db[collection]
+
+                result = collection_to_search.find_one({'_id':ObjectId(id)})
+
+                return result
+            
+        except PyMongoError as e:
+            print('Error in check values...')
+            print(e)
+
     '''
     Retorna os dados com uma query de data
     '''
