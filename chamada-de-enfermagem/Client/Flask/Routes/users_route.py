@@ -112,7 +112,7 @@ json = {
 }
 APENAS PARA ADMINS
 '''
-@user_bp.route('/delete/<str:document_id>', methods=['GET', 'POST'])
+@user_bp.route('/delete/<string:document_id>', methods=['GET', 'POST'])
 def delete_user_by_id(document_id):
 
     mongo_conn.start_connection()
