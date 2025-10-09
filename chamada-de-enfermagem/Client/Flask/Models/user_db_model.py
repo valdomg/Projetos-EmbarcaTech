@@ -39,7 +39,7 @@ class UserDBModel():
     '''
     Deletar um usuários do banco de dados
     '''
-    def delete_user(self, document_id:str):
+    def delete_user_by_id(self, document_id:str):
         return self.db.delete_document_by_id('users', document_id)
     
     
