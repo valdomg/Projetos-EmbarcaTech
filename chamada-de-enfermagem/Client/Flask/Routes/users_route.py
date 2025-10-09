@@ -19,6 +19,7 @@ ROTAS
 /api/users 
 /api/users/register
 /api/users/delete
+/api/users/delete/<document_id>
 '''
 
 load_dotenv()
@@ -85,7 +86,7 @@ def register():
 Rota de remoção de usuário
 
 json = {
-    "username": "nome_do_usuário"
+    "document_id": "id_do_documento"
 }
 APENAS PARA ADMINS
 '''
@@ -95,9 +96,29 @@ def delete_user():
 
     mongo_conn.start_connection()
 
-    result = auth_service.delete(data['username'])
+    result = auth_service.delete(data['document_id'])
+
+    mongo_conn.close_connection()
 
     print(result)
 
     return jsonify(result)
 
+'''
+Rota de remoção de usuário por url
+
+json = {
+    "document_id": "id_do_documento"
+}
+APENAS PARA ADMINS
+'''
+@user_bp.route('/delete/<str:document_id>', methods=['GET', 'POST'])
+def delete_user_by_id(document_id):
+
+    mongo_conn.start_connection()
+
+    result = auth_service.delete(document_id)
+
+    print(result)
+
+    return jsonify(result)
