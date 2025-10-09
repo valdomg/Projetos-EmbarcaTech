@@ -70,6 +70,25 @@ class MongoDBConnection:
             
         return False
     
+        '''
+    Verifica a existência de algum dado no banco de dados
+    '''
+    def check_if_document_exists_by_id(self, collection:str, document_id:str):
+
+        try:
+            if self.client is not None:
+                collection_to_search = self.db[collection]
+
+                result = collection_to_search.find_one({'_id':ObjectId(document_id)})
+
+                if result is not None:
+                    return True                
+        except PyMongoError as e:
+            print('Error in check values...')
+            print(e)
+            
+        return False
+    
     def return_document(self,collection:str, label_to_search:str, value_to_match:str) -> dict:
          
         try:
