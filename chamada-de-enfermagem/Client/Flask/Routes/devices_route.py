@@ -20,6 +20,7 @@ ROTAS
 /api/devices/quantidade
 /api/devices/register
 /api/devices/delete
+/api/devices/delete/<document_id>
 '''
 
 load_dotenv()
@@ -94,10 +95,10 @@ def register_device():
     return jsonify(result)
 
 '''
-Rota para deletar um dispositivo com seu nome de dispositivo
+Rota para deletar um dispositivo com seu id de dispositivo
 
 json = {
-    "device": "nome_do_dispositivo"
+    "document_id": "id_do_dispositivo"
 }
 
 APENA PARA ADMINS
@@ -110,5 +111,23 @@ def delete_device():
     mongo_conn.start_connection()
 
     result = device_service.delete(data['device'])
+
+    mongo_conn.close_connection()
+
+    return jsonify(result)
+
+
+'''
+Rota para deletar um dispositivo com seu nome de dispositivo por url
+APENA PARA ADMINS
+'''
+@devices_bp.route('/delete/<str:document_id>', methods=['GET', 'POST'])
+def delete_device_by_id(document_id):
+
+    mongo_conn.start_connection()
+
+    result = device_service.delete(document_id)
+
+    mongo_conn.close_connection()
 
     return jsonify(result)
