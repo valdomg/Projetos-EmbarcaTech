@@ -70,7 +70,7 @@ class MongoDBConnection:
             
         return False
     
-    def return_document(self,collection:str, label_to_search:str, value_to_match:str):
+    def return_document(self,collection:str, label_to_search:str, value_to_match:str) -> dict:
          
         try:
             if self.client is not None:
@@ -139,17 +139,24 @@ class MongoDBConnection:
     '''
     Função para update de um valor de um label em uma collection
     '''
-    def update_document(self, collection:str, label_to_match:str, value_to_match:str, label_to_update:str, new_value:str) -> bool: 
+    def update_document_by_id(self, collection:str, document_id:str, label_to_update:str, new_value:str) -> bool: 
 
         try:
             if self.client is not None:
 
-                if self.check_if_document_exists(collection, label_to_match, value_to_match) == False:
+                document_to_update = self.return_document_by_id(collection, document_id)
+                
+                if document_to_update == None:
                     print('No values in DB')
                     return False
-
+                
+                
+                if document_to_update.get(label_to_update) == new_value:
+                    print('Same Value, update not complete')
+                    return False
+                
                 collection_search = self.db[collection]                
-                result = collection_search.update_one({label_to_match:value_to_match}, {
+                result = collection_search.update_one({'_id':ObjectId(document_id)}, {
                     '$set': {label_to_update: new_value}
                 } )
 
