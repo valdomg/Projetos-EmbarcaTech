@@ -107,9 +107,6 @@ def delete_user():
 '''
 Rota de remoção de usuário por url
 
-json = {
-    "document_id": "id_do_documento"
-}
 APENAS PARA ADMINS
 '''
 @user_bp.route('/delete/<string:document_id>', methods=['GET', 'POST'])
