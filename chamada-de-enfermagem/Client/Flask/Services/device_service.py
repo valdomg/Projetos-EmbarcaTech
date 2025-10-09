@@ -29,13 +29,14 @@ class AuthServiceDevice:
 
         return {'message': 'Device cadastrado com sucesso'}, 201
     
-    def delete(self, device:str):
+    def delete(self, document_id:str):
 
-        if self.device_db_model.find_by_device(device) is False:
+        if self.device_db_model.find_device_by_id(document_id) is False:
             return {'message': 'Dispositivo não encontrado'}, 400
 
-        if self.device_db_model.delete_device(device) is False:
+        if self.device_db_model.delete_device_by_id(document_id) is False:
             return {'message': 'dispositivo não deletado'}, 400
         
-        return {'message' : 'Dispositivo deletado!'}
+        return {'message' : 'Dispositivo deletado!'} , 201
+
         
