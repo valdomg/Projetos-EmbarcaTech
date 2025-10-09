@@ -89,6 +89,7 @@ pip install paho-mqtt
 pip install PyJWT
 pip install jwt
 pip install gunicorn
+pip install gunicorn[gevent]
 ```
 ### **4. No arquivo .env coloque as credenciais para conexão com seu Banco de dados e do broker**
 ```
