@@ -110,7 +110,7 @@ def delete_device():
 
     mongo_conn.start_connection()
 
-    result = device_service.delete(data['device'])
+    result = device_service.delete(data['document_id'])
 
     mongo_conn.close_connection()
 
@@ -121,7 +121,7 @@ def delete_device():
 Rota para deletar um dispositivo com seu nome de dispositivo por url
 APENA PARA ADMINS
 '''
-@devices_bp.route('/delete/<str:document_id>', methods=['GET', 'POST'])
+@devices_bp.route('/delete/<string:document_id>', methods=['GET', 'POST'])
 def delete_device_by_id(document_id):
 
     mongo_conn.start_connection()
