@@ -63,5 +63,19 @@ class AuthService:
         
         return {'message': 'usuário deletado com sucesso!'}, 201
     
+    '''
+    Função de editar usuário
+    '''
 
+    def update(self, document_id, document_with_updates:dict):
 
+        document_with_updates.pop('document_id')
+
+        if 'password' in document_with_updates:
+            hashed_pw = generate_password_hash(document_with_updates.get('password'))
+            document_with_updates['password'] = hashed_pw
+
+        if self.user_db_model.update_user_by_id(document_id, document_with_updates) is False:
+            return {'message': 'campos não atualizados'}, 400
+
+        return {'message': 'campos atualizados!'}, 201
