@@ -62,8 +62,7 @@ bool reconnectWifi() {
   // Se já está conectado, não faz nada
 
   if (WiFi.status() == WL_CONNECTED) return true;
-  WiFi.softAPdisconnect(true);
-  WiFi.mode(WIFI_STA);
+
   unsigned long now = millis();
 
   // Verifica se já passou o intervalo de reconexão
@@ -86,5 +85,6 @@ void createAccessPoint() {
     WiFi.disconnect();
     WiFi.mode(WIFI_AP);
     WiFi.softAP(SSID_ACCESS_POINT, PASSWORD_ACCESS_POINT);
+    Serial.println(WiFi.softAPIP());
   }
 }

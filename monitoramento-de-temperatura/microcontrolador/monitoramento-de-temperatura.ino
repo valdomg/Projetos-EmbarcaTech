@@ -8,6 +8,10 @@
 #include "log.h"
 #include "config.h"
 #include "storage.h"
+#include "server.h"
+#include <ESP8266WebServer.h>
+
+ESP8266WebServer server(80);
 
 constexpr unsigned long MQTT_INTERVAL_MS = 180 * 1000;  // 3 minutos
 constexpr unsigned long SENSOR_INTERVAL_MS = 1000;      // 1 segundo
@@ -141,7 +145,12 @@ void loop() {
 
   if (wasButtonLongPressed()) {
     createAccessPoint();
+    startServer(&server);
+    server_handle_loop(&server);
+
   } else {
+
+    stopServer(&server);
 
     if (reconnectWifi()) {
       
