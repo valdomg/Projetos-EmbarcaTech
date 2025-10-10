@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from Flask.Services.auth_service import AuthService
+from Flask.Services.user_service import UserService
 from Flask.Services.convert_objectdID import convert_all_id_to_string, convert_object_id_to_string
 from Flask.Models.user_db_model import UserDBModel
 from Flask.Models.user_model import User
@@ -29,7 +29,7 @@ database = os.getenv('MONGO_DATABASE')
 
 mongo_conn = MongoDBConnection(uri, database)
 user_db_model = UserDBModel(mongo_conn)
-auth_service = AuthService(user_db_model)
+user_service = UserService(user_db_model)
 
 user_bp = Blueprint('user', __name__, url_prefix='/api/users')
 
@@ -73,7 +73,7 @@ def register():
     if user.isValid() == False:
         return {'Error': 'Valores faltosos'}, 401
         
-    result = auth_service.register(user.getUsername(), user.getPassword(), user.getRole(), user.getCreateAt())
+    result = user_service.register(user.getUsername(), user.getPassword(), user.getRole(), user.getCreateAt())
     
     if result != None:
         return result
@@ -96,7 +96,7 @@ def delete_user():
 
     mongo_conn.start_connection()
 
-    result = auth_service.delete(data['document_id'])
+    result = user_service.delete(data['document_id'])
 
     mongo_conn.close_connection()
 
@@ -114,8 +114,30 @@ def delete_user_by_id(document_id):
 
     mongo_conn.start_connection()
 
-    result = auth_service.delete(document_id)
+    result = user_service.delete(document_id)
 
     print(result)
+
+    return jsonify(result)
+
+'''
+Rota de edição de usuários
+
+O json pode ser qualquer um dos campos de usuários [username, password, role] 
+mas com obrigatóriedade de ter seu ID
+json = {
+    "document_id" = "id_do_usuario"
+
+}
+APENAS PARA ADMINS
+'''
+@user_bp.route('/update', methods=['GET', 'POST'])
+def update_user_by():
+    data = request.get_data()
+
+    if 'document_id' in data == False:
+        return {'Error': 'Campos faltosos'}, 401
+    
+    result = user_service.update(data['document_id'], data)
 
     return jsonify(result)
