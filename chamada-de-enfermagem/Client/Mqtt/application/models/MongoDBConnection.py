@@ -156,43 +156,41 @@ class MongoDBConnection:
             print(e) 
 
     '''
-    Função para update de um valor de um label em uma collection
+    Funçao para atualizar um documento de acordo com seu ID
     '''
-    def update_document_by_id(self, collection:str, document_id:str, label_to_update:str, new_value:str) -> bool: 
-
+    def update_document_by_id(self,collection:str, document_id:str, document_with_updates:dict) -> bool:
+        
         try:
-            if self.client is not None:
-
-                document_to_update = self.return_document_by_id(collection, document_id)
-                
-                if document_to_update == None:
-                    print('No values in DB')
-                    return False
-                
-                
-                if document_to_update.get(label_to_update) == new_value:
-                    print('Same Value, update not complete')
-                    return False
-                
-                collection_search = self.db[collection]                
-                result = collection_search.update_one({'_id':ObjectId(document_id)}, {
-                    '$set': {label_to_update: new_value}
-                } )
-
-
-                if result == None:
-                    print(f'Error in update operation: {result}')
-                    return False
-                
-                print(f'Successfully update operation: {result}')
-                return True
-            
-            else:
+            if self.client is None:
                 print('Client not connected')
 
+            document_to_update = self.return_document_by_id(collection, document_id)
+
+            if document_to_update == None:
+                print('Not value in DB')
+                return False
+
+            if self.check_if_docs_is_equal(document_with_updates, document_to_update) == True:
+                print('Docs is the same, no update')
+                return False
+                
+            collection_update = self.db[collection]
+
+            result = collection_update.update_one(
+                {'_id': ObjectId(document_id)},
+                {'$set': document_with_updates}
+            )
+
+            if result == None:
+                return False
+            
+            return True
+            
         except PyMongoError as e:
-            print('Error on update document...')
+            print('Error in update values')
             print(e)
+        
+        pass
 
     '''
     Função para deletar um documento da database
@@ -253,6 +251,13 @@ class MongoDBConnection:
             print('Error in delete value')
             print(e)
             return False
+        
+
+    '''
+    Checa se dois documentos do mongodb são iguais
+    '''
+    def check_if_docs_is_equal(self, document_one:dict, document_two:dict) -> bool:
+        same_values = all(document_one[key] == document_two[key] for key in document_one if key in document_two)
 
     '''
     Função para fechar a conexão com o banco de dados
