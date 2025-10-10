@@ -42,4 +42,10 @@ class UserDBModel():
     def delete_user_by_id(self, document_id:str):
         return self.db.delete_document_by_id('users', document_id)
     
+    '''
+    Editar campos de um usuário
+    '''
+    def update_user_by_id(self, document_id:str, document_with_updates:dict):
+        return self.db.update_document_by_id('users', document_id, document_with_updates)
+    
     
