@@ -8,6 +8,7 @@ from Flask.auth import token_required
 from Mqtt.application.models.MongoDBConnection import MongoDBConnection
 from dotenv import load_dotenv
 import os
+import json
 
 '''
 Arquivo para rotas do client com users
@@ -133,9 +134,10 @@ APENAS PARA ADMINS
 '''
 @user_bp.route('/update', methods=['GET', 'POST'])
 def update_user_by():
-    data = request.get_data()
+    
+    data = json.loads(request.get_data())
 
-    if 'document_id' in data == False:
+    if not 'document_id' in data:
         return {'Error': 'Campos faltosos'}, 401
     
     result = user_service.update(data['document_id'], data)
