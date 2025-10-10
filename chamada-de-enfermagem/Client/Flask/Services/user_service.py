@@ -6,7 +6,7 @@ from datetime import datetime
 Classe de utilitário de autenticação
 '''
 
-class AuthService:
+class UserService:
     '''
     Utiliza um user_model para realizar as operações de registro e login
     '''
