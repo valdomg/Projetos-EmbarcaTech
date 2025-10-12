@@ -92,7 +92,7 @@ def on_message(client, userdata, message, properties=None):
                         'dispositivo_id': dispositivo_id,
                         'Local': local_emergencia,
                         'Enfermaria': room_number,
-                        'Data': datetime.now()
+                        'Data': datetime.now(tz=datetime.timetz)
                     }
 
                     mongo.insert_document_collection('chamadas', document)
