@@ -123,12 +123,17 @@ class MongoDBConnection:
     '''
     Retorna os dados com uma query de data
     '''
-    def list_documents_by_date(self, collection:str, field_data:str, end_date:str):
+    def list_documents_by_date(self, collection:str, label_data:str,start_date:datetime, end_date:datetime):
         try:
             if self.client is not None:
                 collection = self.db[collection]
-                return list(collection.find({
-                                field_data:{'$lt': end_date}}))
+                return list (collection.find({
+                        label_data:{
+                            '$gte': start_date,
+                            '$lte': end_date
+                        }
+                    })
+                )
             else:
                 print('Client not connected')
         except PyMongoError as e:
