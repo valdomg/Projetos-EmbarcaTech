@@ -41,7 +41,7 @@ class MongoDBConnection:
     '''
     Lista os documentos na coleção
     '''
-    def list_documents(self, collection:str):
+    def list_all_documents_from_collection(self, collection:str):
         try:
             if self.client is not None:
                 collection = self.db[collection]
