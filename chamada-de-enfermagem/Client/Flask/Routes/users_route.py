@@ -44,7 +44,7 @@ def return_all_users():
 
     mongo_conn.start_connection()
 
-    users = mongo_conn.list_documents('users')
+    users = mongo_conn.list_all_documents_from_collection('users')
 
     if users:
         json_users = convert_all_id_to_string(users)
