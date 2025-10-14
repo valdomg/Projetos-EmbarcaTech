@@ -74,7 +74,8 @@ def return_chamadas_day_count():
 
     mongo_conn.start_connection()
 
-    count_chamadas = chamadas_db_model.return_chamadas_by_day()
+    count_chamadas = chamadas_db_model.return_number_of_chamadas_by_day()
+
     if count_chamadas:
         return {'Quantidade': count_chamadas}, 201
     
