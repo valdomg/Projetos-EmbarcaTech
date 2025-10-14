@@ -19,10 +19,10 @@ def on_connect(client, userdata, flags, rc, properties=None):
 
     client.subscribe(topic)
 
-def on_disconnect(client, userdata, rc):
+def on_disconnect(client, userdata, flags, rc, properties=None):
     if rc != 0:
         print('Desconexão inesperada, tentando novamente...', rc)
-
+        
     print('Tentando novamente...')
     try:
         client.reconnect()
@@ -53,55 +53,49 @@ def on_disconnect(client, userdata, rc):
 
 def on_message(client, userdata, message, properties=None):
     payload = json.loads(message.payload.decode())
-    print(f'Mensagem recebida no tópico {message.topic}: \n{payload}')
+    print(f'Mensagem recebida!')
 
     # Quebra o tópico em partes
-    # ['dispositivos', 'enfermagem/posto', 'id_dispositivo']
     partes = message.topic.split('/')
-    print(f'cabeçalho: {partes[0]}; local: {partes[1]}; id dispositivo: {partes[2]}')
-    
     _, local_topic, dispositivo_id = partes
 
     if mongo.start_connection() == False:
         mongo.close_connection()
+        return 
         
-    else:
-        if mongo.check_if_document_exists('devices','device', dispositivo_id) != True:
-            print('Dispositivo não encontrado')
-            mongo.close_connection() 
+    if mongo.check_if_document_exists('devices','device', dispositivo_id) != True:
+        print('Dispositivo não encontrado na base de dados...')
+        mongo.close_connection() 
+        return 
         
-        else:
-            print('Dispositivo logado!')
-                
-            comando = payload.get('comando')
-            mensagem = payload.get('mensagem')
-            estado = payload.get('estado')
-            local_emergencia = payload.get('local')
-            room_number = payload.get('room_number')
+    print('Dispositivo logado!')
+        
+    comando = payload.get('comando')
+    local_emergencia = payload.get('local')
+    room_number = payload.get('room_number')
 
-            print(comando)
-            if local_topic == 'posto_enfermagem':
-                print(f'Mensagem recebida do dispositivo: {dispositivo_id} da {local_emergencia}: {room_number}, com comando de: {comando}')
 
-                if comando == 'ligar':
-                    '''
-                    Laço condicional para registrar chamada no banco de dados
-                    '''
+    if local_topic == 'posto_enfermagem' and comando == 'ligar':
 
-                    document= {
-                        'dispositivo_id': dispositivo_id,
-                        'Local': local_emergencia,
-                        'Enfermaria': room_number,
-                        'Data': datetime.now()
-                    }
+        '''
+        Laço condicional para registrar chamada no banco de dados
+        '''
+        document= {
+            'dispositivo_id': dispositivo_id,
+            'Local': local_emergencia,
+            'Enfermaria': room_number,
+            'Data': datetime.now()
+        }
 
-                    mongo.insert_document_collection('chamadas', document)
+        result = mongo.insert_document_collection('chamadas', document)
+            
+        print(result)
 
-            if local_topic == 'enfermagem':
-                print(f'Mensagem enviada para: {dispositivo_id} para a {local_emergencia}: {room_number}, com o comando de: {comando}')
-
-        mongo.close_connection()
-        print()
+    if local_topic == 'enfermagem':
+        print(f'Mensagem do tópico: {local_topic}')
+    
+    mongo.close_connection()
+    print()
 
 '''
 Callback para conferir se a inscrição em algum tópico foi bem sucedida
