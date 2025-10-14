@@ -9,18 +9,13 @@
 #include "config.h"
 #include "storage.h"
 #include "server.h"
+#include "config_storage.h"
 #include <ESP8266WebServer.h>
 
 ESP8266WebServer server(80);
 
 constexpr unsigned long MQTT_INTERVAL_MS = 180 * 1000;  // 3 minutos
 constexpr unsigned long SENSOR_INTERVAL_MS = 1000;      // 1 segundo
-
-constexpr uint8_t TEMPERATURE_MAX = 23;
-constexpr uint8_t TEMPERATURE_MIN = 14;
-
-constexpr uint8_t HUMIDITY_MIN = 10;
-constexpr uint8_t HUMIDITY_MAX = 60;
 
 unsigned long lastMQTTPublishTime = 0;
 unsigned long lastSensorReadTime = 0;
@@ -41,12 +36,12 @@ checkErrors(const EnvironmentData& data) {
     return status;
   }
 
-  if (data.temperature > TEMPERATURE_MAX || data.temperature < TEMPERATURE_MIN) {
+  if (data.temperature >  cfg.temperatureMax || data.temperature <  cfg.temperatureMin) {
     status.temperatureError = true;
     log(LOG_WARN, "Temperatura fora do intervalo estipulado");
   }
 
-  if (data.humidity > HUMIDITY_MAX || data.humidity < HUMIDITY_MIN) {
+  if (data.humidity >  cfg.humidityMax || data.humidity <  cfg.humidityMin) {
     status.humidityError = true;
     log(LOG_WARN, "Humidade fora do intervalo estipulado");
   }
@@ -133,6 +128,7 @@ void setup() {
   ledInit();
   log(LOG_DEBUG, "LED iniciado");
 
+  cfg = loadConfig();
 
   if (!connectWiFi()) {
     log(LOG_ERROR, "Erro na conexão com wifi");
@@ -142,8 +138,10 @@ void setup() {
 }
 
 void loop() {
-
-  if (wasButtonLongPressed()) {
+  
+  if (wasButtonLongPressed() || !cfg.valid) {
+    disableSoundAlert();
+    turnOnLed();
     createAccessPoint();
     startServer(&server);
     server_handle_loop(&server);
@@ -153,7 +151,7 @@ void loop() {
     stopServer(&server);
 
     if (reconnectWifi()) {
-      
+
       if (checkMQTTConnected()) {
         resendMqttData();
       }

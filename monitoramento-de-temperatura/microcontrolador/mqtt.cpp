@@ -4,6 +4,7 @@
 #include <WiFiClientSecure.h>
 #include <ArduinoJson.h>
 #include "storage.h"
+#include "config_storage.h"
 
 /**
  * @file mqtt.cpp
@@ -47,7 +48,7 @@ static const unsigned long resendIntervalMQTT = 3000;  // Intervalo (ms) entre o
  */
 void setupMQTT() {
   espClient.setInsecure();  // Não verifica certificado
-  client.setServer(MQTT_SERVER, 8883);
+  client.setServer(cfg.mqttServer.c_str(), 8883);
   log(LOG_DEBUG, "MQTT inicializado");
 }
 
@@ -69,8 +70,9 @@ bool checkMQTTConnected() {
 
     log(LOG_DEBUG, "Tentando conectar ao MQTT...");
     // Tenta conectar ao broker usando credenciais do config.h
-    if (client.connect(MQTT_DEVICE_ID, MQTT_USER, MQTT_PASS)) {
+    if (client.connect(cfg.mqttDeviceId.c_str(), cfg.mqttUser.c_str(), cfg.mqttPass.c_str())) {
       log(LOG_DEBUG, "Conectado ou Broker");
+      
       return true;
     } else {
       log(LOG_ERROR, "Erro ao conectar com Broker rc= %d", client.state());  // Mostra o código de erro da conexão
@@ -97,7 +99,7 @@ bool checkMQTTConnected() {
  */
 bool publishSensorData(float temperature, float humidity) {
   StaticJsonDocument<128> doc;
-  doc["Microcontrollerid"] = MQTT_DEVICE_ID;
+  doc["Microcontrollerid"] = cfg.mqttDeviceId.c_str();
   doc["temperature"] = temperature;
   doc["humidity"] = humidity;
 
@@ -105,7 +107,7 @@ bool publishSensorData(float temperature, float humidity) {
   char buffer[128];
   serializeJson(doc, buffer);
 
-  if (!client.publish(MQTT_TOPIC_PUBLICATION_DATA, buffer)) {
+  if (!client.publish(cfg.mqttTopicData.c_str(), buffer)) {
     log(LOG_WARN, "falha ou enviar dados ao broker");
     return false;
   }
@@ -142,10 +144,10 @@ void resendMqttData() {
  */
 void publishAlert(const char* alert) {
   StaticJsonDocument<96> doc;
-  doc["Microcontrollerid"] = MQTT_DEVICE_ID;
+  doc["Microcontrollerid"] = cfg.mqttDeviceId.c_str();
   doc["alert"] = alert;
 
   char buffer[96];
   serializeJson(doc, buffer);
-  client.publish(MQTT_TOPIC_PUBLICATION_ALERT, buffer);
+  client.publish(cfg.mqttTopicAlert.c_str(), buffer);
 }

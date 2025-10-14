@@ -1,12 +1,14 @@
 #include <ESP8266WiFi.h>
 #include "wifi.h"
 #include "log.h"
+#include "config.h"
+#include "config_storage.h"
 
 // -----------------------------------------------------------------------------
 // Credenciais da rede Wi-Fi
 // -----------------------------------------------------------------------------
-const char* WIFI_SSID = "xxxxxxxxxx";      ///< Nome da rede Wi-Fi (SSID)
-const char* WIFI_PASSWORD = "xxxxxxxx";    ///< Senha da rede Wi-Fi
+const char* WIFI_SSID = cfg.wifiSSID.c_str();   ///< Nome da rede Wi-Fi (SSID)
+const char* WIFI_PASSWORD = cfg.wifiPass.c_str();  ///< Senha da rede Wi-Fi
 
 // -----------------------------------------------------------------------------
 // Buffer e controle de tempo
@@ -30,7 +32,8 @@ static const unsigned long reconnectInterval = 1000 * 75;  // 1 minuto e 15 segu
  * @return false Falha ao conectar dentro do tempo limite.
  */
 bool connectWiFi() {
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+  WiFi.begin(cfg.wifiSSID.c_str(), cfg.wifiPass.c_str());
 
   unsigned long timeout = millis() + 5000;
   while (WiFi.status() != WL_CONNECTED && millis() < timeout) {
