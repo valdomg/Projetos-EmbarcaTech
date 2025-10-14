@@ -68,20 +68,30 @@ def return_documents_chamadas_day():
 
 '''
 Rota de api para contagem de chamadas diárias
+'''
 @chamadas_bp.route('/dia/contagem')
 def return_chamadas_day_count():
 
     mongo_conn.start_connection()
 
+    count_chamadas = chamadas_db_model.return_chamadas_by_day()
+    if count_chamadas:
+        return {'Quantidade': count_chamadas}, 201
+    
+    return {'Error': 'Docs não encontrados'}, 400
+
+'''
+Rota de api para contagem de todas as chamadas
+'''
+@chamadas_bp.route('/todas/contagem')
+def return_all_chamadas_count():
+    mongo_conn.start_connection()
+
+    count_all_chamadas = chamadas_db_model.return_count_all_chamadas()
+
     mongo_conn.close_connection()
 
-    if documents:
-        count_documents = len(documents)
-        return {'Quantidade': count_documents}
+    if count_all_chamadas:
+        return {'Quantidade': count_all_chamadas}, 201
     
-    return {'Erro': 'Docs não encontrados'}, 400
-'''
-
-'''
-
-'''
+    return {'Error': 'Docs não encontrados'}, 400
