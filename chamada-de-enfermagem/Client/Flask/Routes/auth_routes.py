@@ -28,41 +28,9 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 '''
 ROTAS
 
-/auth/register 
 /auth/login
 /auth/logout
 '''
-
-'''
-Rota de registro
-POST para verificar se o usuário existe e registrá-lo no banco de dados
-
-FORMATO DO JSON
-{
-    "username":"email@dominio.com",
-    "password":"",
-    "role":"admin/user"
-}
-
-retorna um json com mensagem de sucesso/falha na inserção
-'''
-
-@auth_bp.route('/register', methods=['POST'])
-def register():
-    data = request.get_json()
-    mongo_conn.start_connection()
-
-    user = User(data['username'], data['password'], data['role'])
-
-    if user.isValid() == False:
-        return {'Error': 'Valores faltosos'}, 401
-        
-    result = user_service.register(user.getUsername(), user.getPassword(), user.getRole(), user.getCreateAt())
-    
-    mongo_conn.close_connection()
-
-    return jsonify(result)
-    
 
 '''
 Rota de login
