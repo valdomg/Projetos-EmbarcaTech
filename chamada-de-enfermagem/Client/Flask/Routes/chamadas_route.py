@@ -17,6 +17,7 @@ ROTAS
 /api/chamadas/ 
 /api/chamadas/dia
 /api/chamadas/dia/contagem
+/api/contagem
 '''
 
 load_dotenv()
@@ -45,6 +46,22 @@ def return_all_documents_chamadas():
         return jsonify(json_docs), 201
     
     return {'erro': 'Documentos não encontrados'}, 400
+
+'''
+Rota de api para contagem de todas as chamadas
+'''
+@chamadas_bp.route('/contagem')
+def return_all_chamadas_count():
+    mongo_conn.start_connection()
+
+    count_all_chamadas = chamadas_db_model.return_count_all_chamadas()
+
+    mongo_conn.close_connection()
+
+    if count_all_chamadas:
+        return {'Quantidade': count_all_chamadas}, 201
+    
+    return {'Error': 'Docs não encontrados'}, 400
 
 '''
 Rota de api para retorno das chamadas do dia
@@ -78,21 +95,5 @@ def return_chamadas_day_count():
 
     if count_chamadas:
         return {'Quantidade': count_chamadas}, 201
-    
-    return {'Error': 'Docs não encontrados'}, 400
-
-'''
-Rota de api para contagem de todas as chamadas
-'''
-@chamadas_bp.route('/todas/contagem')
-def return_all_chamadas_count():
-    mongo_conn.start_connection()
-
-    count_all_chamadas = chamadas_db_model.return_count_all_chamadas()
-
-    mongo_conn.close_connection()
-
-    if count_all_chamadas:
-        return {'Quantidade': count_all_chamadas}, 201
     
     return {'Error': 'Docs não encontrados'}, 400
