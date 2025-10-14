@@ -51,6 +51,43 @@ class MongoDBConnection:
         except PyMongoError as e:
             print('Error in list documents...')
             print(e)
+
+    '''
+    Retorna um valor com a quantidade de documentos na Database
+    '''
+    def count_all_documents_on_collection(self, collection:str):
+        
+        try:
+            if self.client is not None:
+                collection = self.db[collection]
+
+                return collection.count_documents({})
+            
+            else:
+                print('Client is not connected')
+
+        except PyMongoError as e:
+            print('Error in count documents')
+            print(e)
+
+    '''
+    Retorna um valor com a quantidade de documentos em algum período
+    '''
+    def count_documents_by_day(self, collection:str, label_data:str, start_date:datetime, end_date:datetime):
+        try:
+            if self.client is not None:
+                collection = self.db[collection]
+                return collection.count_documents({
+                        label_data:{
+                            '$gte': start_date,
+                            '$lte': end_date
+                        }
+                    })
+            else:
+                print('Client not connected')
+        except PyMongoError as e:
+            print('Error in list documents...')
+            print(e)        
     '''
     Verifica a existência de algum dado no banco de dados
     '''
