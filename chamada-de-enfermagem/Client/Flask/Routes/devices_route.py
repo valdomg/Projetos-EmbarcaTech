@@ -59,12 +59,11 @@ Rota que retorna a quantidade com todos os dispositivos cadastrados
 def return_count_devices():
     mongo_conn.start_connection()
 
-    devices = device_db_model.return_all_devices()
+    count_devices = device_db_model.return_count_all_devices()
 
     mongo_conn.close_connection()
-    if devices:
-        count_devices = len(devices)
 
+    if count_devices:
         return {'Quantidade': count_devices}, 201
     
     return {'Error': 'Devices não encontrados'}, 400
