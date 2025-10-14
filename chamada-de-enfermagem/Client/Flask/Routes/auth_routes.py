@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, render_template, redirect, make_response, url_for
 import jwt
 from datetime import datetime, timedelta, timezone
-from Flask.Services.auth_service import AuthService
+from Flask.Services.user_service import UserService
 from Flask.Models.user_db_model import UserDBModel
 from Flask.Models.user_model import User
 from Flask.auth import SECRET_KEY
@@ -21,7 +21,7 @@ database = os.getenv('MONGO_DATABASE')
 
 mongo_conn = MongoDBConnection(uri, database)
 user_db_model = UserDBModel(mongo_conn)
-auth_service = AuthService(user_db_model)
+user_service = UserService(user_db_model)
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -56,7 +56,7 @@ def register():
     if user.isValid() == False:
         return {'Error': 'Valores faltosos'}, 401
         
-    result = auth_service.register(user.getUsername(), user.getPassword(), user.getRole(), user.getCreateAt())
+    result = user_service.register(user.getUsername(), user.getPassword(), user.getRole(), user.getCreateAt())
     
     mongo_conn.close_connection()
 
@@ -77,7 +77,7 @@ def login():
         password = request.form.get('password')
 
         mongo_conn.start_connection()
-        user = auth_service.login(username, password)
+        user = user_service.login(username, password)
         mongo_conn.close_connection()
         
         print(datetime.now() + timedelta(hours=3))
