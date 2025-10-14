@@ -30,6 +30,7 @@ ROTAS
 
 /auth/register 
 /auth/login
+/auth/logout
 '''
 
 '''
@@ -100,3 +101,17 @@ def login():
         return render_template('login.html', error='Credenciais Inválidas')
 
     return render_template('login.html')
+
+'''
+Função para deslogar usuário
+
+retorna a página de login
+'''
+@auth_bp.route('/logout', methods=['GET'])
+def logout():
+
+    resp = make_response(redirect(url_for('auth.login')))
+    
+    resp.set_cookie('jwt', '', expires=0, httponly=True)
+
+    return resp
