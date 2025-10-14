@@ -24,5 +24,8 @@ class DeviceDBModel():
     def delete_device_by_id(self, document_id:str):
         return self.db.delete_document_by_id('devices', document_id)
     
+    def return_count_all_devices(self):
+        return self.db.count_all_documents_on_collection('devices')
+
     def return_all_devices(self):
-        return self.db.list_documents('devices')
+        return self.db.list_all_documents_from_collection('devices')
