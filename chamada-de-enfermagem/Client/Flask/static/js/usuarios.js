@@ -48,12 +48,12 @@ async function carregarUsuarios() {
     linha.classList.add('linha');
 
     linha.innerHTML += `
-      <div class="celula">0</div>
+      <div class="celula">${usuario._id}</div>
       <div class="celula">${usuario.username}</div>
       <div class="celula">${usuario.role}</div>
       <div class="celula">
-        <button class="btn-excluir" data-id="${usuario._id.$oid}">Excluir</button>
-        <button class="btn-editar" data-id="${usuario._id.$oid}">Alterar</button>
+        <button class="btn-excluir" data-id="${usuario._id}">Excluir</button>
+        <button class="btn-editar" data-id="${usuario._id}">Alterar</button>
       </div>
     `
 
@@ -63,7 +63,7 @@ async function carregarUsuarios() {
   document.querySelectorAll('.btn-excluir').forEach(btn => {
     btn.addEventListener('click', async function() {
       const id = this.getAttribute('data-id');
-      const resposta = await fetch(`/usuarios/excluir/${id}`, { method: 'DELETE' });
+      const resposta = await fetch(`/api/users/delete/${id}`, { method: 'DELETE' });
       if (resposta.ok) {
         alert(`Usuário ${id} excluído`);
         location.reload(); 
