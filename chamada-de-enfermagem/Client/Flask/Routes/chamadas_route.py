@@ -50,7 +50,7 @@ def return_all_documents_chamadas():
 '''
 Rota de api para contagem de todas as chamadas
 '''
-@chamadas_bp.route('/contagem')
+@chamadas_bp.route('/contagem', methods=['GET'])
 def return_all_chamadas_count():
     mongo_conn.start_connection()
 
@@ -66,7 +66,7 @@ def return_all_chamadas_count():
 '''
 Rota de api para retorno das chamadas do dia
 '''
-@chamadas_bp.route('/dia', methods=['GET','POST'])
+@chamadas_bp.route('/dia', methods=['GET'])
 def return_documents_chamadas_day():
 
     mongo_conn.start_connection()
@@ -86,7 +86,7 @@ def return_documents_chamadas_day():
 '''
 Rota de api para contagem de chamadas diárias
 '''
-@chamadas_bp.route('/dia/contagem')
+@chamadas_bp.route('/dia/contagem', methods=['GET'])
 def return_chamadas_day_count():
 
     mongo_conn.start_connection()

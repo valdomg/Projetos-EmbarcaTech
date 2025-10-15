@@ -76,7 +76,7 @@ json = {
 
 APENAS PARA ADMINS
 '''
-@devices_bp.route('/register', methods=['GET', 'POST'])
+@devices_bp.route('/register', methods=['POST'])
 def register_device():
     data = request.get_json()
 
@@ -102,7 +102,7 @@ json = {
 
 APENA PARA ADMINS
 '''
-@devices_bp.route('/delete', methods=['GET', 'POST'])
+@devices_bp.route('/delete', methods=['DELETE'])
 def delete_device():
 
     data = request.get_json()
@@ -120,7 +120,7 @@ def delete_device():
 Rota para deletar um dispositivo com seu nome de dispositivo por url
 APENA PARA ADMINS
 '''
-@devices_bp.route('/delete/<string:document_id>', methods=['GET', 'POST'])
+@devices_bp.route('/delete/<string:document_id>', methods=['DELETE'])
 def delete_device_by_id(document_id):
 
     mongo_conn.start_connection()

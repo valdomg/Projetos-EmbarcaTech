@@ -91,7 +91,7 @@ json = {
 }
 APENAS PARA ADMINS
 '''
-@user_bp.route('/delete', methods=['POST'])
+@user_bp.route('/delete', methods=['DELETE'])
 def delete_user():
     data = request.get_json()
 
@@ -110,7 +110,7 @@ Rota de remoção de usuário por url
 
 APENAS PARA ADMINS
 '''
-@user_bp.route('/delete/<string:document_id>', methods=['GET', 'POST'])
+@user_bp.route('/delete/<string:document_id>', methods=['DELETE'])
 def delete_user_by_id(document_id):
 
     mongo_conn.start_connection()
@@ -132,7 +132,7 @@ json = {
 }
 APENAS PARA ADMINS
 '''
-@user_bp.route('/update', methods=['GET', 'POST'])
+@user_bp.route('/update', methods=['PUT'])
 def update_user_by():
     
 

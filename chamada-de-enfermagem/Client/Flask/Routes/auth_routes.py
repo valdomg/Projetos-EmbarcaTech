@@ -75,7 +75,7 @@ Função para deslogar usuário
 
 retorna a página de login
 '''
-@auth_bp.route('/logout', methods=['GET'])
+@auth_bp.route('/logout')
 def logout():
 
     resp = make_response(redirect(url_for('auth.login')))
