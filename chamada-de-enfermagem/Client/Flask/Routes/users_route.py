@@ -135,11 +135,14 @@ APENAS PARA ADMINS
 @user_bp.route('/update', methods=['GET', 'POST'])
 def update_user_by():
     
+
     data = json.loads(request.get_data())
 
     if not 'document_id' in data:
         return {'Error': 'Campos faltosos'}, 401
     
+    mongo_conn.start_connection()
     result = user_service.update(data['document_id'], data)
+    mongo_conn.close_connection()
 
     return jsonify(result)
