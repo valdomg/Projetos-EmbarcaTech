@@ -20,7 +20,7 @@ class UserService:
     retorna um json com o status da inserção
     '''
     def register(self, username:str, password:str, role:str, createdAt: datetime):
-        if self.user_db_model.find_by_username(username):
+        if self.user_db_model.check_user_exists_by_username(username):
             return {'error': 'Usuário já existente'}, 400
         
         hashed_pw = generate_password_hash(password)
@@ -43,7 +43,7 @@ class UserService:
     retorna um json com o status da operação
     '''
     def login(self, username:str, password:str):
-        user = self.user_db_model.find_by_username(username)
+        user = self.user_db_model.return_user_by_username(username)
 
         if not user or not check_password_hash(user['password'], password):
             return None
@@ -55,7 +55,7 @@ class UserService:
     '''
     def delete(self, document_id:str):
 
-        if self.user_db_model.find_user_by_id(document_id) is False:
+        if self.user_db_model.check_if_user_exists_by_id(document_id) is False:
             return {'message': 'usuário não existente'}, 400
         
         if self.user_db_model.delete_user_by_id(document_id) is False:
@@ -71,10 +71,20 @@ class UserService:
 
         document_with_updates.pop('document_id')
 
+        if 'username' in document_with_updates:
+            if self.user_db_model.check_user_exists_by_username(document_with_updates['username']):
+                return {'message': 'nome de usuário em uso'}, 400
+            
         if 'password' in document_with_updates:
-            hashed_pw = generate_password_hash(document_with_updates.get('password'))
-            document_with_updates['password'] = hashed_pw
 
+            password = document_with_updates.get('password')
+            print(password)
+            if not password or password.split() == '' or ' ' in password:
+                return {'message':'Senha não preenchida ou com espaços'}, 400
+            
+            hashed_pw = generate_password_hash(password)
+            document_with_updates['password'] = hashed_pw   
+            
         if self.user_db_model.update_user_by_id(document_id, document_with_updates) is False:
             return {'message': 'campos não atualizados'}, 400
 
