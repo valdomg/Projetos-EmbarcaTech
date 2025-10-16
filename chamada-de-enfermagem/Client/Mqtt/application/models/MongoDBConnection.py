@@ -7,11 +7,9 @@ from datetime import datetime
 
 
 class MongoDBConnection:
-
     '''
     Classe para conexão com banco de dados MongoDB
     '''
-
     def __init__(self, uri:str, database_name:str):
         self.uri = uri
         self.database_name = database_name
@@ -38,7 +36,7 @@ class MongoDBConnection:
         else:
             print('Database não definida')
             return False
-
+    
     def list_all_documents_from_collection(self, collection:str):
         '''
         Lista os documentos na coleção
@@ -52,7 +50,44 @@ class MongoDBConnection:
         except PyMongoError as e:
             print('Error in list documents...')
             print(e)
-    
+
+    def count_all_documents_on_collection(self, collection:str):
+        '''
+        Retorna um valor com a quantidade de documentos na Database
+        '''
+        
+        try:
+            if self.client is not None:
+                collection = self.db[collection]
+
+                return collection.count_documents({})
+            
+            else:
+                print('Client is not connected')
+
+        except PyMongoError as e:
+            print('Error in count documents')
+            print(e)
+
+    def count_documents_by_date(self, collection:str, label_data:str, start_date:datetime, end_date:datetime):
+        '''
+        Retorna um valor com a quantidade de documentos em algum período
+        '''
+        try:
+            if self.client is not None:
+                collection = self.db[collection]
+                return collection.count_documents({
+                        label_data:{
+                            '$gte': start_date,
+                            '$lte': end_date
+                        }
+                    })
+            else:
+                print('Client not connected')
+        except PyMongoError as e:
+            print('Error in list documents...')
+            print(e)        
+   
     def check_if_document_exists(self, collection:str, label:str, value:str):
         '''
         Verifica a existência de algum dado no banco de dados
@@ -94,9 +129,8 @@ class MongoDBConnection:
         return False
     def return_document(self,collection:str, label_to_search:str, value_to_match:str) -> dict:
         '''
-        Retorna um documento por qualquer label da collection
+        Retorna um documento de acordo com seu label
         '''
-         
         try:
             if self.client is not None:
                 collection_to_search = self.db[collection]
@@ -116,7 +150,7 @@ class MongoDBConnection:
     
     def return_document_by_id(self, collection:str, id:str):
         '''
-        Retorna os dados de um documento de uma collection por um ID
+        Retorna um documento de acordo com seu ID
         '''
         try:
             if self.client is not None:
@@ -133,7 +167,7 @@ class MongoDBConnection:
 
     def list_documents_by_date(self, collection:str, label_data:str,start_date:datetime, end_date:datetime):
         '''
-        Retorna os dados com uma query de data
+        Retorna uma lista com documentos com uma query de data
         '''
         try:
             if self.client is not None:
@@ -175,7 +209,6 @@ class MongoDBConnection:
         '''
         Funçao para atualizar um documento de acordo com seu ID
         '''
-        
         try:
             if self.client is None:
                 print('Client not connected')
@@ -210,9 +243,8 @@ class MongoDBConnection:
 
     def delete_document(self, collection:str, label_to_match:str, value_to_match:str) -> bool:
         '''
-        Função para deletar um documento da database
+        Função para deletar um documento da database de acordo com um label e seu valor
         '''
-
         try:
             if self.client is not None:
                 
@@ -240,7 +272,7 @@ class MongoDBConnection:
         
     def delete_document_by_id(self, collection:str, document_id:str) -> bool:
         '''
-        Função para deletar um documento da database
+        Função para deletar um documento da database de acordo com seu id
         '''
         try:
             if self.client is not None:
@@ -267,15 +299,12 @@ class MongoDBConnection:
             print(e)
             return False
         
-
     def check_if_docs_is_equal(self, document_one:dict, document_two:dict) -> bool:
         '''
         Checa se dois documentos do mongodb são iguais
         '''
         same_values = all(document_one[key] == document_two[key] for key in document_one if key in document_two)
 
-        return same_values
-    
     def close_connection(self):
         '''
         Função para fechar a conexão com o banco de dados

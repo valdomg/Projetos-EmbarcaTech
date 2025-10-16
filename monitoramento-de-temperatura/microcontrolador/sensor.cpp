@@ -1,6 +1,7 @@
 #include <Wire.h>
 #include "sensor.h"
 #include "log.h"
+#include "config.h"
 
 Adafruit_AHTX0 aht;  ///< Objeto global do sensor AHT10 (via biblioteca Adafruit)
 
@@ -15,7 +16,7 @@ Adafruit_AHTX0 aht;  ///< Objeto global do sensor AHT10 (via biblioteca Adafruit
  * @note Em versões futuras, os pinos podem ser passados como parâmetros em vez de fixos.
  */
 void initializeSensor() {
-  Wire.begin(4, 5);  // Define os pinos SDA e SCL do barramento I²C
+  Wire.begin(PIN_SENSOR_SDA, PIN_SENSOR_SCL);  // Define os pinos SDA e SCL do barramento I²C
 
   if (!aht.begin()) {
     log(LOG_ERROR, "Sensor AHT10 não inicializado");
