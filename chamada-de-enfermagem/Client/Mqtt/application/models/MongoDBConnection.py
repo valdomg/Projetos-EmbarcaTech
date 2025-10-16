@@ -99,10 +99,10 @@ class MongoDBConnection:
 
                 result = collection_to_search.find_one({label:value})
 
-                if result is not None:
-                    return True  
+                if result is None:
+                    return False  
                 
-                return False              
+                return True              
         except PyMongoError as e:
             print('Error in check values...')
             print(e)
@@ -120,8 +120,11 @@ class MongoDBConnection:
 
                 result = collection_to_search.find_one({'_id':ObjectId(document_id)})
 
-                if result is not None:
-                    return True                
+                if result is None:
+                    return False
+
+                return True
+                            
         except PyMongoError as e:
             print('Error in check values...')
             print(e)
@@ -138,7 +141,7 @@ class MongoDBConnection:
 
                 result = collection_to_search.find_one({label_to_search:value_to_match})
 
-                if result == None:
+                if result is None:
                     return False
 
                 return result
@@ -216,7 +219,7 @@ class MongoDBConnection:
 
             document_to_update = self.return_document_by_id(collection, document_id)
 
-            if document_to_update == None:
+            if document_to_update is None:
                 print('Not value in DB')
                 return False
 
@@ -231,7 +234,7 @@ class MongoDBConnection:
                 {'$set': document_with_updates}
             )
 
-            if result == None:
+            if result is None:
                 return False
             
             return True
@@ -256,7 +259,7 @@ class MongoDBConnection:
                 collection_delete = self.db[collection]
                 result = collection_delete.delete_one({label_to_match: value_to_match})
 
-                if result == False:
+                if result is False:
                     print(f'Error in delete value: {result}')
                     return False
                 
@@ -285,7 +288,7 @@ class MongoDBConnection:
                 collection_delete = self.db[collection]
                 result = collection_delete.delete_one({'_id': ObjectId(document_id)})
 
-                if result == False:
+                if result is False:
                     print(f'Error in delete value: {result}')
                     return False
                 
@@ -305,6 +308,8 @@ class MongoDBConnection:
         Checa se dois documentos do mongodb são iguais
         '''
         same_values = all(document_one[key] == document_two[key] for key in document_one if key in document_two)
+
+        return same_values
 
     def close_connection(self):
         '''
