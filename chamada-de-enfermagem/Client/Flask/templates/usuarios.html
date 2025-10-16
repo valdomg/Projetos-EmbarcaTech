@@ -7,6 +7,7 @@
 
   <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tabela.css') }}">
 
   <title>Chamada de enfermagem</title>
 </head>
@@ -30,7 +31,7 @@
       <!-- Sidebar -->
       <nav class="col-md-1 col-lg-1 d-md-block bg-light sidebar vh-100 ">
         <div class="d-flex flex-column align-items-center">
-          <ul class="nav nav-pills flex-column mb-auto text-center ">
+          <ul class="nav nav-pills flex-column mb-auto text-center w-100">
             <li>
               <a href="/relatorio" class="nav-link py-2 px-2">
                 <img src="static/img/icons/home.png" alt="" class="icon-side">
@@ -60,57 +61,53 @@
         </div>
       </nav>
 
-      <!-- Conteúdo -->
-      <main class="col">
-        <div class="row box-container dados-rapidos">
-          <div class="col borda-conteiner m-3">
-            <p>Enfermarias:</p>
-            <h1>5</h1>
-          </div>
-          <div class="col borda-conteiner m-3">
-            <p>Total de chamadas:</p>
-            <h1>65</h1>
-          </div>
-        </div>
-
-        <div class="row box-container">
-          <div class="col borda-conteiner m-3">
-            <div class="row m-3">
-              <h3 class="float-end">Gráficos:</h3>
-              <select id="tipo-grafico" class="form-select" style="width:250px">
-                <option value="hora" selected>Chamadas por hora</option>
-                <option value="mes">Chamadas no mês</option>
-              </select>
-              <canvas id="grafico-chamadas" style="width: 50vw"></canvas>
+      <!-- Conteudo -->
+       <div class="col">
+            <div class="usuarios-tabela">
+                <div id="planilha" class="borda-conteiner">
+                  <div class="linha">
+                    <div class="celula cabecalho">Id</div>
+                    <div class="celula cabecalho">Nome</div>
+                    <div class="celula cabecalho">Funcao</div>
+                    <div class="celula cabecalho">Ações</div>
+                  </div>
+                    <div id="userTable">
+                      
+                    </div>
+                </div>
             </div>
-          </div>
 
-          <div class="col borda-conteiner m-3">
-            <div class="row w-75 mx-auto">
-              <h3>Chamadas recentes:</h3>
-              <div id="chamadas-lista">
-                <!-- Lista para visualizacao -->
+            <div class="formularioAddUser">
+              <button id="abrir">Novo usuário</button>
+
+              <div id="formulario">
+                <h3>Cadastrar Usuário</h3>
+                <form id="formUser">
+                  <label>Nome:</label>
+                  <input type="text" name="username" required><br><br>
+
+                  
+                  
+                  <label>Senha:</label>
+                  <input type="text" name="password" required><br><br>
+                  
+                  <label for="funcao">Função:</label>
+                  <select id="funcao" name="role">
+                    <option value="admin">Administrador</option>
+                    <option value="usuario">Usuário</option>
+                  </select>
+                  <button type="submit">Salvar</button>
+                  <button type="button" id="fechar">Cancelar</button>
+                </form>
+              </div>
               
-                
-              </div>
-              <div class="paginacao">
-                <a href="#" class="prev">«</a>
-                <a href="#" class="active">1</a>
-                <a href="#">2</a>
-                <a href="#" class="next">»</a>
-              </div>
             </div>
-          </div>
-        </div>
-      </main>
-    </div>
-  </div>
+       </div>
 
   <!-- Scripts -->
   <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.bundle.js') }}"></script>
   <script src="{{ url_for('static', filename='chart.js/Chart.bundle.min.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/chamadas.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/grafico.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/usuarios.js') }}"></script>
 </body>
 
 </html>

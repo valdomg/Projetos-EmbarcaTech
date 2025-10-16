@@ -1,45 +1,71 @@
 
-document.getElementById('emitirRelatorio').addEventListener('click',
-  async () => {
-    const dias = parseInt(document.getElementById('periodo').value);
+import { roomTempInterval, roomsSearch } from "./api.js";
 
-    const dataFim = new Date(); // agora
-    const dataInicio = new Date();
-    dataInicio.setDate(dataFim.getDate() - dias);
+//gerar opções do menu relario dinamicamente
+async function gerarOptions() {
 
-    const start = dataInicio.toISOString(); // formato UTC
-    const end = dataFim.toISOString();
+  try {
+      const dados = await roomsSearch();
+      
+      const select = document.getElementById('room-select');
+      dados.forEach(sala => {
+      select.innerHTML += `<option value="${sala._id}">${sala.name}</option>`;
+    });
+  }catch(erro){
+    console.error("Erro ao carregar opções do menu:", erro);
+  }
+}
 
-    const url = `https://api.thingspeak.com/channels/2922648/feeds.json?api_key=E29GDPTCKLB578Q8&start=${start}&end=${end}`;
+//so gera as opções do menu se houver o id no html
+if (document.getElementById('room-select')) {
+  gerarOptions();
+}
 
-    try {
-      const response = await fetch(url);
-      const data = await response.json();
 
-      const feeds = data.feeds;
 
-      if (!feeds.length) {
-        alert("Sem dados para este período.");
-        return;
-      }
+const emitir = document.getElementById('emitirRelatorio');
+// evento clique chamando a funcao gerar relatorio
+if (emitir){
+  emitir.addEventListener('click', async ()=>{
 
-      const csvHeader = 'Data;Temperatura;Umidade\n';
-      const csvRows = feeds.map(feed => {
-        const data = new Date(feed.created_at).toLocaleString();
-        const temp = feed.field3 || '';
-        const umid = feed.field2 || '';
-        return `${data};${temp};${umid}`;
-      });
+    gerarRelatorio();
+  })
+}
 
-      const csvContent = csvHeader + csvRows.join('\n');
-      downloadCSV(csvContent, `relatorio_${dias}dias.csv`);
 
-    } catch (error) {
-      console.error('Erro ao gerar relatório:', error);
-      alert("Erro ao gerar relatório.");
+export async function gerarRelatorio() {
+
+    // Converte os valores dos inputs em ISO
+  const idRoom = document.querySelector('select').value;
+  const start = new Date(document.getElementById('start').value).toISOString();
+  const end = new Date(document.getElementById('end').value).toISOString();
+
+  try {
+    const dados = await roomTempInterval(idRoom, start, end);
+    console.log(dados);
+
+    if (!dados.length) {
+      window.alert("Sem dados para o período");
+      return;
     }
-  });
-  
+
+    // Monta CSV
+    const csvHeader = 'Data;Temperatura;Umidade\n';
+    const csvRows = dados.map(salas => {
+      const data = new Date(salas.timestamp).toLocaleString("pt-BR");
+      const temp = salas.temperature || '';
+      const umid = salas.humidity || '';
+      return `${data};${temp};${umid}`;
+    });
+
+    const csvContent = csvHeader + csvRows.join('\n');
+    downloadCSV(csvContent, `relatorio_${start}_${Date.now()}.csv`);
+
+  } catch (erro){
+    window.alert(` ${erro.message}`);
+  }
+};
+
 
 //funcao para baixar arquivo csv
 function downloadCSV(content, filename) {
@@ -54,3 +80,9 @@ function downloadCSV(content, filename) {
     document.body.removeChild(link);
   }
 }
+
+//eventListener de logout
+document.getElementById("logoutBtn").addEventListener("click", async function () {
+  localStorage.removeItem("token");
+  window.location.href = "login.html";
+});

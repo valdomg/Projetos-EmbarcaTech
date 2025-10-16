@@ -1,45 +1,63 @@
 
-document.getElementById("loginForm").addEventListener("submit", async function(event) {
-    event.preventDefault(); // Impede o envio tradicional do formulário
+import { userLogin } from "./api.js";
 
-    const usuario = document.getElementById("usuario").value;
-    const senha = document.getElementById("senha").value;
 
-    // Prepara o corpo da requisição com as credenciais
-    const body = {
-        email: usuario,
-        password: senha
-    };
+//login 
+const form = document.getElementById("loginForm");
 
-    console.log(body);
+if (form) {
+    form.addEventListener('submit', async function (event) {
+        event.preventDefault(); // Impede o envio tradicional do formulário
 
-    try {
-        // Faz a requisição de login
-        const response = await fetch("http://localhost:3000/api/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(body),
-        });
+        const email = document.getElementById("email").value;
+        const senha = document.getElementById("senha").value;
 
-        const data = await response.json();
-        console.log(data);
-
-        if (response.ok) {
-            // Se o login for bem-sucedido, redireciona o usuário
-            // Aqui você pode guardar o token no localStorage ou sessionStorage
-            localStorage.setItem("token", data.token); // Exemplo de como salvar o token
-
-            // Redireciona para a página de dashboard ou home após login
-            window.location.href = "index.html"; // Substitua com sua URL de destino
-        } else {
-            // Se o login falhar, exibe a mensagem de erro
-            alert(data.message || "Erro no login.");
+        try {
+            const result = await userLogin(email, senha);
+            console.log("Usuário cadastrado:", result);
+        } catch (err) {
+            console.error("Erro:", err);
         }
-    } catch (error) {
-        console.error("Erro ao fazer login:", error);
-        alert("Erro ao tentar fazer login. Tente novamente.");
-        console.log(data.token);
+    });
+}
+
+
+//verificar acesso e permissoes
+export function checkAcess(permissao = null) {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    alert("Sessão expirada, faça login novamente.");
+    window.location.href = "login.html";
+    return false;
+  }
+
+  try {
+    const decoded = jwt_decode(token);
+    const now = Date.now() / 1000;
+    console.log("Token decodificado:", decoded);
+
+
+    if (permissao && decoded.role !== permissao) {
+      alert("Acesso negado! Apenas " + permissao + "s podem acessar esta página.");
+      window.location.href = "index.html";
+      return false;
     }
-});
+
+    if (decoded.exp && decoded.exp < now) {
+      alert("Sessão expirada, faça login novamente.");
+      localStorage.removeItem("token");
+      window.location.href = "login.html";
+      return false;
+    }
+
+    return true; // acesso liberado
+
+  } catch (e) {
+    console.error("Erro ao decodificar token:", e);
+    alert(`Erro: ${e}`);
+    localStorage.removeItem("token");
+    window.location.href = "login.html";
+    return false;
+  }
+}
