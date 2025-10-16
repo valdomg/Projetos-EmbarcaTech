@@ -85,7 +85,7 @@ def register_device():
     device = Device(data['device'])
 
     if device.isValid() == False:
-        return {'Error', 'Valores faltosos'}, 401
+        return {'Error': 'Valores faltosos'}, 400
     
     result = device_service.register(device.getDevice(), device.getCreatedAt())
 
@@ -130,3 +130,28 @@ def delete_device_by_id(document_id):
     mongo_conn.close_connection()
 
     return jsonify(result)
+
+'''
+Rota para atualizar um dispositivo
+
+json{
+    "document_id":"id_do_dispositivo"
+    "device": "novo_nome_device"
+}
+
+APENAS PARA ADMINS
+'''
+@devices_bp.route('/update', methods=['PUT'])
+def update_device_by_id():
+
+    data = request.get_json()
+
+    mongo_conn.start_connection()
+    try:
+        result = device_service.update(data['document_id'], data)
+    except Exception as e:
+        print('Error in update')
+        print(e)
+        result = {'message':'Error in update'}, 400
+
+    return result
