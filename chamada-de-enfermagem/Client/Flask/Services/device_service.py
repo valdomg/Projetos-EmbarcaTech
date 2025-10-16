@@ -5,7 +5,7 @@ from datetime import datetime
 Classe de utilitário de registro de devices
 '''
 
-class AuthServiceDevice:
+class DeviceService:
     '''
     Utiliza um DeviceDBModel para realizar as operações de registro
     '''
@@ -39,4 +39,17 @@ class AuthServiceDevice:
         
         return {'message' : 'Dispositivo deletado!'} , 201
 
+    def update(self, document_id:str, document_with_updates:dict):
+        document_with_updates.pop('document_id')
+
+        for key, value in document_with_updates.items():
+            if not value or value.split() == '' or ' ' in value:
+                return {'message': 'Valores faltosos ou com espaço, verifique as informações'}, 400
+            
+            if self.device_db_model.find_device_by_id(document_id):
+                return False
+            
+        if self.device_db_model.update_device(document_id, document_with_updates) is False:
+            return {'message': 'Device não alterado, verifique as informações'}, 400
         
+        return {'Message', 'Dispositivo atualizado!'}, 201

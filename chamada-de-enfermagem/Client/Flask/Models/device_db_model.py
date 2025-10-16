@@ -18,8 +18,9 @@ class DeviceDBModel():
     def insert_device(self, device_data:dict):
         return self.db.insert_document_collection('devices', device_data)
     
-    def update_device(self, label_to_match:str, value_to_match:str,label_to_update:str, new_value:str):
-        pass
+    def update_device(self, document_id:str, documents_with_updates:dict):   
+        return self.db.update_document_by_id('devices', document_id, documents_with_updates)
+
 
     def delete_device_by_id(self, document_id:str):
         return self.db.delete_document_by_id('devices', document_id)
