@@ -10,7 +10,7 @@ class DeviceDBModel():
         self.db = db
 
     def find_by_device(self, device:str):
-        return self.db.return_document('devices', 'device', device)
+        return self.db.check_if_document_exists('devices', 'device', device)
     
     def find_device_by_id(self, document_id:str) -> bool:
         return self.db.check_if_document_exists_by_id('devices', document_id)
