@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request
 from datetime import datetime
 from Flask.auth import token_required 
 from Mqtt.application.models.MongoDBConnection import MongoDBConnection
-from Flask.Services.device_service import AuthServiceDevice
+from Flask.Services.device_service import DeviceService
 from Flask.Services.convert_objectdID import convert_all_id_to_string, convert_object_id_to_string
 from Flask.Models.device_db_model import DeviceDBModel
 from Flask.Models.device_model import Device
@@ -30,7 +30,7 @@ database = os.getenv('MONGO_DATABASE')
 
 mongo_conn = MongoDBConnection(uri, database)
 device_db_model = DeviceDBModel(mongo_conn)
-device_service = AuthServiceDevice(device_db_model)
+device_service = DeviceService(device_db_model)
 
 devices_bp = Blueprint('devices', __name__, url_prefix='/api/devices')
 
