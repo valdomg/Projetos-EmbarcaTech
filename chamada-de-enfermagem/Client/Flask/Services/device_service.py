@@ -42,14 +42,15 @@ class DeviceService:
     def update(self, document_id:str, document_with_updates:dict):
         document_with_updates.pop('document_id')
 
-        for key, value in document_with_updates.items():
-            if not value or value.split() == '' or ' ' in value:
+        for key, name_device in document_with_updates.items():
+    
+            if not name_device or name_device.split() == '' or ' ' in name_device:
                 return {'message': 'Valores faltosos ou com espaço, verifique as informações'}, 400
             
-            if self.device_db_model.find_device_by_id(document_id):
+            if self.device_db_model.find_device_by_id(document_id) is False:
                 return {'message': 'Device não encontrado'}
             
-            if self.device_db_model.find_by_device(value) is True:
+            if self.device_db_model.find_by_device(name_device) is True:
                 return {'message': 'Nome de device em uso, valor não alterado!'}, 400
             
         if self.device_db_model.update_device(document_id, document_with_updates) is False:
