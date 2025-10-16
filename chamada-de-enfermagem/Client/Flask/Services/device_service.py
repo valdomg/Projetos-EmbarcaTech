@@ -47,9 +47,12 @@ class DeviceService:
                 return {'message': 'Valores faltosos ou com espaço, verifique as informações'}, 400
             
             if self.device_db_model.find_device_by_id(document_id):
-                return False
+                return {'message': 'Device não encontrado'}
+            
+            if self.device_db_model.find_by_device(value) is True:
+                return {'message': 'Nome de device em uso, valor não alterado!'}, 400
             
         if self.device_db_model.update_device(document_id, document_with_updates) is False:
-            return {'message': 'Device não alterado, verifique as informações'}, 400
+            return {'message': 'Device não alterado, tente novamente'}, 400
         
-        return {'Message', 'Dispositivo atualizado!'}, 201
+        return {'Message': 'Dispositivo atualizado!'}, 201
