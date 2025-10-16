@@ -71,19 +71,22 @@ class UserService:
 
         document_with_updates.pop('document_id')
 
-        if 'username' in document_with_updates:
-            if self.user_db_model.check_user_exists_by_username(document_with_updates['username']):
-                return {'message': 'nome de usuário em uso'}, 400
-            
-        if 'password' in document_with_updates:
+        for key, value in document_with_updates.items():
 
-            password = document_with_updates.get('password')
-            print(password)
-            if not password or password.split() == '' or ' ' in password:
-                return {'message':'Senha não preenchida ou com espaços'}, 400
+            if not value or value.split() == '' or ' ' in value:
+                return {'Message': 'Valores com faltosos ou com espaço, tente novamente'}, 400
+
+            if key == 'username':
+                if self.user_db_model.check_user_exists_by_username(document_with_updates['username']):
+                    return {'message': 'nome de usuário em uso'}, 400
             
-            hashed_pw = generate_password_hash(password)
-            document_with_updates['password'] = hashed_pw   
+            if key == 'role':    
+                if value != 'user' and value != 'admin':
+                    return {'message': 'Valores errados em tipo de usuário'}
+            if key == 'password':
+                password = value
+                hashed_pw = generate_password_hash(password)
+                document_with_updates['password'] = hashed_pw
             
         if self.user_db_model.update_user_by_id(document_id, document_with_updates) is False:
             return {'message': 'campos não atualizados'}, 400
