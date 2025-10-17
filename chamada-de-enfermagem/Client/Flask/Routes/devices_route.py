@@ -152,8 +152,8 @@ def delete_device():
         result = device_service.delete(data['document_id'])
     
     except Exception as e:
-        logging.exception('Error in register', e)
-        result = jsonify({'Error': 'Falha na tentativa de deletar device'}), 400
+        logging.exception('Error in delete', e)
+        result = jsonify({'Error': 'Falha na tentativa de deletar device'}), 500
 
     finally:
         mongo_conn.close_connection()
@@ -182,7 +182,7 @@ def delete_device_by_id(document_id):
     
     except Exception as e:
         logging.exception('Error in register', e)
-        result = jsonify({'Error': 'Falha na tentativa de deletar device'}), 400
+        result = jsonify({'Error': 'Falha na tentativa de deletar device'}), 500
 
     finally:
         mongo_conn.close_connection()
@@ -216,9 +216,8 @@ def update_device_by_id():
 
         result = device_service.update(data['document_id'], data)
     except Exception as e:
-        print('Error in update')
-        print(e)
-        result = {'Error':'falha ao atualizar device'}, 400
+        logging.exception('Error in update')
+        result = jsonify({'Error':'falha ao atualizar device'}), 500
 
     finally:
         mongo_conn.close_connection()
