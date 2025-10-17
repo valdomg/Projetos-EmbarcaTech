@@ -1,50 +1,52 @@
 #include <ESP8266WiFi.h>
 #include "wifi.h"
 #include "log.h"
-
-// -----------------------------------------------------------------------------
-// Credenciais da rede Wi-Fi
-// -----------------------------------------------------------------------------
-const char* WIFI_SSID = "xxxxxxxxxx";      ///< Nome da rede Wi-Fi (SSID)
-const char* WIFI_PASSWORD = "xxxxxxxx";    ///< Senha da rede Wi-Fi
+#include "config.h"
+#include "config_storage.h"
 
 // -----------------------------------------------------------------------------
 // Buffer e controle de tempo
 // -----------------------------------------------------------------------------
-char ipBuffer[16];                         ///< Armazena o IP em formato string
-static unsigned long lastConnectionAttemp = 0;
-static const unsigned long reconnectInterval = 1000 * 75; // 1 minuto e 15 segundos
+
+char ipBuffer[16];  ///< Armazena o endereço IP do dispositivo em formato de string (ex: "192.168.1.10")
+
+static unsigned long lastConnectionAttemp = 0; ///< Marca o tempo da última tentativa de conexão
+static const unsigned long reconnectInterval = 1000 * 75; ///< Intervalo de reconexão (1 minuto e 15 segundos)
 
 // -----------------------------------------------------------------------------
 // Funções
 // -----------------------------------------------------------------------------
 
 /**
- * @brief Tenta conectar à rede Wi-Fi.
+ * @brief Conecta o dispositivo à rede Wi-Fi configurada.
  * 
- * - Inicia a conexão com o SSID e senha configurados.
- * - Aguarda até 5 segundos para a conexão ser estabelecida.
- * - Se conectado, obtém e registra o endereço IP.
+ * Esta função utiliza o SSID e senha definidos em `cfg.wifiSSID` e `cfg.wifiPass`.
+ * São obtidos a partir da estrutura global `cfg`, que contém as variáveis persistidas.
+ * Ela tenta estabelecer uma conexão com a rede Wi-Fi e aguarda até 5 segundos
+ * para o processo ser concluído.
  * 
- * @return true  Conexão estabelecida com sucesso.
- * @return false Falha ao conectar dentro do tempo limite.
+ * - Se a conexão for bem-sucedida, o endereço IP é obtido e registrado no log.
+ * - Caso contrário, retorna `false` indicando falha na conexão.
+ * 
+ * @return true  Se a conexão foi estabelecida com sucesso.
+ * @return false Se não foi possível conectar dentro do tempo limite.
  */
 bool connectWiFi() {
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  WiFi.begin(cfg.wifiSSID.c_str(), cfg.wifiPass.c_str());
 
   unsigned long timeout = millis() + 5000;
   while (WiFi.status() != WL_CONNECTED && millis() < timeout) {
-    delay(500);  // Pequena espera antes de verificar novamente
+    delay(500);  // Aguarda meio segundo antes de verificar novamente
   }
 
   if (WiFi.status() == WL_CONNECTED) {
-    log(LOG_INFO, "Conectado a rede wifi %s", WIFI_SSID);
+    log(LOG_INFO, "Conectado à rede Wi-Fi %s", cfg.wifiSSID.c_str());
 
     IPAddress ip = WiFi.localIP();
     snprintf(ipBuffer, sizeof(ipBuffer), "%u.%u.%u.%u",
              ip[0], ip[1], ip[2], ip[3]);
 
-    log(LOG_INFO, "IP: %s", ipBuffer);
+    log(LOG_INFO, "Endereço IP: %s", ipBuffer);
     return true;
   }
 
@@ -52,27 +54,58 @@ bool connectWiFi() {
 }
 
 /**
- * @brief Garante que o dispositivo esteja conectado ao Wi-Fi.
+ * @brief Mantém a conexão Wi-Fi ativa, tentando reconectar quando necessário.
  * 
- * - Se já estiver conectado, não faz nada.
- * - Caso contrário, a cada 1 minuto e 15 segundos tenta reconectar à rede.
- * - Executa uma nova tentativa de conexão com timeout de 10 segundos.
+ * Esta função deve ser chamada periodicamente (ex: no loop principal).
+ * 
+ * - Se o dispositivo estiver conectado, nada é feito.
+ * - Caso contrário, a cada 1 minuto e 15 segundos, uma nova tentativa de conexão é feita.
+ * - Se uma tentativa for feita, a função chama internamente `connectWiFi()`.
+ * 
+ * @return true  Se o dispositivo está ou foi reconectado com sucesso.
+ * @return false Se ainda não está conectado e o tempo de reconexão não chegou.
  */
 bool reconnectWifi() {
-  // Se já está conectado, não faz nada
+  // Se já está conectado, retorna imediatamente
   if (WiFi.status() == WL_CONNECTED) return true;
 
   unsigned long now = millis();
 
-  // Verifica se já passou o intervalo de reconexão
+  // Verifica se já passou o intervalo mínimo para tentar reconectar
   if (now - lastConnectionAttemp >= reconnectInterval) {
     lastConnectionAttemp = now;
 
-    log(LOG_ERROR,"WiFi desconectado");
-    WiFi.disconnect();                       // garante que está desconectado
-    log(LOG_INFO, "tentando reconectar com wifi...");
+    log(LOG_ERROR, "Wi-Fi desconectado");
+    WiFi.disconnect();  // Garante que qualquer conexão antiga seja encerrada
+    log(LOG_INFO, "Tentando reconectar ao Wi-Fi...");
     return connectWiFi();
   }
+
   return false;
 }
 
+/**
+ * @brief Cria um ponto de acesso (Access Point) para configuração local.
+ * 
+ * Caso o dispositivo não esteja em modo AP, esta função:
+ * - Desconecta o Wi-Fi atual.
+ * - Configura o modo `WIFI_AP`.
+ * - Inicializa um Access Point com o SSID e senha definidos nas constantes
+ *   `SSID_ACCESS_POINT` e `PASSWORD_ACCESS_POINT`.
+ * 
+ * Também imprime o endereço IP do AP via `Serial`.
+ */
+void createAccessPoint() {
+  WiFiMode_t mode = WiFi.getMode();
+
+  if (mode != WIFI_AP) {
+    WiFi.disconnect();
+    WiFi.mode(WIFI_AP);
+    WiFi.softAP(SSID_ACCESS_POINT, PASSWORD_ACCESS_POINT);
+    IPAddress ip = WiFi.softAPIP();
+    
+    snprintf(ipBuffer, sizeof(ipBuffer), "%u.%u.%u.%u",
+             ip[0], ip[1], ip[2], ip[3]);
+    log(LOG_INFO, "Endereço IP: %s", ipBuffer);
+  }
+}
