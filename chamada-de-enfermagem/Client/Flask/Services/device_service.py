@@ -25,7 +25,7 @@ class DeviceService:
             'createdAt': createdAt
             }) is False:
 
-            return {'message': 'Device não inserido no banco de dados'}, 400
+            return {'message': 'Device não inserido no banco de dados'}, 500
 
         return {'message': 'Device cadastrado com sucesso'}, 201
     
@@ -35,9 +35,9 @@ class DeviceService:
             return {'message': 'Dispositivo não encontrado'}, 400
 
         if self.device_db_model.delete_device_by_id(document_id) is False:
-            return {'message': 'dispositivo não deletado'}, 400
+            return {'message': 'dispositivo não deletado'}, 500
         
-        return {'message' : 'Dispositivo deletado!'} , 201
+        return {'message' : 'Dispositivo deletado!'} , 200
 
     def update(self, document_id:str, document_with_updates:dict):
         document_with_updates.pop('document_id')
@@ -48,12 +48,12 @@ class DeviceService:
                 return {'message': 'Valores faltosos ou com espaço, verifique as informações'}, 400
             
             if self.device_db_model.find_device_by_id(document_id) is False:
-                return {'message': 'Device não encontrado'}
+                return {'message': 'Device não encontrado'}, 400
             
             if self.device_db_model.find_by_device(name_device) is True:
                 return {'message': 'Nome de device em uso, valor não alterado!'}, 400
             
         if self.device_db_model.update_device(document_id, document_with_updates) is False:
-            return {'message': 'Device não alterado, tente novamente'}, 400
+            return {'message': 'Device não alterado, tente novamente'}, 500
         
-        return {'Message': 'Dispositivo atualizado!'}, 201
+        return {'Message': 'Dispositivo atualizado!'}, 200

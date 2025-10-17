@@ -43,9 +43,9 @@ def return_all_documents_chamadas():
 
     if documents:
         json_docs = convert_all_id_to_string(documents)
-        return jsonify(json_docs), 201
+        return jsonify(json_docs), 200
     
-    return {'erro': 'Documentos não encontrados'}, 400
+    return {'erro': 'Documentos não encontrados'}, 404
 
 '''
 Rota de api para contagem de todas as chamadas
@@ -59,9 +59,9 @@ def return_all_chamadas_count():
     mongo_conn.close_connection()
 
     if count_all_chamadas:
-        return {'Quantidade': count_all_chamadas}, 201
+        return {'Quantidade': count_all_chamadas}, 200
     
-    return {'Error': 'Docs não encontrados'}, 400
+    return {'Error': 'Docs não encontrados'}, 404
 
 '''
 Rota de api para retorno das chamadas do dia
@@ -79,9 +79,9 @@ def return_documents_chamadas_day():
 
         json_chamadas = convert_all_id_to_string(chamadas)
 
-        return jsonify(json_chamadas), 201
+        return jsonify(json_chamadas), 200
     
-    return {'Erro': 'Docs não encontrados'},400
+    return {'Erro': 'Docs não encontrados'},404
 
 '''
 Rota de api para contagem de chamadas diárias
@@ -94,6 +94,6 @@ def return_chamadas_day_count():
     count_chamadas = chamadas_db_model.return_number_of_chamadas_by_day()
 
     if count_chamadas:
-        return {'Quantidade': count_chamadas}, 201
+        return {'Quantidade': count_chamadas}, 200
     
-    return {'Error': 'Docs não encontrados'}, 400
+    return {'Error': 'Docs não encontrados'}, 404

@@ -32,7 +32,7 @@ class UserService:
             'createdAt': createdAt
             }) is False:
 
-            return {'message': 'Usuário não inserido no banco de dados'}, 400
+            return {'message': 'Usuário não inserido no banco de dados'}, 500
 
         return {'message': 'Usuário cadastrado com sucesso'}, 201
 
@@ -59,9 +59,9 @@ class UserService:
             return {'message': 'usuário não existente'}, 400
         
         if self.user_db_model.delete_user_by_id(document_id) is False:
-            return {'message': 'usuário não deletado'}, 400
+            return {'message': 'usuário não deletado'}, 500
         
-        return {'message': 'usuário deletado com sucesso!'}, 201
+        return {'message': 'usuário deletado com sucesso!'}, 200
     
     '''
     Função de editar usuário
@@ -82,13 +82,14 @@ class UserService:
             
             if key == 'role':    
                 if value != 'user' and value != 'admin':
-                    return {'message': 'Valores errados em tipo de usuário'}
+                    return {'message': 'Valores errados em tipo de usuário'} , 400
+                
             if key == 'password':
                 password = value
                 hashed_pw = generate_password_hash(password)
                 document_with_updates['password'] = hashed_pw
             
         if self.user_db_model.update_user_by_id(document_id, document_with_updates) is False:
-            return {'message': 'campos não atualizados'}, 400
+            return {'message': 'campos não atualizados'}, 500
 
-        return {'message': 'campos atualizados!'}, 201
+        return {'message': 'campos atualizados!'}, 200

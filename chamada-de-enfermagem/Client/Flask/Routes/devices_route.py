@@ -48,9 +48,9 @@ def return_all_devices():
 
         json_devices = convert_all_id_to_string(devices)
 
-        return jsonify(json_devices), 201
+        return jsonify(json_devices), 200
     
-    return {'Error': 'Devices não encontrados'},400
+    return {'Error': 'Devices não encontrados'},404
 
 '''
 Rota que retorna a quantidade com todos os dispositivos cadastrados
@@ -64,9 +64,9 @@ def return_count_devices():
     mongo_conn.close_connection()
 
     if count_devices:
-        return {'Quantidade': count_devices}, 201
+        return {'Quantidade': count_devices}, 200
     
-    return {'Error': 'Devices não encontrados'}, 400
+    return {'Error': 'Devices não encontrados'}, 404
 
 '''
 Rota que registra um novo dispositivo no banco de dados
@@ -85,13 +85,13 @@ def register_device():
     device = Device(data['device'])
 
     if device.isValid() == False:
-        return {'Error': 'Valores faltosos'}, 400
+        return {'Error': 'Valores incorretos, tente novamente'}, 400
     
     result = device_service.register(device.getDevice(), device.getCreatedAt())
 
     mongo_conn.close_connection()
 
-    return jsonify(result)
+    return result
 
 '''
 Rota para deletar um dispositivo com seu id de dispositivo
@@ -113,7 +113,7 @@ def delete_device():
 
     mongo_conn.close_connection()
 
-    return jsonify(result)
+    return result
 
 
 '''
@@ -129,7 +129,7 @@ def delete_device_by_id(document_id):
 
     mongo_conn.close_connection()
 
-    return jsonify(result)
+    return result
 
 '''
 Rota para atualizar um dispositivo
