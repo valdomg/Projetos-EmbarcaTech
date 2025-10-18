@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request
 from datetime import datetime
 from Flask.auth import token_required 
 from Mqtt.application.models.MongoDBConnection import MongoDBConnection
-from Flask.Services.device_service import AuthServiceDevice
+from Flask.Services.device_service import DeviceService
 from Flask.Services.convert_objectdID import convert_all_id_to_string, convert_object_id_to_string
 from Flask.Models.device_db_model import DeviceDBModel
 from Flask.Models.device_model import Device
@@ -30,7 +30,7 @@ database = os.getenv('MONGO_DATABASE')
 
 mongo_conn = MongoDBConnection(uri, database)
 device_db_model = DeviceDBModel(mongo_conn)
-device_service = AuthServiceDevice(device_db_model)
+device_service = DeviceService(device_db_model)
 
 devices_bp = Blueprint('devices', __name__, url_prefix='/api/devices')
 
@@ -48,9 +48,9 @@ def return_all_devices():
 
         json_devices = convert_all_id_to_string(devices)
 
-        return jsonify(json_devices), 201
+        return jsonify(json_devices), 200
     
-    return {'Error': 'Devices não encontrados'},400
+    return {'Error': 'Devices não encontrados'},404
 
 '''
 Rota que retorna a quantidade com todos os dispositivos cadastrados
@@ -59,15 +59,14 @@ Rota que retorna a quantidade com todos os dispositivos cadastrados
 def return_count_devices():
     mongo_conn.start_connection()
 
-    devices = device_db_model.return_all_devices()
+    count_devices = device_db_model.return_count_all_devices()
 
     mongo_conn.close_connection()
-    if devices:
-        count_devices = len(devices)
 
-        return {'Quantidade': count_devices}, 201
+    if count_devices:
+        return {'Quantidade': count_devices}, 200
     
-    return {'Error': 'Devices não encontrados'}, 400
+    return {'Error': 'Devices não encontrados'}, 404
 
 '''
 Rota que registra um novo dispositivo no banco de dados
@@ -77,7 +76,7 @@ json = {
 
 APENAS PARA ADMINS
 '''
-@devices_bp.route('/register', methods=['GET', 'POST'])
+@devices_bp.route('/register', methods=['POST'])
 def register_device():
     data = request.get_json()
 
@@ -86,13 +85,13 @@ def register_device():
     device = Device(data['device'])
 
     if device.isValid() == False:
-        return {'Error', 'Valores faltosos'}, 401
+        return {'Error': 'Valores incorretos, tente novamente'}, 400
     
     result = device_service.register(device.getDevice(), device.getCreatedAt())
 
     mongo_conn.close_connection()
 
-    return jsonify(result)
+    return result
 
 '''
 Rota para deletar um dispositivo com seu id de dispositivo
@@ -103,7 +102,7 @@ json = {
 
 APENA PARA ADMINS
 '''
-@devices_bp.route('/delete', methods=['GET', 'POST'])
+@devices_bp.route('/delete', methods=['DELETE'])
 def delete_device():
 
     data = request.get_json()
@@ -114,14 +113,14 @@ def delete_device():
 
     mongo_conn.close_connection()
 
-    return jsonify(result)
+    return result
 
 
 '''
 Rota para deletar um dispositivo com seu nome de dispositivo por url
 APENA PARA ADMINS
 '''
-@devices_bp.route('/delete/<string:document_id>', methods=['GET', 'POST'])
+@devices_bp.route('/delete/<string:document_id>', methods=['DELETE'])
 def delete_device_by_id(document_id):
 
     mongo_conn.start_connection()
@@ -130,4 +129,29 @@ def delete_device_by_id(document_id):
 
     mongo_conn.close_connection()
 
-    return jsonify(result)
+    return result
+
+'''
+Rota para atualizar um dispositivo
+
+json{
+    "document_id":"id_do_dispositivo"
+    "device": "novo_nome_device"
+}
+
+APENAS PARA ADMINS
+'''
+@devices_bp.route('/update', methods=['PUT'])
+def update_device_by_id():
+
+    data = request.get_json()
+
+    mongo_conn.start_connection()
+    try:
+        result = device_service.update(data['document_id'], data)
+    except Exception as e:
+        print('Error in update')
+        print(e)
+        result = {'message':'Error in update'}, 400
+
+    return result

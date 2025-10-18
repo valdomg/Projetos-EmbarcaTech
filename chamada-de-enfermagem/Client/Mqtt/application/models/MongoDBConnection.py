@@ -127,7 +127,6 @@ class MongoDBConnection:
             print(e)
             
         return False
-    
     def return_document(self,collection:str, label_to_search:str, value_to_match:str) -> dict:
         '''
         Retorna um documento de acordo com seu label
@@ -313,4 +312,4 @@ class MongoDBConnection:
         if self.client:
             self.client.close()
             print("Conexão fechada.")
-
+            

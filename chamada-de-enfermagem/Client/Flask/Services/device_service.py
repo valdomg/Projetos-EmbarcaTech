@@ -5,7 +5,7 @@ from datetime import datetime
 Classe de utilitário de registro de devices
 '''
 
-class AuthServiceDevice:
+class DeviceService:
     '''
     Utiliza um DeviceDBModel para realizar as operações de registro
     '''
@@ -25,7 +25,7 @@ class AuthServiceDevice:
             'createdAt': createdAt
             }) is False:
 
-            return {'message': 'Device não inserido no banco de dados'}, 400
+            return {'message': 'Device não inserido no banco de dados'}, 500
 
         return {'message': 'Device cadastrado com sucesso'}, 201
     
@@ -35,8 +35,25 @@ class AuthServiceDevice:
             return {'message': 'Dispositivo não encontrado'}, 400
 
         if self.device_db_model.delete_device_by_id(document_id) is False:
-            return {'message': 'dispositivo não deletado'}, 400
+            return {'message': 'dispositivo não deletado'}, 500
         
-        return {'message' : 'Dispositivo deletado!'} , 201
+        return {'message' : 'Dispositivo deletado!'} , 200
 
+    def update(self, document_id:str, document_with_updates:dict):
+        document_with_updates.pop('document_id')
+
+        for key, name_device in document_with_updates.items():
+    
+            if not name_device or name_device.split() == '' or ' ' in name_device:
+                return {'message': 'Valores faltosos ou com espaço, verifique as informações'}, 400
+            
+            if self.device_db_model.find_device_by_id(document_id) is False:
+                return {'message': 'Device não encontrado'}, 400
+            
+            if self.device_db_model.find_by_device(name_device) is True:
+                return {'message': 'Nome de device em uso, valor não alterado!'}, 400
+            
+        if self.device_db_model.update_device(document_id, document_with_updates) is False:
+            return {'message': 'Device não alterado, tente novamente'}, 500
         
+        return {'Message': 'Dispositivo atualizado!'}, 200

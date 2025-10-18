@@ -33,13 +33,7 @@ acesso para users/admins
 @token_required
 def relatorio_page():
 
-    mongo_conn.start_connection()
-
-    chamadas = mongo_conn.list_documents('chamadas')
-
-    mongo_conn.close_connection()
-
-    return render_template('relatorio.html', chamadas=chamadas)
+    return render_template('relatorio.html')
 
 @pages_bp.route('/usuarios')
 def usuario_page():

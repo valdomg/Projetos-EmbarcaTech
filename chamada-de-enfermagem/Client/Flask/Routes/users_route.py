@@ -44,7 +44,7 @@ def return_all_users():
 
     mongo_conn.start_connection()
 
-    users = mongo_conn.list_documents('users')
+    users = mongo_conn.list_all_documents_from_collection('users')
 
     if users:
         json_users = convert_all_id_to_string(users)
@@ -91,7 +91,7 @@ json = {
 }
 APENAS PARA ADMINS
 '''
-@user_bp.route('/delete', methods=['POST'])
+@user_bp.route('/delete', methods=['DELETE'])
 def delete_user():
     data = request.get_json()
 
@@ -110,7 +110,7 @@ Rota de remoção de usuário por url
 
 APENAS PARA ADMINS
 '''
-@user_bp.route('/delete/<string:document_id>', methods=['GET', 'POST'])
+@user_bp.route('/delete/<string:document_id>', methods=['DELETE'])
 def delete_user_by_id(document_id):
 
     mongo_conn.start_connection()
@@ -132,14 +132,17 @@ json = {
 }
 APENAS PARA ADMINS
 '''
-@user_bp.route('/update', methods=['GET', 'POST'])
+@user_bp.route('/update', methods=['PUT'])
 def update_user_by():
     
+
     data = json.loads(request.get_data())
 
     if not 'document_id' in data:
         return {'Error': 'Campos faltosos'}, 401
     
+    mongo_conn.start_connection()
     result = user_service.update(data['document_id'], data)
+    mongo_conn.close_connection()
 
     return jsonify(result)

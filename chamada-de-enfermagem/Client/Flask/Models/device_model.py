@@ -11,7 +11,7 @@ class Device():
 
 
     def isValid(self):
-        if not self.device or self.device.split() == '':
+        if not self.device or self.device.split() == '' or ' ' in self.device:
             print('Error in device')
             return False
         
