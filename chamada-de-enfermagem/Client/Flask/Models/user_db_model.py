@@ -18,13 +18,19 @@ class UserDBModel():
 
     retorna um dict com as informações do usuário
     '''
-    def find_by_username(self, username:str):
+    def return_user_by_username(self, username:str):
         return self.db.return_document('users','username',username)
     
     '''
+    Checa se o documento existe pelo seu username
+    '''
+    def check_user_exists_by_username(self, username:str):
+        return self.db.check_if_document_exists('users', 'username', username)
+
+    '''
     Realiza um busca por um documento por ID
     '''
-    def find_user_by_id(self, document_id:str) -> bool:
+    def check_if_user_exists_by_id(self, document_id:str) -> bool:
         return self.db.check_if_document_exists_by_id('users', document_id)
     
     '''
