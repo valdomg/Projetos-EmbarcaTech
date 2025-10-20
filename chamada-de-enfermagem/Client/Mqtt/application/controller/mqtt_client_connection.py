@@ -2,21 +2,21 @@ import paho.mqtt.client as mqtt
 from time import sleep
 import json
 from Mqtt.application.models.callbacks import on_connect as ocm, on_message as oms, on_subscribe as osub, on_disconnect as ods
-
-'''
-Classe de conexão do mqtt
-
-atributos
-
-broker          = ip do broker
-port            = porta do broker
-client_name     = nome do client
-user_name       = nome de usuário para a senha
-password        = senha para o client
-keepalive       = tempo para verificar o estado do broker (ativo ou não)
-'''
+import logging
 
 class MqttClientConnection:
+    '''
+    Classe de conexão do mqtt
+
+    atributos
+
+    broker          = ip do broker
+    port            = porta do broker
+    client_name     = nome do client
+    user_name       = nome de usuário para a senha
+    password        = senha para o client
+    keepalive       = tempo para verificar o estado do broker (ativo ou não)
+    '''
     def __init__(self, broker_ip:str, port:int, client_name:str, user_name:str, password:str ,keepalive:int):
         
         self.broker_ip      =       broker_ip
@@ -27,10 +27,10 @@ class MqttClientConnection:
         self.keepalive      =       keepalive
         self.mqtt_client    =       None
 
-    '''
-    Função para conectar o client ao broker, definir as funções de callback
-    '''
     def start_connection(self) -> bool:
+        '''
+        Função para conectar o client ao broker, definir as funções de callback
+        '''
 
         try:
             
@@ -47,25 +47,26 @@ class MqttClientConnection:
             mqtt_client.on_subscribe    = osub
             mqtt_client.on_disconnect   = ods
 
-            mqtt_client.connect(host=self.broker_ip, port=self.port, keepalive=self.keepalive)
+            mqtt_client.connect_async(host=self.broker_ip, port=self.port, keepalive=self.keepalive)
             self.mqtt_client = mqtt_client
             self.mqtt_client.loop_start()
             
         except Exception as e:
-            print(e)
+            logging.exception(e)
             return False
         
-    '''
-    Função com loop infinito para manter o client ativo
-    '''
     def start(self):
+            
+        '''
+        Função com loop infinito para manter o client ativo
+        '''
         self.start_connection()
         while True: sleep(0.001)
 
-    '''
-    Função para publicar em algum tópico 
-    '''
     def publish_on_topic(self,topic, msg):
+        '''
+        Função para publicar em algum tópico 
+        '''
 
         payload = {
             'id': self.client_name,
