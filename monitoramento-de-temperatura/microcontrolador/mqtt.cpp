@@ -23,7 +23,7 @@
 // -----------------------------------------------------------------------------
 
 /// Cliente seguro para comunicação criptografada via TLS/SSL.
-WiFiClientSecure espClient;
+WiFiClient espClient;
 
 /// Cliente MQTT da biblioteca PubSubClient, utilizando o cliente seguro.
 PubSubClient client(espClient);
@@ -36,8 +36,8 @@ PubSubClient client(espClient);
 static unsigned long lastAttempConnectMQTT = 0;           ///< Tempo da última tentativa de conexão ao broker MQTT.
 static const unsigned long reconnectIntervalMQTT = 3000;  ///< Intervalo mínimo entre tentativas de reconexão (ms).
 
-static unsigned long lastConnectionDataSent = 0;          ///< Tempo da última tentativa de envio de mensagem armazenada.
-static const unsigned long resendIntervalMQTT = 3000;     ///< Intervalo mínimo entre reenvios de mensagens (ms).
+static unsigned long lastConnectionDataSent = 0;       ///< Tempo da última tentativa de envio de mensagem armazenada.
+static const unsigned long resendIntervalMQTT = 3000;  ///< Intervalo mínimo entre reenvios de mensagens (ms).
 
 
 // -----------------------------------------------------------------------------
@@ -54,11 +54,38 @@ static const unsigned long resendIntervalMQTT = 3000;     ///< Intervalo mínimo
  * do sistema (por exemplo, no `setup()`).
  */
 void setupMQTT() {
-  espClient.setInsecure();  // Desativa a verificação do certificado TLS
-  client.setServer(cfg.mqttServer.c_str(), 8883);
+  // espClient.setInsecure();  // Desativa a verificação do certificado TLS
+  client.setServer(cfg.mqttServer.c_str(), 1883);
   log(LOG_DEBUG, "MQTT inicializado");
 }
 
+
+/**
+ * @brief Reconfigura o cliente MQTT e o cliente TLS (WiFiClientSecure).
+ *
+ * Essa função é chamada quando o cliente MQTT falha repetidamente ao tentar
+ * reconectar ao broker. Em situações assim, o cliente TLS pode ficar em um
+ * estado inválido, bloqueando novas conexões. O procedimento abaixo recria
+ * ambos os clientes para restaurar a comunicação.
+ *
+ * Operações executadas:
+ * - Reinstancia o objeto `WiFiClientSecure` (limpa conexões antigas);
+ * - Desativa a verificação de certificado TLS (`setInsecure`);
+ * - Redefine o servidor MQTT e a porta segura;
+ * - Reassocia o cliente TLS ao cliente MQTT.
+ *
+ * Essa rotina evita a necessidade de reiniciar o microcontrolador.
+ */
+void resetMQTTClient() {
+  log(LOG_WARN, "Reinicializando cliente MQTT e TLS...");
+
+  espClient = WiFiClient();  // recria o cliente seguro
+  // espClient.setInsecure();         // desativa verificação de certificado
+  client.setServer(cfg.mqttServer.c_str(), 8883);
+  client.setClient(espClient);
+
+  log(LOG_DEBUG, "Cliente MQTT reconfigurado");
+}
 
 /**
  * @brief Verifica e mantém a conexão com o broker MQTT.
@@ -70,10 +97,13 @@ void setupMQTT() {
  * @return false Se ainda não foi possível restabelecer a conexão.
  */
 bool checkMQTTConnected() {
-  client.loop();                        // Mantém o link ativo e processa mensagens
-  if (client.connected()) return true;  // Já está conectado
 
-  unsigned long now = millis();         // Obtém tempo atual
+  if (client.connected()) {
+    client.loop();  // Mantém o link ativo e processa mensagens
+    return true;    // Já está conectado
+  }
+
+  unsigned long now = millis();  // Obtém tempo atual
 
   // Verifica se já passou o intervalo mínimo entre tentativas
   if (now - lastAttempConnectMQTT >= reconnectIntervalMQTT) {
@@ -83,10 +113,21 @@ bool checkMQTTConnected() {
 
     // Tenta autenticar no broker com credenciais do arquivo de configuração
     if (client.connect(cfg.mqttDeviceId.c_str(), cfg.mqttUser.c_str(), cfg.mqttPass.c_str())) {
-      log(LOG_DEBUG, "Conectado ao broker MQTT");
+      log(LOG_INFO, "Conectado ao broker MQTT");
       return true;
     } else {
       log(LOG_ERROR, "Erro ao conectar com broker (rc=%d)", client.state());
+
+
+      static uint8_t connection_drop_count = 0;
+
+      connection_drop_count++;
+
+      if (connection_drop_count >= 3) {
+        resetMQTTClient();
+        connection_drop_count = 0;
+      }
+
       return false;
     }
   }
@@ -123,7 +164,7 @@ bool checkMQTTConnected() {
  */
 bool publishSensorData(float temperature, float humidity) {
   StaticJsonDocument<128> doc;
-  doc["Microcontrollerid"] = cfg.mqttDeviceId.c_str();
+  doc["microcontrollerId"] = cfg.mqttDeviceId.c_str();
   doc["temperature"] = temperature;
   doc["humidity"] = humidity;
 
@@ -191,3 +232,4 @@ void publishAlert(const char* alert) {
   serializeJson(doc, buffer);
   client.publish(cfg.mqttTopicAlert.c_str(), buffer);
 }
+
