@@ -105,7 +105,7 @@ def on_message(client, userdata, message, properties=None):
             logging.warning('Chamada inserida no banco de dados!')
         
     if local_topic == 'enfermaria':
-        logging.info('Mensagem do tópico:', local_topic)
+        logging.info(f'Mensagem do tópico: {local_topic}')
     
     mongo.close_connection()
 
