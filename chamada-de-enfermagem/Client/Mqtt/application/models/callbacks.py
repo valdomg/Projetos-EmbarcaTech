@@ -39,11 +39,9 @@ def on_disconnect(client, userdata, flags, rc, properties=None):
     except Exception as e:
         logging.exception('Conexão mal sucedida, erro:', rc)
 
-
-
 def on_message(client, userdata, message, properties=None):
     '''
-        Callback para formatar as mensagens recebidas nos tópicos
+    Callback para formatar as mensagens recebidas nos tópicos
 
         Os dispositivos nas salas assinam apenas o tópico em que estão,
         dessa forma, dentro do payload podem receber comandos de desligar/ligar ou qualquer outro
@@ -61,7 +59,12 @@ def on_message(client, userdata, message, properties=None):
             'comando': 'ligar/desligar'
         }
     '''
-    payload = json.loads(message.payload.decode())
+        
+    try:
+        payload = json.loads(message.payload.decode())
+    except json.JSONDecodeError:
+        logging.error(f'Falha ao decodificar mensagem.. {message.payload.decode()}')
+        return
     logging.info(f'Mensagem recebida!')
 
     # Quebra o tópico em partes
@@ -89,6 +92,7 @@ def on_message(client, userdata, message, properties=None):
         '''
         Laço condicional para registrar chamada no banco de dados
         '''
+
         document= {
             'dispositivo_id': dispositivo_id,
             'local': local_emergencia,
