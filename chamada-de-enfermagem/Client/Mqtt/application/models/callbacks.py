@@ -7,13 +7,12 @@ import logging
 from time import sleep
 
 load_dotenv()
-logging.basicConfig(level='INFO')
 topic = os.getenv('BROKER_TOPIC')
 uri = os.getenv('MONGO_URI') 
 database = os.getenv('MONGO_DATABASE')
 
-
 mongo = MongoDBConnection(uri, database)
+
 def on_connect(client, userdata, flags, rc, properties=None):
     '''
     Callback usado ao conectar o client a algum tópico do broker
@@ -63,7 +62,7 @@ def on_message(client, userdata, message, properties=None):
     try:
         payload = json.loads(message.payload.decode())
     except json.JSONDecodeError:
-        logging.error(f'Falha ao decodificar mensagem.. {message.payload.decode()}')
+        logging.error(f'Falha ao decodificar mensagem..')
         return
     logging.info(f'Mensagem recebida!')
 
@@ -80,7 +79,7 @@ def on_message(client, userdata, message, properties=None):
         mongo.close_connection() 
         return 
         
-    print('Dispositivo logado!')
+    logging.info('Dispositivo logado!')
         
     comando = payload.get('comando')
     local_emergencia = payload.get('local')
@@ -114,7 +113,7 @@ def on_subscribe(client, userdata, mid, granted_os, properties=None):
     '''
     Callback para conferir se a inscrição em algum tópico foi bem sucedida
     '''
-    logging.info('Inscrito com sucesso!')
+    logging.info(f'Inscrito com sucesso no tópico: {topic}')
 
 
 def reconnect_mqtt(client):
