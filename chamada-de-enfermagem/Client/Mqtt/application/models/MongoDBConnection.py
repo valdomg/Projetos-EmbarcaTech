@@ -4,6 +4,7 @@ from pymongo.server_api import ServerApi
 from bson.objectid import ObjectId
 import os
 from datetime import datetime
+import logging
 
 
 class MongoDBConnection:
@@ -26,15 +27,15 @@ class MongoDBConnection:
                 self.client = MongoClient(self.uri, server_api=ServerApi('1'))
                 self.db = self.client[self.database_name]
                 self.client.admin.command('ping')
-                print("Pinged your deployment. You successfully connected to MongoDB!")
+                logging.info("Pinged your deployment. You successfully connected to MongoDB!")
                 return True
             except ConnectionFailure as e:
                 self.client = None
                 self.db = None
-                print(e)
+                logging.exception(e)
                 return False
         else:
-            print('Database não definida')
+            logging.warning('Database não definida')
             return False
     
     def list_all_documents_from_collection(self, collection:str):
@@ -46,10 +47,10 @@ class MongoDBConnection:
                 collection = self.db[collection]
                 return list(collection.find())
             else:
-                print('Client not connected')
+                logging.warning('Client not connected')
         except PyMongoError as e:
-            print('Error in list documents...')
-            print(e)
+            logging.error('Error in list documents...')
+            logging.exception(e)
 
     def count_all_documents_on_collection(self, collection:str):
         '''
@@ -63,11 +64,11 @@ class MongoDBConnection:
                 return collection.count_documents({})
             
             else:
-                print('Client is not connected')
+                logging.warning('Client is not connected')
 
         except PyMongoError as e:
-            print('Error in count documents')
-            print(e)
+            logging.error('Error in count documents')
+            logging.exception(e)
 
     def count_documents_by_date(self, collection:str, label_data:str, start_date:datetime, end_date:datetime):
         '''
@@ -83,10 +84,10 @@ class MongoDBConnection:
                         }
                     })
             else:
-                print('Client not connected')
+                logging.warning('Client not connected')
         except PyMongoError as e:
-            print('Error in list documents...')
-            print(e)        
+            logging.error('Error in list documents...')
+            logging.exception(e)        
    
     def check_if_document_exists(self, collection:str, label:str, value:str):
         '''
@@ -102,10 +103,13 @@ class MongoDBConnection:
                 if result is None:
                     return False  
                 
-                return True              
+                return True
+
+            else:
+                logging.warning('Client not connected')              
         except PyMongoError as e:
-            print('Error in check values...')
-            print(e)
+            logging.error('Error in check values...')
+            logging.exception(e)
             
         return False
     
@@ -124,10 +128,13 @@ class MongoDBConnection:
                     return False
 
                 return True
+            
+            else:
+                logging.warning('Client not connected')
                             
         except PyMongoError as e:
-            print('Error in check values...')
-            print(e)
+            logging.error('Error in check values...')
+            logging.exception(e)
             
         return False
     def return_document(self,collection:str, label_to_search:str, value_to_match:str) -> dict:
@@ -144,10 +151,12 @@ class MongoDBConnection:
                     return False
 
                 return result
+            else:
+                logging.warning('Client not connected')
 
         except PyMongoError as e:
-            print('Error in check values...')
-            print(e)
+            logging.error('Error in check values...')
+            logging.exception(e)
             
         return False
     
@@ -164,9 +173,12 @@ class MongoDBConnection:
 
                 return result
             
+            else:
+                logging.warning('Client not connected')
+
         except PyMongoError as e:
-            print('Error in check values...')
-            print(e)
+            logging.error('Error in check values...')
+            logging.exception(e)
 
     def list_documents_by_date(self, collection:str, label_data:str,start_date:datetime, end_date:datetime):
         '''
@@ -183,10 +195,10 @@ class MongoDBConnection:
                     })
                 )
             else:
-                print('Client not connected')
+                logging.warning('Client not connected')
         except PyMongoError as e:
-            print('Error in list documents...')
-            print(e)
+            logging.error('Error in list documents...')
+            logging.exception(e)
 
     def insert_document_collection(self,collection:str, document: dict):
         '''
@@ -202,11 +214,11 @@ class MongoDBConnection:
                 return result
 
             else:
-                print('Client not connected')
+                logging.warning('Client not connected')
 
         except PyMongoError as e:
-            print('Error on insert document...')
-            print(e) 
+            logging.error('Error on insert document...')
+            logging.exception(e) 
 
     def update_document_by_id(self,collection:str, document_id:str, document_with_updates:dict) -> bool:
         '''
@@ -214,16 +226,16 @@ class MongoDBConnection:
         '''
         try:
             if self.client is None:
-                print('Client not connected')
+                logging.warning('Client not connected')
 
             document_to_update = self.return_document_by_id(collection, document_id)
 
             if document_to_update is None:
-                print('Not value in DB')
+                logging.info('Not value in DB')
                 return False
 
             if self.check_if_docs_is_equal(document_with_updates, document_to_update) == True:
-                print('Docs is the same, no update')
+                logging.info('Docs is the same, no update')
                 return False
                 
             collection_update = self.db[collection]
@@ -239,8 +251,8 @@ class MongoDBConnection:
             return True
             
         except PyMongoError as e:
-            print('Error in update values')
-            print(e)
+            logging.error('Error in update values')
+            logging.exception(e)
         
         pass
 
@@ -252,25 +264,25 @@ class MongoDBConnection:
             if self.client is not None:
                 
                 if self.check_if_document_exists(collection, label_to_match, value_to_match) == False:
-                    print('No values in DB')
+                    logging.info('No values in DB')
                     return False
                 
                 collection_delete = self.db[collection]
                 result = collection_delete.delete_one({label_to_match: value_to_match})
 
                 if result is False:
-                    print(f'Error in delete value: {result}')
+                    logging.warning(f'Error in delete value: {result}')
                     return False
                 
-                print(f'Successfully in delete value: {result}')
+                logging.info(f'Successfully in delete value: {result}')
                 return True
             
             else:
-                print('Client not connected')
+                logging.warning('Client not connected')
 
         except PyMongoError as e:
-            print('Error in delete value')
-            print(e)
+            logging.error('Error in delete value')
+            logging.exception(e)
             return False
         
     def delete_document_by_id(self, collection:str, document_id:str) -> bool:
@@ -281,25 +293,25 @@ class MongoDBConnection:
             if self.client is not None:
                 
                 if self.check_if_document_exists_by_id(collection, document_id) == False:
-                    print('No values in DB')
+                    logging.info('No values in DB')
                     return False
                 
                 collection_delete = self.db[collection]
                 result = collection_delete.delete_one({'_id': ObjectId(document_id)})
 
                 if result is False:
-                    print(f'Error in delete value: {result}')
+                    logging.error(f'Error in delete value: {result}')
                     return False
                 
-                print(f'Successfully in delete value: {result}')
+                logging.info(f'Successfully in delete value: {result}')
                 return True
             
             else:
-                print('Client not connected')
+                logging.warning('Client not connected')
 
         except PyMongoError as e:
-            print('Error in delete value')
-            print(e)
+            logging.error('Error in delete value')
+            logging.exception(e)
             return False
         
     def check_if_docs_is_equal(self, document_one:dict, document_two:dict) -> bool:
@@ -316,5 +328,5 @@ class MongoDBConnection:
         '''
         if self.client:
             self.client.close()
-            print("Conexão fechada.")
+            logging.info("Conexão fechada.")
             
