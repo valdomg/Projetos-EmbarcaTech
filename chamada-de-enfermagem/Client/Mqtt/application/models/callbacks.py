@@ -2,6 +2,7 @@ import json
 import os
 from dotenv import load_dotenv
 from Mqtt.application.models.MongoDBConnection import MongoDBConnection
+from Mqtt.application.services.utilities import send_update_to_flask 
 from datetime import datetime
 import logging
 from time import sleep
@@ -84,7 +85,7 @@ def on_message(client, userdata, message, properties=None):
     comando = payload.get('comando')
     local_emergencia = payload.get('local')
     room_number = payload.get('room_number')
-
+    estado = payload.get('estado')
 
     if local_topic == 'posto_enfermaria' and comando == 'ligar':
 
@@ -100,13 +101,14 @@ def on_message(client, userdata, message, properties=None):
         }
 
         result = mongo.insert_document_collection('chamadas', document)
-
+        
         if result:
             logging.warning('Chamada inserida no banco de dados!')
         
     if local_topic == 'enfermaria':
         logging.info(f'Mensagem do tópico: {local_topic}')
     
+    send_update_to_flask(room_number, estado)
     mongo.close_connection()
 
 def on_subscribe(client, userdata, mid, granted_os, properties=None):
@@ -117,6 +119,9 @@ def on_subscribe(client, userdata, mid, granted_os, properties=None):
 
 
 def reconnect_mqtt(client):
+    '''
+    Função de reconexão do client com mqtt
+    '''
     delay = 1
     while True:
         try:
