@@ -1,6 +1,7 @@
 #include <WiFiClientSecure.h>   // Biblioteca para conexões seguras via TLS/SSL (necessária para MQTT com SSL/TLS).
 #include "mqtt.h"               // Header com as declarações das funções e variáveis MQTT usadas no projeto.
 #include "config.h"             // Arquivo de configuração com constantes (servidor, usuário, senha, tópicos, etc.).
+#include "jsonDataProcessing.h" // Header com a declaração da função que processa os dados JSON recebido do MQTT
 
 // -----------------------------------------------------------------------------
 // Objetos globais
@@ -74,6 +75,9 @@ void callback(char* topic, byte* payload, unsigned int length) {
     Serial.print((char)payload[i]); // Converte cada byte para caractere e imprime
   }
   Serial.println();
+
+  // Processa os dados Json recebidos
+  processing_json_MQTT(payload, length);
 }
 
 /**
