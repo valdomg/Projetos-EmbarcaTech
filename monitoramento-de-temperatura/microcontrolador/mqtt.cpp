@@ -23,7 +23,7 @@
 // -----------------------------------------------------------------------------
 
 /// Cliente seguro para comunicação criptografada via TLS/SSL.
-WiFiClientSecure espClient;
+WiFiClient espClient;
 
 /// Cliente MQTT da biblioteca PubSubClient, utilizando o cliente seguro.
 PubSubClient client(espClient);
@@ -54,11 +54,38 @@ static const unsigned long resendIntervalMQTT = 3000;  ///< Intervalo mínimo en
  * do sistema (por exemplo, no `setup()`).
  */
 void setupMQTT() {
-  espClient.setInsecure();  // Desativa a verificação do certificado TLS
-  client.setServer(cfg.mqttServer.c_str(), 8883);
+  // espClient.setInsecure();  // Desativa a verificação do certificado TLS
+  client.setServer(cfg.mqttServer.c_str(), 1883);
   log(LOG_DEBUG, "MQTT inicializado");
 }
 
+
+/**
+ * @brief Reconfigura o cliente MQTT e o cliente TLS (WiFiClientSecure).
+ *
+ * Essa função é chamada quando o cliente MQTT falha repetidamente ao tentar
+ * reconectar ao broker. Em situações assim, o cliente TLS pode ficar em um
+ * estado inválido, bloqueando novas conexões. O procedimento abaixo recria
+ * ambos os clientes para restaurar a comunicação.
+ *
+ * Operações executadas:
+ * - Reinstancia o objeto `WiFiClientSecure` (limpa conexões antigas);
+ * - Desativa a verificação de certificado TLS (`setInsecure`);
+ * - Redefine o servidor MQTT e a porta segura;
+ * - Reassocia o cliente TLS ao cliente MQTT.
+ *
+ * Essa rotina evita a necessidade de reiniciar o microcontrolador.
+ */
+void resetMQTTClient() {
+  log(LOG_WARN, "Reinicializando cliente MQTT e TLS...");
+
+  espClient = WiFiClient();  // recria o cliente seguro
+  // espClient.setInsecure();         // desativa verificação de certificado
+  client.setServer(cfg.mqttServer.c_str(), 8883);
+  client.setClient(espClient);
+
+  log(LOG_DEBUG, "Cliente MQTT reconfigurado");
+}
 
 /**
  * @brief Verifica e mantém a conexão com o broker MQTT.
@@ -137,7 +164,7 @@ bool checkMQTTConnected() {
  */
 bool publishSensorData(float temperature, float humidity) {
   StaticJsonDocument<128> doc;
-  doc["Microcontrollerid"] = cfg.mqttDeviceId.c_str();
+  doc["microcontrollerId"] = cfg.mqttDeviceId.c_str();
   doc["temperature"] = temperature;
   doc["humidity"] = humidity;
 
@@ -206,30 +233,3 @@ void publishAlert(const char* alert) {
   client.publish(cfg.mqttTopicAlert.c_str(), buffer);
 }
 
-
-/**
- * @brief Reconfigura o cliente MQTT e o cliente TLS (WiFiClientSecure).
- *
- * Essa função é chamada quando o cliente MQTT falha repetidamente ao tentar
- * reconectar ao broker. Em situações assim, o cliente TLS pode ficar em um
- * estado inválido, bloqueando novas conexões. O procedimento abaixo recria
- * ambos os clientes para restaurar a comunicação.
- *
- * Operações executadas:
- * - Reinstancia o objeto `WiFiClientSecure` (limpa conexões antigas);
- * - Desativa a verificação de certificado TLS (`setInsecure`);
- * - Redefine o servidor MQTT e a porta segura;
- * - Reassocia o cliente TLS ao cliente MQTT.
- *
- * Essa rotina evita a necessidade de reiniciar o microcontrolador.
- */
-void resetMQTTClient() {
-  log(LOG_WARN, "Reinicializando cliente MQTT e TLS...");
-
-  espClient = WiFiClientSecure();  // recria o cliente seguro
-  espClient.setInsecure();         // desativa verificação de certificado
-  client.setServer(cfg.mqttServer.c_str(), 8883);
-  client.setClient(espClient);
-
-  log(LOG_DEBUG, "Cliente MQTT reconfigurado");
-}
