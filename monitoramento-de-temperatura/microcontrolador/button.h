@@ -5,66 +5,104 @@
 
 /**
  * @file button.h
- * @brief Declarações e definições relacionadas ao controle de botão com interrupção.
- * 
- * Este módulo gerencia um botão físico conectado ao microcontrolador,
- * incluindo inicialização do pino, detecção via interrupção e leitura do estado.
- * O debounce é tratado no arquivo `button.cpp`.
+ * @brief Declarações de funções e variáveis para o controle de botões com interrupção.
+ *
+ * Este módulo oferece uma interface para o gerenciamento de dois tipos de botões:
+ * - Um botão de **clique curto** (mute)
+ * - Um botão de **pressão longa** (long press)
+ *
+ * O tratamento de debounce e lógica de alternância (toggle) são implementados em `button.cpp`.
+ * As rotinas são compatíveis com microcontroladores baseados em Arduino/ESP.
  */
 
-/**
- * @brief Pino ao qual o botão está conectado.
- * 
- * Neste caso, o botão está ligado ao pino 13 do microcontrolador.
- * O pino é configurado com resistor de pull-up interno.
- */
-constexpr uint8_t PIN_BUTTON = 13;
+// -----------------------------------------------------------------------------
+// Funções de inicialização e controle
+// -----------------------------------------------------------------------------
 
 /**
- * @brief Inicializa o botão.
- * 
- * - Configura o pino como entrada com pull-up interno.
- * - **Não ativa a interrupção automaticamente**. 
- *   Para habilitar a interrupção deve-se chamar `enableButtonInterrupt()`.
+ * @brief Inicializa o pino do botão.
+ *
+ * Configura o pino especificado como **entrada com pull-up interno**,
+ * preparando-o para ser utilizado com interrupções.
+ *
+ * @param pin Pino digital onde o botão está conectado.
  */
-void buttonInit();
+void buttonInit(uint8_t pin);
 
 /**
- * @brief Verifica se o botão foi pressionado.
- * 
- * Essa função retorna o estado lógico do botão, atualizado 
- * pela rotina de interrupção (`buttonISR`).
- * 
- * - Se o botão foi pressionado, o estado lógico alterna (toggle).
- * - A flag de pressionamento é resetada internamente após a leitura.
- * 
- * @return true  se o botão está em estado ativo.
- * @return false se o botão está em estado inativo.
+ * @brief Habilita a interrupção do botão de clique curto (mute).
+ *
+ * A rotina de interrupção (`muteButtonISR`) será chamada automaticamente
+ * a cada evento de borda de subida (**RISING**) no pino configurado.
+ *
+ * @param pin Pino do botão de mute.
  */
-bool buttonWasPressed();
+void enableButtonInterruptRising(uint8_t pin);
 
 /**
- * @brief Reseta o estado lógico do botão.
- * 
- * Define o estado do botão como `false`, 
- * independente de cliques anteriores.
+ * @brief Desabilita a interrupção do botão de clique curto (mute).
+ *
+ * Após esta chamada, o botão não gerará mais interrupções
+ * até que `enableButtonInterruptRising()` seja reativado.
+ *
+ * @param pin Pino do botão de mute.
+ */
+void disableButtonInterruptRising(uint8_t pin);
+
+/**
+ * @brief Habilita a interrupção do botão de pressão longa.
+ *
+ * A rotina de interrupção (`longPressButtonISR`) será chamada
+ * a cada mudança de estado (**CHANGE**) do pino configurado.
+ *
+ * @param pin Pino do botão de pressão longa.
+ */
+void enableButtonInterruptChange(uint8_t pin);
+
+/**
+ * @brief Desabilita a interrupção do botão de pressão longa.
+ *
+ * Após esta chamada, o botão de long press deixará de gerar eventos.
+ *
+ * @param pin Pino do botão de pressão longa.
+ */
+void disableButtonInterruptChange(uint8_t pin);
+
+// -----------------------------------------------------------------------------
+// Funções de estado lógico
+// -----------------------------------------------------------------------------
+
+/**
+ * @brief Verifica se o sistema está em estado de mute.
+ *
+ * Essa função verifica a flag de clique e alterna (`toggle`) o estado lógico.
+ * Retorna o estado atual do sistema:
+ * - `true`  → sistema mutado
+ * - `false` → sistema ativo
+ *
+ * @return `true` se o botão foi pressionado e o sistema está mutado.
+ * @return `false` caso contrário.
+ */
+bool wasMuted();
+
+/**
+ * @brief Verifica se o botão de pressão longa foi acionado.
+ *
+ * Retorna o valor da flag `flagLongPress`, que indica se o botão
+ * foi mantido pressionado por mais de 15 segundos.
+ *
+ * @return `true` se o botão foi pressionado por mais de 15 segundos.
+ * @return `false` caso contrário.
+ */
+bool wasButtonLongPressed();
+
+/**
+ * @brief Reseta o estado lógico do botão de mute.
+ *
+ * Define o estado interno (`isMuted`) como `false`,
+ * independente de eventos anteriores. 
+ * Útil durante inicializações ou reinicializações do sistema.
  */
 void resetButtonState();
-
-/**
- * @brief Desabilita a interrupção associada ao botão.
- * 
- * Após essa chamada, o botão não gerará mais eventos de interrupção
- * até que `enableButtonInterrupt()` seja chamado novamente.
- */
-void disableButtonInterrupt();
-
-/**
- * @brief Habilita a interrupção associada ao botão.
- * 
- * Configura o microcontrolador para chamar a rotina de interrupção
- * (`buttonISR`) quando o botão for pressionado (borda de subida - RISING).
- */
-void enableButtonInterrupt();
 
 #endif
