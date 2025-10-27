@@ -45,7 +45,7 @@ def pub_enfermaria_de_posto_enfermaria(dispositivo_id: str, estado: str, mensage
 pub_posto_enfermaria_de_enfermaria(
 
         dispositivo_id='enfermaria2',
-        estado='emergência',
+        estado='emergencia',
         mensagem='ligar LED',
         room_number='1',
         local='enfermaria',
