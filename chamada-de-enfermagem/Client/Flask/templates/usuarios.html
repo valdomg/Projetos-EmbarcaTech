@@ -55,7 +55,7 @@
               <img src="static/img/icons/usuario.png" alt="" class="icon-side">
             </a>
             <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser3">
-              <li><a class="dropdown-item" href="#">Sair</a></li>
+              <li><a class="dropdown-item" href="/auth/logout">Sair</a></li>
             </ul>
           </div>
         </div>
@@ -66,7 +66,6 @@
             <div class="usuarios-tabela">
                 <div id="planilha" class="borda-conteiner">
                   <div class="linha">
-                    <div class="celula cabecalho">Id</div>
                     <div class="celula cabecalho">Nome</div>
                     <div class="celula cabecalho">Funcao</div>
                     <div class="celula cabecalho">Ações</div>
@@ -79,10 +78,10 @@
 
             <div class="formularioAddUser">
               <button id="abrir">Novo usuário</button>
+              <div id="overlay">
 
-              <div id="formulario">
-                <h3>Cadastrar Usuário</h3>
-                <form id="formUser">
+                <form id="formCadastro" class="formulario">
+                  <h3>Cadastrar Usuário</h3>
                   <label>Nome:</label>
                   <input type="text" name="username" required><br><br>
 
@@ -99,8 +98,27 @@
                   <button type="submit">Salvar</button>
                   <button type="button" id="fechar">Cancelar</button>
                 </form>
-              </div>
               
+              <form id="formPut" class="formulario">
+                  <h3>Alterar Usuário</h3>
+                  <label>Nome:</label>
+                  <input type="text" name="username" required><br><br>
+
+                  
+                  
+                  <label>Senha:</label>
+                  <input type="text" name="password" required><br><br>
+                  
+                  <label for="funcao">Função:</label>
+                  <select id="funcao" name="role">
+                    <option value="admin">Administrador</option>
+                    <option value="usuario">Usuario</option>
+                  </select>
+                  <button type="submit">Salvar</button>
+                  <button type="button" id="fecharPut">Cancelar</button>
+                </form>
+              </div>
+
             </div>
        </div>
 
