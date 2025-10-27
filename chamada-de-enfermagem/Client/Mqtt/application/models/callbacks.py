@@ -1,7 +1,7 @@
 import json
 import os
 from dotenv import load_dotenv
-from Mqtt.application.models.MongoDBConnection import MongoDBConnection
+from MongoDB.MongoDBConnection import MongoDBConnection
 from Mqtt.application.services.utilities import send_update_to_flask 
 from datetime import datetime
 import logging
