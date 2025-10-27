@@ -1,24 +1,40 @@
 import requests
 import logging
+from dotenv import load_dotenv
+import os
+from Mqtt.application.models.MongoDBConnection import MongoDBConnection
+from datetime import datetime
 
-API_URL = 'http://127.0.0.1:5000/api/mapa/registrar'
-def send_update_to_flask(room_number:int, status:str):
+load_dotenv()
+
+mongo__conn = MongoDBConnection(os.getenv('MONGO_URI'), os.getenv('MONGO_DATABASE'))
+
+def register_call_mongo_db(device:str, room_number:int, status:str):
     '''
-    Função para enviar status do microcontrolador para o endpoint de statuss
+    Função para registrar/atualizar uma chamada na tabela de status_chamadas
     '''
-    try:
+    document = {
+        'device': device,
+        'room_number': room_number,
+        'status': status,
+        'updateAt': datetime.now()
+    }
 
-        if status != 'emergencia' and status != 'oscioso':
-            logging.warning(f'status desconhecido: {status}')
-            return
+    mongo__conn.start_connection()
+    if mongo__conn.check_if_document_exists('status_chamada', 'device', device):
+        
+        print('documento já existe, atualizando')
 
-        payload = {'room_number': room_number, 'status':status}
-        response = requests.post(API_URL, json=payload, timeout=3)
+        result = mongo__conn.return_document('status_chamada', 'device', device)
 
-        if response.status_code == 201:
-            logging.info(f'Sucesso ao enviar status do quarto {room_number} ({status}) para o mapa.')
-        else:
-            logging.warning(f'Erro ao enviar status para o mapa: {response.status_code} - {response.text}')
+        if not result:    
+            logging.WARNING('Device não encontrado!')
 
-    except requests.exceptions.RequestException as e:
-        logging.error(f'Falha ao comunicar com o Flask: {e}')
+        id_chamada = str(result['_id'])
+
+        mongo__conn.update_document_by_id('status_chamada', id_chamada, document)
+
+    else:    
+        mongo__conn.insert_document_collection('status_chamada', document)
+
+    mongo__conn.close_connection()
