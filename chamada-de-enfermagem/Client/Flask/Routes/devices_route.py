@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 from datetime import datetime
 from Flask.auth import token_required 
-from Mqtt.application.models.MongoDBConnection import MongoDBConnection
+from MongoDB.MongoDBConnection import MongoDBConnection
 from Flask.Services.device_service import DeviceService
 from Flask.Services.convert_objectdID import convert_all_id_to_string, convert_object_id_to_string
 from Flask.Models.device_db_model import DeviceDBModel

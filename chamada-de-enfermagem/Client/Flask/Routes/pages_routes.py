@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template
-from Mqtt.application.models.MongoDBConnection import MongoDBConnection
+from MongoDB.MongoDBConnection import MongoDBConnection
 from dotenv import load_dotenv
 from Flask.auth import token_required 
 import os

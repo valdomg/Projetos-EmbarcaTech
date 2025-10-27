@@ -5,7 +5,7 @@ from Flask.Models.user_db_model import UserDBModel
 from Flask.Models.user_model import User
 from Flask.auth import SECRET_KEY
 from Flask.auth import token_required 
-from Mqtt.application.models.MongoDBConnection import MongoDBConnection
+from MongoDB.MongoDBConnection import MongoDBConnection
 from dotenv import load_dotenv
 import os
 import json
