@@ -55,7 +55,7 @@
               <img src="static/img/icons/usuario.png" alt="" class="icon-side">
             </a>
             <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser3">
-              <li><a class="dropdown-item" href="#">Sair</a></li>
+              <li><a class="dropdown-item" href="/auth/logout">Sair</a></li>
             </ul>
           </div>
         </div>
@@ -66,8 +66,7 @@
             <div class="usuarios-tabela">
                 <div id="planilha" class="borda-conteiner">
                   <div class="linha3">
-                    <div class="celula cabecalho">Id</div>
-                    <div class="celula cabecalho">Nome</div>
+                    <div class="celula cabecalho">Dispositivo</div>
                     <div class="celula cabecalho">Ações</div>
                   </div>
                     <div id="userTable">
@@ -76,7 +75,7 @@
                 </div>
             </div>
 
-            <div class="formularioAddUser">
+            <!-- <div class="formularioAddUser">
               <button id="abrir">Novo Dispositivo</button>
 
               <div id="formulario">
@@ -89,6 +88,29 @@
                 </form>
               </div>
               
+            </div> -->
+
+            <div class="formularioAddUser">
+              <button id="abrir">Novo Dispositivo</button>
+              <div id="overlay">
+
+                <form id="formCadastro" class="formulario">
+                  <h3>Cadastrar Dispositivo</h3>
+                  <label>Nome:</label>
+                  <input type="text" name="device" required><br><br>
+                  <button type="submit">Salvar</button>
+                  <button type="button" id="fechar">Cancelar</button>
+                </form>
+              
+              <form id="formPut" class="formulario">
+                  <h3>Alterar Dispositivo</h3>
+                  <label>Nome:</label>
+                  <input type="text" name="device" required><br><br>
+                  <button type="submit">Salvar</button>
+                  <button type="button" id="fecharPut">Cancelar</button>
+                </form>
+              </div>
+
             </div>
        </div>
 

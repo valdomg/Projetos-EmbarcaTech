@@ -1,20 +1,31 @@
 const abrir = document.getElementById('abrir');
 const fechar = document.getElementById('fechar');
-const form = document.getElementById('formulario');
-const formUsers = document.getElementById('formUser');
+const fecharPut = document.getElementById('fecharPut');
+const form = document.getElementById('formCadastro');
+const formPut = document.getElementById('formPut');
+const overlay = document.getElementById('overlay');
+
+let idEditando = null;
 
 abrir.addEventListener('click', () => {
   form.style.display = 'block';
+  overlay.style.display = 'block';
 });
 
 fechar.addEventListener('click', () => {
   form.style.display = 'none';
+  overlay.style.display = 'none';
 });
 
-formUsers.addEventListener('submit', async (e) => {
+fecharPut.addEventListener('click', () => {
+  overlay.style.display = 'none';
+  formPut.style.display = 'none';
+});
+
+form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  const formData = new FormData(formUsers);
+  const formData = new FormData(form);
   const dados = Object.fromEntries(formData.entries());
 
   try {
@@ -28,14 +39,42 @@ formUsers.addEventListener('submit', async (e) => {
 
     const resultado = await resposta.json();
     console.log(resultado);
-    carregarUsuarios();
+    carregarDispositivos();
 
   } catch (error) {
     console.error(error);
   }
 });
 
-async function carregarUsuarios() {
+formPut.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const formData = new FormData(formPut);
+  const dados = Object.fromEntries(formData.entries());
+
+  dados["document_id"] = idEditando;
+
+  try {
+      // Modo edição
+      const resposta = await fetch(`/api/devices/update`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados)
+      });
+
+      if (resposta.ok) {
+        formPut.style.display = 'none';
+        overlay.style.display = 'none';
+        carregarDispositivos();
+      } else {
+        alert('Erro ao atualizar usuário.');
+      } 
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+async function carregarDispositivos() {
   const resposta = await fetch('/api/devices');
   const devices = await resposta.json();
 
@@ -48,7 +87,6 @@ async function carregarUsuarios() {
     linha.classList.add('linha3');
 
     linha.innerHTML += `
-      <div class="celula">${device._id}</div>
       <div class="celula">${device.device}</div>
       <div class="celula">
         <button class="btn-excluir" data-id="${device._id}">Excluir</button>
@@ -64,13 +102,29 @@ async function carregarUsuarios() {
       const id = this.getAttribute('data-id');
       const resposta = await fetch(`/api/devices/delete/${id}`, { method: 'DELETE' });
       if (resposta.ok) {
-        alert(`Usuário ${id} excluído`);
         location.reload(); 
       } else {
         alert(`Erro ao excluir o usuário ${id}`);
       }
     });
-  });
+  },
+
+  document.querySelectorAll('.btn-editar').forEach(btn => {
+    btn.addEventListener('click', function () {
+      const id = this.getAttribute('data-id');
+      const linha = this.closest('.linha3');
+      const nome = linha.querySelector('.celula:nth-child(1)').innerText;
+
+      document.querySelector('#formPut input[name="device"]').value = nome;
+
+      idEditando = id;
+
+      formPut.style.display = 'block';
+      overlay.style.display = 'block';
+    });
+  })
+);
+
 }
 
-carregarUsuarios();
+carregarDispositivos();
