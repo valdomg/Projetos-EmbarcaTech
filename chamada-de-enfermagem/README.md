@@ -68,7 +68,7 @@ git clone https://github.com/Embarcatech-Residencia-CAPEDII/Projetos
 cd ./chamada-de-enfermagem
 ```
 
-### **2. Criar o Ambiente Virtual**
+### **2. Criar o Ambiente Virtual e instale as dependências**
 ```bash
 python -m venv .venv
 ```
@@ -81,21 +81,28 @@ source .venv/bin/activate   # Linux/MacOS
 .venv\Scripts\activate      #Windows
 ```
 
-### **3. Instalar o Flask e dependências**
 ```bash
-pip install flask-pymongo
-pip install dotenv
-pip install paho-mqtt
-pip install PyJWT
-pip install jwt
-pip install gunicorn
-pip install gunicorn[gevent]
-pip install requests
+pip install -r requirements.txt
+```
+
+
+### **3. Instale e crie o usuário no mongodb**
+Acesse o site oficial do MongoDB e faça o tutorial de instalação, após a instalação crie o usuário de crud para a database.
+
+```bash
+mongosh
+```
+```bash
+use admin
+```
+```bash
+db.createUser({user:'<nome_user>',pwd:'<senha>', roles:[{role:'readWrite',db:'<nome-database>'}]})
 ```
 ### **4. No arquivo .env coloque as credenciais para conexão com seu Banco de dados e do broker**
 ```
-MONGO_URI = ''
-MONGO_DATABASE = ''
+MONGO_URI ='mongodb://<nome-user>:<senha>@localhost:27017/<nome-database>?authSource=admin'
+
+MONGO_DATABASE = 'nome-database'
 
 BROKER_IP = ''
 BROKER_PORT = ''
