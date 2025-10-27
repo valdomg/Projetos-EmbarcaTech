@@ -108,7 +108,7 @@ void processing_json_MQTT(byte* payload, unsigned int length){
 
   Serial.println("#######################");
 
-  // Adiciona na lista
-  listCalls.add(room_number);
+  // Adiciona na lista somente os valores importantes para marcar o chamado como resolvido
+  listCalls.add(room_number, id);
   listUpdated = true;  // marca que a lista foi alterada
 }

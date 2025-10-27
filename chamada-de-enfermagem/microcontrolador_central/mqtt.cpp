@@ -95,5 +95,12 @@ void publicReponseDivice(const char* id, float value) {
   char topic[50];
   snprintf(topic, sizeof(topic), "%s/%s", MQTT_PUBLICATION_TOPIC, id); // Monta o tópico final (base + id).
 
+  // TESTE
+  // Serial.print("\n ******(Publicar MQTT) Quarto marcado como concluído: ");
+  // Serial.println(payload);
+  // Serial.print("\n ******(Publicar MQTT) ID dspositivo: ");
+  // Serial.println(id);
+  // endTESTE
+
   client.publish(topic, payload); // Publica a mensagem no broker MQTT.
 }

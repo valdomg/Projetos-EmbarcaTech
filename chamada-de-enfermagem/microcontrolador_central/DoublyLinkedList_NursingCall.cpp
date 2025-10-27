@@ -1,4 +1,5 @@
 #include "DoublyLinkedList_NursingCall.h"  // Inclui o header da lista
+#include <cstring> // para strncpy
 
 
 /* Construtor:
@@ -32,6 +33,12 @@ int List_NursingCall::getInfirmaryCurrent() {
     return -1;
 }
 
+// retorna o campo ID do nó current
+const char* List_NursingCall::getIdCurrent() {
+    if (current) return current->id;
+    return nullptr;
+}
+
 // retorna true quando há pelo menos um nó
 bool List_NursingCall::hasNursingCall() {
     return total > 0;
@@ -40,9 +47,14 @@ bool List_NursingCall::hasNursingCall() {
 // =========================
 //        Add Nó
 // =========================
-void List_NursingCall::add(int infirmary) { // Adicionar um nó ao final da lista
+void List_NursingCall::add(int infirmary, const char* id) { // Adicionar um nó ao final da lista
     NursingCall* new_node = new NursingCall; // Cria um novo nó
     new_node->infirmary = infirmary; // O campo infirmary do novo nó recebe o valor correspondente
+
+    // Copia o ID 
+    strncpy(new_node->id, id, sizeof(new_node->id) - 1);
+    new_node->id[sizeof(new_node->id) - 1] = '\0';
+
     new_node->next = nullptr; // Como vai ser o último nó, o campo next é vazio
     new_node->prev = tail; // Liga o prev do novo ao tail atual
 

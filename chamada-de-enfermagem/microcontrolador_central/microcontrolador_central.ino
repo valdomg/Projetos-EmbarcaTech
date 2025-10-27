@@ -49,15 +49,24 @@ void handleDelete() {  // ===== Botão Delete
   if (!deletionConfirmation) {
     showExclusionConfirm(listCalls.getInfirmaryCurrent());
     deletionConfirmation = true;
-  } else {                      // Segundo clique: executa deleção
-    listCalls.removeCurrent();  // Apaga o item selecionado
-    fixed_data();               // Atualiza o display com os dados fixos
+  } else { // Segundo clique: executa deleção
+
+
+    /* ___Pública (marcar com concluído o chamado) via MQTT*/  
+    int infirmary = listCalls.getInfirmaryCurrent();
+    const char* idDevice = listCalls.getIdCurrent();
+    // Chama a função de públicar o ID do dispositivo e o número da enfermaria (tranforma em float o infirmary)
+    publicReponseDivice(idDevice, (float)infirmary); 
+    
+      
+    listCalls.removeCurrent(); // Apaga o item selecionado
+    fixed_data(); // Atualiza o display com os dados fixos
     showInfirmaryNumber(
       listCalls.getInfirmaryCurrent(),
       listCalls.hasNursingCall(),
       listCalls.getTotal());  // Mostra os dados no display
-      // reseta o flag
-      deletionConfirmation = false;
+    // reseta o flag
+    deletionConfirmation = false;
   }
 }
 
@@ -76,9 +85,9 @@ void setup() {
   initButtons();
 
   showInfirmaryNumber(
-      listCalls.getInfirmaryCurrent(),
-      listCalls.hasNursingCall(),
-      listCalls.getTotal());  // Mostra os dados no display
+    listCalls.getInfirmaryCurrent(),
+    listCalls.hasNursingCall(),
+    listCalls.getTotal());  // Mostra os dados no display
 }
 
 void loop() {
