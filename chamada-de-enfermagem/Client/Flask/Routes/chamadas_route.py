@@ -3,7 +3,7 @@ from datetime import datetime
 from Flask.auth import token_required 
 from Flask.Models.chamadas_db_model import ChamadasDBModel
 from Flask.Services.convert_objectdID import convert_all_id_to_string, convert_object_id_to_string
-from Mqtt.application.models.MongoDBConnection import MongoDBConnection
+from MongoDB.MongoDBConnection import MongoDBConnection
 from dotenv import load_dotenv
 import os
 import logging
