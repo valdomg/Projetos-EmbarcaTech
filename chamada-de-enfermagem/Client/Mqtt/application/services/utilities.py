@@ -2,7 +2,7 @@ import requests
 import logging
 from dotenv import load_dotenv
 import os
-from Mqtt.application.models.MongoDBConnection import MongoDBConnection
+from MongoDB.MongoDBConnection import MongoDBConnection
 from datetime import datetime
 
 load_dotenv()
