@@ -6,6 +6,7 @@ const formPut = document.getElementById('formPut');
 const overlay = document.getElementById('overlay');
 
 let idEditando = null;
+let nomeEditando = null;
 
 abrir.addEventListener('click', () => {
   form.style.display = 'block';
@@ -27,6 +28,11 @@ form.addEventListener('submit', async (e) => {
 
   const formData = new FormData(form);
   const dados = Object.fromEntries(formData.entries());
+
+  console.log(nomeEditando)
+  console.log(dados.username)
+
+  
 
   try {
       // Modo adicionar 
@@ -55,6 +61,10 @@ formPut.addEventListener('submit', async (e) => {
   const dados = Object.fromEntries(formData.entries());
 
   dados["document_id"] = idEditando;
+
+  if (dados.username === nomeEditando) {
+    delete dados.username;
+  }
 
   try {
       // Modo edição
@@ -125,6 +135,7 @@ async function carregarUsuarios() {
 
       // Marca que estamos editando
       idEditando = id;
+      nomeEditando = nome;
 
       // Abre o formulário
       formPut.style.display = 'block';
