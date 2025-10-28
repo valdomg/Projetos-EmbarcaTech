@@ -29,6 +29,12 @@ async function roomUpdate() {
     const ultimaLeitura = dados[dados.length - 1];
 
     const grid = document.getElementById("roomGrid");
+
+    // condição caso o grid tenha sido removido do html
+    if(!grid){
+      console.log('Não encontrou o elemento RoomGrid');
+      return;
+    }
     grid.innerHTML = "";
 
     const tempGaugeId = `gauge-temp-${salaAtual}`;
@@ -49,12 +55,6 @@ async function roomUpdate() {
 
   } catch (error) {
     console.error("Erro ao carregar sala:", error);
-
-    if (error.message.includes("401") || error.message.includes("403")) {
-      alert("Acesso não autorizado. Faça login novamente.");
-      localStorage.removeItem("token");
-      window.location.href = "login.html";
-    }
   }
 }
 
@@ -69,8 +69,11 @@ async function atualizarGraficos() {
     const { start, end } = calcularIntervalo();
     const dados = await roomTempInterval(salaAtual, start, end);
 
-    if (!dados || dados.length === 0) {
-      console.warn("Nenhum dado retornado para o gráfico.");
+    const grafico = document.querySelector(".chart"); 
+
+    if (!Array.isArray(dados) || !dados || dados.length === 0) {
+      console.log("Nenhum dado retornado para o gráfico.");
+      grafico.innerHTML = '<h4>Sem dados nas últimas 24 horas!</h4>'
       return;
     }
 

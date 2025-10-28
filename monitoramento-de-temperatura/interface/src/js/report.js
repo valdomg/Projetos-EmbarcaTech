@@ -1,25 +1,50 @@
 
-import { TempIntervalo } from "./api.js";
+import { roomTempInterval, roomsSearch } from "./api.js";
 
-document.getElementById('emitirRelatorio').addEventListener('click', async () => {
-  const token = localStorage.getItem("token");
-
-  if (!token) {
-    alert("Sessão expirou, Faça login novamente");
-    window.location.href = "login.html";
-    return;
-  }
-
-  // Converte os valores dos inputs em ISO
-  const  start = new Date(document.getElementById('start').value).toISOString();
-  const  end = new Date(document.getElementById('end').value).toISOString();
+//gerar opções do menu relario dinamicamente
+async function gerarOptions() {
 
   try {
-    const dados = await TempIntervalo(start, end);
+      const dados = await roomsSearch();
+      
+      const select = document.getElementById('room-select');
+      dados.forEach(sala => {
+      select.innerHTML += `<option value="${sala._id}">${sala.name}</option>`;
+    });
+  }catch(erro){
+    console.error("Erro ao carregar opções do menu:", erro);
+  }
+}
+
+//so gera as opções do menu se houver o id no html
+if (document.getElementById('room-select')) {
+  gerarOptions();
+}
+
+
+
+const emitir = document.getElementById('emitirRelatorio');
+// evento clique chamando a funcao gerar relatorio
+if (emitir){
+  emitir.addEventListener('click', async ()=>{
+
+    gerarRelatorio();
+  })
+}
+
+
+export async function gerarRelatorio() {
+
+    // Converte os valores dos inputs em ISO
+  const idRoom = document.querySelector('select').value;
+  const start = new Date(document.getElementById('start').value).toISOString();
+  const end = new Date(document.getElementById('end').value).toISOString();
+
+  try {
+    const dados = await roomTempInterval(idRoom, start, end);
     console.log(dados);
 
     if (!dados.length) {
-      console.error(`Nenhum dado encontrado para o período`);
       window.alert("Sem dados para o período");
       return;
     }
@@ -36,16 +61,10 @@ document.getElementById('emitirRelatorio').addEventListener('click', async () =>
     const csvContent = csvHeader + csvRows.join('\n');
     downloadCSV(csvContent, `relatorio_${start}_${Date.now()}.csv`);
 
-  } catch (error) {
-    console.error("Erro ao carregar sala:", error);
-
-    if (error.message.includes("401") || error.message.includes("403")) {
-      alert("Acesso não autorizado. Faça login novamente.");
-      localStorage.removeItem("token");
-      window.location.href = "login.html";
-    }
+  } catch (erro){
+    window.alert(` ${erro.message}`);
   }
-});
+};
 
 
 //funcao para baixar arquivo csv

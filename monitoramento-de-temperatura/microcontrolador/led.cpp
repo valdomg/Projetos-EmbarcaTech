@@ -1,4 +1,5 @@
 #include "led.h"   // Inclui o header correspondente, que contém a definição do pino e protótipos das funções
+#include "config.h"
 
 // -----------------------------------------------------------------------------
 // Variáveis globais

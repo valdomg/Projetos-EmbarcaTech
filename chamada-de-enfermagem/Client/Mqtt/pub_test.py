@@ -15,9 +15,9 @@ def publish_message(topic: str, payload: dict):
     client.disconnect()
     print(f"Mensagem publicada em '{topic}': {payload}")
 
-def pub_enfermagem_dispositivo(dispositivo_id: str, estado: str, mensagem: str, room_number: str, local:str, comando: str):
-    """Publica um evento vindo da enfermagem."""
-    topic = f'dispositivos/posto_enfermagem/{dispositivo_id}'
+def pub_posto_enfermaria_de_enfermaria(dispositivo_id: str, estado: str, mensagem: str, room_number: str, local:str, comando: str):
+    """Publica um evento vindo da enfermaria."""
+    topic = f'dispositivos/posto_enfermaria/{dispositivo_id}'
     payload = {
         'id': dispositivo_id,
         'estado': estado,
@@ -28,9 +28,9 @@ def pub_enfermagem_dispositivo(dispositivo_id: str, estado: str, mensagem: str, 
     }
     publish_message(topic, payload)
 
-def pub_posto_enfermagem(dispositivo_id: str, estado: str, mensagem: str, room_number: str, local:str, comando: str):
-    """Publica um evento vindo do posto de enfermagem no tópico local."""
-    topic = f'dispositivos/enfermagem/{dispositivo_id}'
+def pub_enfermaria_de_posto_enfermaria(dispositivo_id: str, estado: str, mensagem: str, room_number: str, local:str, comando: str):
+    """Publica um evento vindo do posto de enfermaria no tópico local."""
+    topic = f'dispositivos/enfermaria/{dispositivo_id}'
     payload = {
         'id': dispositivo_id,
         'estado': estado,
@@ -42,24 +42,24 @@ def pub_posto_enfermagem(dispositivo_id: str, estado: str, mensagem: str, room_n
     publish_message(topic, payload)
 
 # ====== EXEMPLOS DE USO ======
-pub_enfermagem_dispositivo(
+pub_posto_enfermaria_de_enfermaria(
 
-        dispositivo_id='Enfermagem1',
+        dispositivo_id='enfermaria2',
         estado='emergencia',
-        mensagem='Ligar LED',
+        mensagem='ligar LED',
         room_number='1',
-        local='Enfermagem',
+        local='enfermaria',
         comando='ligar'
         
 )
 
-
-pub_posto_enfermagem(
-        dispositivo_id='Enfermagem1',
-        estado='emergencia',
-        mensagem='Ligar LED',
-        room_number='1',
-        local='Enfermagem',
-        comando='ligar'
+'''
+pub_enfermaria_de_posto_enfermaria(
+        dispositivo_id='enfermaria10',
+        estado='oscioso',
+        mensagem='desligar LED',
+        room_number='10',
+        local='enfermaria',
+        comando='desligar'
 )
-
+'''

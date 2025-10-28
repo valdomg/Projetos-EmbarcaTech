@@ -39,6 +39,12 @@ export async function carregarTemperaturas() {
 
     // Renderiza grid
     const grid = document.getElementById("roomsGrid");
+
+    // condição caso o grid tenha sido removido do html
+    if(!grid){
+      console.log('Não encontrou o elemento RoomGrid');
+      return;
+    }
     grid.innerHTML = "";
 
     salas.forEach(sala => {
