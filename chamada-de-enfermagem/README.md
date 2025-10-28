@@ -139,7 +139,16 @@ cd ./chamada-de-enfermagem/Client
 gunicorn -w 4 -b 0.0.0.0:5000 Flask.app:app        #Linux
 ```
 
-### **8. Realizar um teste**
+### **8. Abrir a documentação da API em ambiente de produção**
+```bash
+cd ./chamada-de-enfermagem/Client
+```
+```bash
+python -m Flask.doc        #Linux
+```
+
+
+### **9. Realizar um teste**
 Em outro terminal execute o arquivo pub_test.py e veja a nova chamada dentro do app 
 ```bash
 python pub_test.py  #Windows/Linux
