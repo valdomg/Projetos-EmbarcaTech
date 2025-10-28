@@ -1,7 +1,7 @@
 import json
 import os
 from dotenv import load_dotenv
-from Mqtt.application.models.MongoDBConnection import MongoDBConnection
+from MongoDB.MongoDBConnection import MongoDBConnection
 from Mqtt.application.services.utilities import register_call_mongo_db 
 from datetime import datetime
 import logging
