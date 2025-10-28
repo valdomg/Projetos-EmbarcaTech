@@ -71,3 +71,84 @@ chamadas = [
         'Data': 'ISODate'
     },
 ]
+
+status_chamadas =[
+    {
+        '_id': 'ObjectID',
+        'dispositivo_id': 'Device1',
+        'Local': '<local_chamada>',
+        'status': 'emergencia',
+        'updateAt': 'ISODate'
+    },
+
+    {
+        '_id': 'ObjectID',
+        'dispositivo_id': 'Device2',
+        'Local': '<local_chamada>',
+        'status': 'oscioso',
+        'updateAt': 'ISODate'
+    },
+    
+    {
+        '_id': 'ObjectID',
+        'dispositivo_id': 'Device3',
+        'Local': '<local_chamada>',
+        'status': 'emergencia',
+        'updateAt': 'ISODate'
+    }
+]
+
+status_chamadas_emergencia = [
+    {
+        '_id': 'ObjectID',
+        'dispositivo_id': 'Device1',
+        'Local': '<local_chamada>',
+        'status': 'emergencia',
+        'updateAt': 'ISODate'
+    },
+
+    {
+        '_id': 'ObjectID',
+        'dispositivo_id': 'Device2',
+        'Local': '<local_chamada>',
+        'status': 'emergencia',
+        'Data': 'ISODate'
+    },
+    
+    {
+        '_id': 'ObjectID',
+        'dispositivo_id': 'Device3',
+        'Local': '<local_chamada>',
+        'status': 'emergencia',
+        'Data': 'ISODate'
+    }
+    
+]
+
+
+status_chamadas_oscioso = [
+    {
+        '_id': 'ObjectID',
+        'dispositivo_id': 'Device1',
+        'Local': '<local_chamada>',
+        'status': 'oscioso',
+        'Data': 'ISODate'
+    },
+
+    {
+        '_id': 'ObjectID',
+        'dispositivo_id': 'Device2',
+        'Local': '<local_chamada>',
+        'status': 'oscioso',
+        'Data': 'ISODate'
+    },
+    
+    {
+        '_id': 'ObjectID',
+        'dispositivo_id': 'Device3',
+        'Local': '<local_chamada>',
+        'status': 'oscioso',
+        'Data': 'ISODate'
+    }
+    
+]

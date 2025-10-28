@@ -1,50 +1,104 @@
+
 from flask import Blueprint, jsonify, request
 import logging
+from dotenv import load_dotenv
+import os
 from Flask.Models.chamadas_status_model import ChamadasStatusModel
+from Flask.Services.convert_objectdID import convert_all_id_to_string, convert_object_id_to_string
+from MongoDB.MongoDBConnection import MongoDBConnection
+
 
 mapa_bp = Blueprint('mapa', __name__, url_prefix='/api/mapa')
-
 '''
-Rota de api para informar qual enfermaria está com emergência
+Rota de api para informar status das enfermaria
 
 ROTAS
-/api/mapa/registrar_chamadas
 /api/mapa/status/oscioso
 /api/mapa/status/emergencia
 /api/mapa/status
 '''
+load_dotenv()
 
-status_chamadas = ChamadasStatusModel(list())
+uri = os.getenv('MONGO_URI')
+database = os.getenv('MONGO_DATABASE')
 
-@mapa_bp.route('/registrar', methods=['POST'])
-def registrar_chamada():
+mongo_conn = MongoDBConnection(uri, database)
+status_chamadas = ChamadasStatusModel(mongo_conn)
 
-    data = request.get_json()
-    try:
-        if 'room_number' not in data or 'status' not in data:
-            return jsonify({'Erro':'Campos incorretos'}), 400
-        
-        if status_chamadas.adicionar_sala(data['room_number'], data['status']):
-            return jsonify({'Message': 'chamado registrado'}), 201
-
-    except Exception as e:
-        print(e)
 
 @mapa_bp.route('/status', methods=['GET'])
 def get_status():
-    print(status_chamadas.return_salas())
-    return jsonify(status_chamadas.return_salas()), 200
+
+    try:
+        mongo_conn.start_connection()
+    except Exception as e:
+        logging.exception('Erro ao conectar ao banco de dados')
+        return jsonify({'Error':'Erro interno do banco de dados'}), 500
+
+    try:
+        chamadas = status_chamadas.return_docs_from_status_chamadas()
+
+        if chamadas:
+            json_chamadas = convert_all_id_to_string(chamadas)
+            return jsonify(json_chamadas), 200
+
+    except Exception as e:
+        logging.exception('Error in return documents')
+        return jsonify({'Error':'failure in return documents'}), 400
+
+    finally:
+        mongo_conn.close_connection()
+
+    return {'Error': 'Chamadas não encontradas'},404
 
 
 @mapa_bp.route('/status/oscioso', methods=['GET'])
 def get_status_oscioso():
-    salas = status_chamadas.return_salas_status_oscioso()
-    return jsonify(salas), 200
+
+    try:
+        mongo_conn.start_connection()
+    except Exception as e:
+        logging.exception('Erro ao conectar ao banco de dados')
+        return jsonify({'Error':'Erro interno do banco de dados'}), 500
+
+    try:
+        chamadas = status_chamadas.return_docs_status('oscioso')
+
+        if chamadas:
+            json_chamadas = convert_all_id_to_string(chamadas)
+            return jsonify(json_chamadas), 200
+
+    except Exception as e:
+        logging.exception('Error in return documents')
+        return jsonify({'Error':'failure in return documents'}), 400
+
+    finally:
+        mongo_conn.close_connection()
+
+    return {'Error': 'Chamadas não encontradas'},404
 
 @mapa_bp.route('/status/emergencia', methods=['GET'])
 def get_status_emergencia():
-    salas = status_chamadas.return_salas_status_emergencia()
-    return jsonify(salas), 200
 
+    try:
+        mongo_conn.start_connection()
+    except Exception as e:
+        logging.exception('Erro ao conectar ao banco de dados')
+        return jsonify({'Error':'Erro interno do banco de dados'}), 500
 
+    try:
+        chamadas = status_chamadas.return_docs_status('emergencia')
+
+        if chamadas:
+            json_chamadas = convert_all_id_to_string(chamadas)
+            return jsonify(json_chamadas), 200
+
+    except Exception as e:
+        logging.exception('Error in return documents')
+        return jsonify({'Error':'failure in return documents'}), 400
+
+    finally:
+        mongo_conn.close_connection()
+
+    return {'Error': 'Chamadas não encontradas'},404
 

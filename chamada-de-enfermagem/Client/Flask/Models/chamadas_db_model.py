@@ -1,4 +1,4 @@
-from Mqtt.application.models.MongoDBConnection import MongoDBConnection
+from MongoDB.MongoDBConnection import MongoDBConnection
 from datetime import datetime, timezone
 
 class ChamadasDBModel():
