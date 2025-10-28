@@ -21,18 +21,18 @@ def register_call_mongo_db(device:str, room_number:int, status:str):
     }
 
     mongo__conn.start_connection()
-    if mongo__conn.check_if_document_exists('status_chamada', 'device', device):
+    if mongo__conn.check_if_document_exists('status_chamadas', 'device', device):
         
         print('documento já existe, atualizando')
 
-        result = mongo__conn.return_document('status_chamada', 'device', device)
+        result = mongo__conn.return_document('status_chamadas', 'device', device)
 
         if not result:    
             logging.WARNING('Device não encontrado!')
 
         id_chamada = str(result['_id'])
 
-        mongo__conn.update_document_by_id('status_chamada', id_chamada, document)
+        mongo__conn.update_document_by_id('status_chamadas', id_chamada, document)
 
     else:    
         mongo__conn.insert_document_collection('status_chamada', document)
