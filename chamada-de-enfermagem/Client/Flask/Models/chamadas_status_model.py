@@ -19,8 +19,8 @@ class ChamadasStatusModel:
         '''
         Retornar os documentos por status do documento da collection
         '''
-        docs = self.db.list_all_documents_from_collection()
-        docs_status = {}
+        docs = self.db.list_all_documents_from_collection('status_chamadas')
+        docs_status = []
 
         if not docs:
             return False
