@@ -1,3 +1,6 @@
+const contagemChamada = document.getElementById("contagemChamada")
+const contagemDispositivos = document.getElementById("contagemDispositivos")
+
 function renderChamadas(dados, containerId) {
   const container = document.getElementById(containerId);
 
@@ -30,9 +33,29 @@ async function fetchChamadas(containerId) {
 
         const dados = await response.json(); 
         renderChamadas(dados, containerId);
-    } catch (error) {
+
+    }
+     catch (error) {
         console.error(error);
     }   
+
+    try {
+        const response = await fetch("/api/chamadas/dia/contagem"); 
+        const dados = await response.json()
+
+        contagemChamada.innerHTML = dados.Quantidade;
+    } catch (error) {
+      console.error(error);
+    }
+
+    try {
+        const response = await fetch("/api/devices/quantidade"); 
+        const dados = await response.json()
+
+        contagemDispositivos.innerHTML = dados.Quantidade;
+    } catch (error) {
+      console.error(error);
+    }
 }
 
 fetchChamadas("chamadas-lista");
