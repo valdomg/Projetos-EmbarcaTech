@@ -1,8 +1,8 @@
 import json
 import os
 from dotenv import load_dotenv
-from Mqtt.application.models.MongoDBConnection import MongoDBConnection
-from Mqtt.application.services.utilities import send_update_to_flask 
+from MongoDB.MongoDBConnection import MongoDBConnection
+from Mqtt.application.services.utilities import register_call_mongo_db 
 from datetime import datetime
 import logging
 from time import sleep
@@ -108,12 +108,13 @@ def on_message(client, userdata, message, properties=None):
     if local_topic == 'enfermaria':
         logging.info(f'Mensagem do tópico: {local_topic}')
     
-    send_update_to_flask(room_number, estado)
     mongo.close_connection()
+    
+    register_call_mongo_db(dispositivo_id, room_number, estado)
 
 def on_subscribe(client, userdata, mid, granted_os, properties=None):
     '''
-    Callback para conferir se a inscrição em algum tópico foi bem sucedida
+    Callback para conferir s'e a inscrição em algum tópico foi bem sucedida
     '''
     logging.info(f'Inscrito com sucesso no tópico: {topic}')
 
