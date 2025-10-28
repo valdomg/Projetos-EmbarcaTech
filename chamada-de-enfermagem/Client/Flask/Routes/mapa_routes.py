@@ -23,7 +23,7 @@ uri = os.getenv('MONGO_URI')
 database = os.getenv('MONGO_DATABASE')
 
 mongo_conn = MongoDBConnection(uri, database)
-status_chamadas = ChamadasStatusModel(MongoDBConnection)
+status_chamadas = ChamadasStatusModel(mongo_conn)
 
 
 @mapa_bp.route('/status', methods=['GET'])
