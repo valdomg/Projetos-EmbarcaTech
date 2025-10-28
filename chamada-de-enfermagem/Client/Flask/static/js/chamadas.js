@@ -6,16 +6,16 @@ function renderChamadas(dados, containerId) {
     div.className = "chamada-exibir borda-conteiner";
 
     div.appendChild(Object.assign(document.createElement("p"), {
-      textContent: `Enfermaria: ${item.enfermaria}`
+      textContent: `Enfermaria: ${item.Enfermaria}`
     }));
 
     div.appendChild(Object.assign(document.createElement("p"), {
-      textContent: `Data: ${item.data}`
+      textContent: `Data: ${item.Data}`
     }));
 
-    div.appendChild(Object.assign(document.createElement("p"), {
-      textContent: `Hora: ${item.hora}`
-    }));
+    // div.appendChild(Object.assign(document.createElement("p"), {
+    //   textContent: `Hora: ${item.hora}`
+    // }));
 
     container.appendChild(div);
   });

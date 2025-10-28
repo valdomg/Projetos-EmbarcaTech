@@ -13,8 +13,8 @@ abrir.addEventListener('click', () => {
 });
 
 fechar.addEventListener('click', () => {
-  overlay.style.display = 'none';
   form.style.display = 'none';
+  overlay.style.display = 'none';
 });
 
 fecharPut.addEventListener('click', () => {
@@ -29,20 +29,18 @@ form.addEventListener('submit', async (e) => {
   const dados = Object.fromEntries(formData.entries());
 
   try {
-      // Modo adicionar 
-      const resposta = await fetch('/api/users/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dados)
-      });
+    const resposta = await fetch('/api/devices/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'  
+      },
+      body: JSON.stringify(dados)
+    });
 
-      if (resposta.ok) {
-        form.style.display = 'none';
-        overlay.style.display = 'none';
-        carregarUsuarios();
-      } else {
-        alert('Erro ao adicionar usuário.');
-    }
+    const resultado = await resposta.json();
+    console.log(resultado);
+    carregarDispositivos();
+
   } catch (error) {
     console.error(error);
   }
@@ -58,7 +56,7 @@ formPut.addEventListener('submit', async (e) => {
 
   try {
       // Modo edição
-      const resposta = await fetch(`/api/users/update`, {
+      const resposta = await fetch(`/api/devices/update`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dados)
@@ -67,7 +65,7 @@ formPut.addEventListener('submit', async (e) => {
       if (resposta.ok) {
         formPut.style.display = 'none';
         overlay.style.display = 'none';
-        carregarUsuarios();
+        carregarDispositivos();
       } else {
         alert('Erro ao atualizar usuário.');
       } 
@@ -76,24 +74,23 @@ formPut.addEventListener('submit', async (e) => {
   }
 });
 
-async function carregarUsuarios() {
-  const resposta = await fetch('/api/users');  
-  const usuarios = await resposta.json();
+async function carregarDispositivos() {
+  const resposta = await fetch('/api/devices');
+  const devices = await resposta.json();
 
   const planilha = document.getElementById('userTable');
 
   planilha.innerHTML = "";
 
-  usuarios.forEach(usuario => {
+  devices.forEach(device => {
     const linha = document.createElement('div');
-    linha.classList.add('linha');
+    linha.classList.add('linha3');
 
     linha.innerHTML += `
-      <div class="celula">${usuario.username}</div>
-      <div class="celula">${usuario.role}</div>
+      <div class="celula">${device.device}</div>
       <div class="celula">
-        <button class="btn-excluir" data-id="${usuario._id}">Excluir</button>
-        <button class="btn-editar" data-id="${usuario._id}">Alterar</button>
+        <button class="btn-excluir" data-id="${device._id}">Excluir</button>
+        <button class="btn-editar" data-id="${device._id}">Alterar</button>
       </div>
     `
 
@@ -103,9 +100,9 @@ async function carregarUsuarios() {
   document.querySelectorAll('.btn-excluir').forEach(btn => {
     btn.addEventListener('click', async function() {
       const id = this.getAttribute('data-id');
-      const resposta = await fetch(`/api/users/delete/${id}`, { method: 'DELETE' });
+      const resposta = await fetch(`/api/devices/delete/${id}`, { method: 'DELETE' });
       if (resposta.ok) {
-        carregarUsuarios(); 
+        location.reload(); 
       } else {
         alert(`Erro ao excluir o usuário ${id}`);
       }
@@ -115,40 +112,19 @@ async function carregarUsuarios() {
   document.querySelectorAll('.btn-editar').forEach(btn => {
     btn.addEventListener('click', function () {
       const id = this.getAttribute('data-id');
-      const linha = this.closest('.linha');
+      const linha = this.closest('.linha3');
       const nome = linha.querySelector('.celula:nth-child(1)').innerText;
-      const funcao = linha.querySelector('.celula:nth-child(2)').innerText;
 
-      // Preenche o formulário com os dados atuais
-      document.querySelector('#formPut input[name="username"]').value = nome;
-      // document.querySelector('#formPut input[name="role"]').value = funcao;
+      document.querySelector('#formPut input[name="device"]').value = nome;
 
-      // Marca que estamos editando
       idEditando = id;
 
-      // Abre o formulário
       formPut.style.display = 'block';
       overlay.style.display = 'block';
     });
   })
 );
+
 }
 
-async function putUsuarios(dados) {
-  try {
-    const resposta = await fetch('/api/users/register', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'  
-      },
-      body: JSON.stringify(dados)
-    });
-    carregarUsuarios();
-
-  } catch (error) {
-    console.error(error);
-  }
-}
-
-
-carregarUsuarios();
+carregarDispositivos();
