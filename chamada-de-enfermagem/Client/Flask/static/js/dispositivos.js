@@ -6,6 +6,7 @@ const formPut = document.getElementById('formPut');
 const overlay = document.getElementById('overlay');
 
 let idEditando = null;
+let nomeEditando = null;
 
 abrir.addEventListener('click', () => {
   form.style.display = 'block';
@@ -53,6 +54,10 @@ formPut.addEventListener('submit', async (e) => {
   const dados = Object.fromEntries(formData.entries());
 
   dados["document_id"] = idEditando;
+
+  if (dados.device === nomeEditando) {
+    delete dados.device;
+  }
 
   try {
       // Modo edição
@@ -118,6 +123,8 @@ async function carregarDispositivos() {
       document.querySelector('#formPut input[name="device"]').value = nome;
 
       idEditando = id;
+      nomeEditando = nome;
+
 
       formPut.style.display = 'block';
       overlay.style.display = 'block';
