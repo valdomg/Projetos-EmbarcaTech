@@ -69,11 +69,14 @@ void checkMQTTConnected() {
 void callback(char* topic, byte* payload, unsigned int length) {
   log(LOG_DEBUG, "Mensagem recebida no tópico: %s",topic);
 
-  Serial.print("Mensagem: ");
+  char message[140];
+
   for (unsigned int i = 0; i < length; i++) {
-    Serial.print((char)payload[i]); // Converte cada byte para caractere e imprime
+    message[i] = (char)payload[i]; // Converte cada byte para caractere e imprime
   }
-  // Serial.println();
+  message[length] = '\0';
+
+  log(LOG_DEBUG, message);
 
   // Processa os dados Json recebidos
   processing_json_MQTT(payload, length);

@@ -54,7 +54,7 @@ void log(LogLevel level, const char* fmt, ...) {
   }
 
   // Buffer para a mensagem formatada
-  char buf[128];
+  char buf[140];
   va_list args;
   va_start(args, fmt);
   vsnprintf(buf, sizeof(buf), fmt, args);
