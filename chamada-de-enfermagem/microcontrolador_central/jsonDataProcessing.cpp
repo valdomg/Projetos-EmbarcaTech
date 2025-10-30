@@ -2,6 +2,7 @@
 #include "listNursingCall_utils.h"
 #include <ArduinoJson.h>
 #include <cstring>
+#include "log.h"
 
 
 /*  Exemplo JSON (payload) recebido:
@@ -62,7 +63,7 @@ void processing_json_MQTT(byte* payload, unsigned int length){
     // - Se endptr == rn, nenhum dígito foi convertido.
     // - Se *endptr != '\0', há caracteres não numéricos após o número.
     if (endptr == rn || *endptr != '\0') {
-      Serial.println("Erro: room_number string inválida");
+      log(LOG_ERROR, "room_number string inválida");
       return; // não adiciona o dado (saída antecipada)
     }
 
@@ -70,12 +71,12 @@ void processing_json_MQTT(byte* payload, unsigned int length){
     room_number = (int)v;
 
   } else { // Caso o tipo de 'room_number' não seja nem inteiro nem string
-    Serial.println("Erro: room_number não é string nem número!");
+    log(LOG_ERROR,"room_number não é string nem número!");
     return; // não adiciona o dado
   }
   // Verificação adicional: garante que o número esteja dentro do intervalo aceitável (Modificar de acordo com o números dos quartos)
   if (room_number <= 0 || room_number > 9999) {
-    Serial.println("room_number fora dos limites aceitáveis");
+    log(LOG_ERROR,"room_number fora dos limites aceitáveis");
     return; // Valor inválido, interrompe a execução
   }
 
@@ -111,4 +112,7 @@ void processing_json_MQTT(byte* payload, unsigned int length){
   // Adiciona na lista
   listCalls.add(room_number);
   listUpdated = true;  // marca que a lista foi alterada
+
+
+  
 }

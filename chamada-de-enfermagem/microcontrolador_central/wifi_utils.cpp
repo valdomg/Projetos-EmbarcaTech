@@ -1,6 +1,7 @@
-#include <WiFi.h>        // Biblioteca oficial ESP32 para conexão Wi-Fi
+#include <ESP8266WiFi.h>        // Biblioteca oficial ESP32 para conexão Wi-Fi
 #include "wifi_utils.h"  // Declarações das funções públicas do módulo Wi-Fi
 #include "config.h"      // Constantes globais do projeto (SSID e senha)
+#include "log.h"
 
 // ------------------------------------------------------------
 // Variáveis internas do módulo
@@ -31,8 +32,7 @@ static const unsigned long reconnectInterval = 2000; // 10 segundos
  */
 bool connectToWiFi() {
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);  // inicia conexão
-  Serial.print("Conectando a ");
-  Serial.println(WIFI_SSID);
+  log(LOG_INFO,"Conctandoo ao wifi");
 
   // Define um timeout de 10 segundos
   unsigned long timeout = millis() + 10000;
@@ -40,19 +40,19 @@ bool connectToWiFi() {
   // Aguarda até a conexão ou até o timeout
   while (WiFi.status() != WL_CONNECTED && millis() < timeout) {
     delay(500);            // aguarda meio segundo entre tentativas
-    Serial.print(".");     // imprime ponto para indicar progresso
+    // Serial.print(".");     // imprime ponto para indicar progresso
   }
 
-  Serial.println();
+  // Serial.println();
 
   // Verifica se a conexão foi bem sucedida
   if (WiFi.status() == WL_CONNECTED) {
-    Serial.println("Conectado ao Wi-Fi");
+    log(LOG_INFO,"Conectado ao Wi-Fi: %s", WIFI_SSID);
     Serial.println(WiFi.localIP()); // mostra o IP atribuído
     return true;
   }
 
-  Serial.println("Falha na conexão Wi-Fi");
+  log(LOG_ERROR, "Falha na conexão Wi-Fi");
   return false;
 }
 
@@ -73,14 +73,14 @@ void checkAndReconnectWifi() {
   if (now - lastConnectionAttemp >= reconnectInterval) {
     lastConnectionAttemp = now;
 
-    Serial.println("WiFi desconectado");
+    log(LOG_INFO, "WiFi desconectado");
     WiFi.disconnect();                       // garante que está desconectado
-    Serial.print("Conectando ao wifi ");
+    log(LOG_INFO,"Conectando ao wifi ");
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);    // inicia reconexão
 
     // Se reconectar com sucesso, exibe informações
     if (WiFi.status() == WL_CONNECTED) {
-      Serial.println("Conectado ao Wi-Fi");
+      log(LOG_INFO, "Conectado ao Wi-Fi");
       Serial.println(WiFi.localIP());
     }
   }
