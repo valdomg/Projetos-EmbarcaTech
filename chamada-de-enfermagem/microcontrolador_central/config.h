@@ -6,6 +6,9 @@
 constexpr LogLevel LOG_MODE = LOG_INFO;     // Configuração de modo para monitoriamento serial | opções com grau crescente de verbosidade: LOG_NONE, LOG_ERROR, LOG_WARN, LOG_INFO, LOG_DEBUG
 
 
+const constexpr uint8_t PIN_BUZZER = 15;        //pino para atuação do buzzer
+const uint8_t NUMBER_SOUND_ALERTS = 5;
+
 constexpr char* WIFI_SSID = "xxxxxxxxxxxxxx";
 constexpr char* WIFI_PASSWORD = "xxxxxxxxxxxxxx";
 
