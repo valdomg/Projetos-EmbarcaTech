@@ -5,7 +5,7 @@
 #include "listNursingCall_utils.h"
 #include "buttons.h"
 #include "config.h"
-
+#include "buzzer.h"
 
 // flag que indica se o botão de deletar foi pressionado uma vez e está aguardando confirmação
 bool deletionConfirmation = false;
@@ -78,6 +78,9 @@ void setup() {
   // Inicializa botões
   initButtons();
 
+  // inicializa buzzer
+  buzzerInit();
+
   showInfirmaryNumber(
       listCalls.getInfirmaryCurrent(),
       listCalls.hasNursingCall(),
@@ -109,6 +112,7 @@ void loop() {
       listCalls.getInfirmaryCurrent(),
       listCalls.hasNursingCall(),
       listCalls.getTotal());
+      
     listUpdated = false;  // reseta a flag
   }
 
@@ -117,5 +121,9 @@ void loop() {
     if (checkButton(button_next)) handleNext();
     if (checkButton(button_prev)) handlePrev();
     if (checkButton(button_delete)) handleDelete();
+  }
+
+  if (doesHaveNotificationBuzzer()){
+    toggleBuzzer();
   }
 }
