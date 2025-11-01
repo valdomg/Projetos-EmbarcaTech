@@ -53,9 +53,10 @@ def on_message(client, userdata, message, properties=None):
 
         o formato de payload será assim: {
             'id_dispositivo':'id_dispositivo',
-            'estado':'emergência/timeout',
+            'estado':'emergência/oscioso',
             'mensagem':'mensagem para debug',
-            'local': 'sala do dispositivo',
+            'local': 'Bloco/Ala/Região',
+            'room_number': 'número da sala'
             'comando': 'ligar/desligar'
         }
     '''
@@ -96,7 +97,7 @@ def on_message(client, userdata, message, properties=None):
         document= {
             'dispositivo_id': dispositivo_id,
             'local': local_emergencia,
-            'enfermaria': room_number,
+            'sala': room_number,
             'data': datetime.now()
         }
 
