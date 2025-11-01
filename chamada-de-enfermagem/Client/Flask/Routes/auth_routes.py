@@ -1,12 +1,12 @@
 from flask import Blueprint, request, jsonify, render_template, redirect, make_response, url_for
 import jwt
 from datetime import datetime, timedelta, timezone
-from Flask.Services.auth_service import AuthService
+from Flask.Services.user_service import UserService
 from Flask.Models.user_db_model import UserDBModel
 from Flask.Models.user_model import User
 from Flask.auth import SECRET_KEY
 from Flask.auth import token_required, admin_required
-from Mqtt.application.models.MongoDBConnection import MongoDBConnection
+from MongoDB.MongoDBConnection import MongoDBConnection
 from dotenv import load_dotenv
 import os
 
@@ -21,47 +21,16 @@ database = os.getenv('MONGO_DATABASE')
 
 mongo_conn = MongoDBConnection(uri, database)
 user_db_model = UserDBModel(mongo_conn)
-auth_service = AuthService(user_db_model)
+user_service = UserService(user_db_model)
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 '''
 ROTAS
 
-/auth/register 
 /auth/login
+/auth/logout
 '''
-
-'''
-Rota de registro
-POST para verificar se o usuário existe e registrá-lo no banco de dados
-
-FORMATO DO JSON
-{
-    "username":"email@dominio.com",
-    "password":"",
-    "role":"admin/user"
-}
-
-retorna um json com mensagem de sucesso/falha na inserção
-'''
-
-@auth_bp.route('/register', methods=['POST'])
-def register():
-    data = request.get_json()
-    mongo_conn.start_connection()
-
-    user = User(data['username'], data['password'], data['role'])
-
-    if user.isValid() == False:
-        return {'Error': 'Valores faltosos'}, 401
-        
-    result = auth_service.register(user.getUsername(), user.getPassword(), user.getRole(), user.getCreateAt())
-    
-    mongo_conn.close_connection()
-
-    return jsonify(result)
-    
 
 '''
 Rota de login
@@ -77,7 +46,7 @@ def login():
         password = request.form.get('password')
 
         mongo_conn.start_connection()
-        user = auth_service.login(username, password)
+        user = user_service.login(username, password)
         mongo_conn.close_connection()
         
         print(datetime.now() + timedelta(hours=3))
@@ -100,3 +69,17 @@ def login():
         return render_template('login.html', error='Credenciais Inválidas')
 
     return render_template('login.html')
+
+'''
+Função para deslogar usuário
+
+retorna a página de login
+'''
+@auth_bp.route('/logout')
+def logout():
+
+    resp = make_response(redirect(url_for('auth.login')))
+    
+    resp.set_cookie('jwt', '', expires=0, httponly=True)
+
+    return resp

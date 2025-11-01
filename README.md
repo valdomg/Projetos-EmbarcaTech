@@ -9,7 +9,7 @@ Este repositório reúne os projetos desenvolvidos durante a **Residência do Em
 - **Desenvolvimento de soluções inovadoras** que auxiliem profissionais de saúde no cuidado com pacientes.  
 
 ## 📂 Projetos
-Atualmente, foram desenvolvidos os seguintes sistemas:
+Atualmente, estão sendo desenvolvidos os seguintes sistemas:
 ### 🔹 [Sistema de Chamada Emergencial para Pacientes em Ambientes Hospitalares](./chamada-de-enfermagem/README.md)
 Este projeto busca tornar mais ágil e eficiente a interação entre pacientes e a equipe de enfermagem em hospitais. A proposta consiste na instalação de **pontos de chamada** junto aos leitos, permitindo que pacientes ou acompanhantes possam solicitar ajuda de forma imediata em situações de emergência.  
 ### 🔹 [Monitoramento de Temperatura em Salas Hospitalares](./monitoramento-de-temperatura/README.md)
@@ -29,7 +29,7 @@ Este sistema tem como foco o **controle automatizado da temperatura** em áreas 
 ### 🔹 Hardware:
 - ESP8266 D1 Mini - Microcontrolador;
 - Display LCD 1602;
-- BME280 - Sensor de Temperatura;
+- AHT10 - Sensor de Temperatura;
 
 ### 🔹 Prototipação:
 - [Figma](https://www.figma.com/);

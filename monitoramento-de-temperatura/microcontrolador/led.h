@@ -4,18 +4,6 @@
 #include <Arduino.h>   // Necessário para usar funções e tipos da plataforma Arduino
 
 // -----------------------------------------------------------------------------
-// Definições de pinos e constantes
-// -----------------------------------------------------------------------------
-
-/**
- * @brief Pino digital utilizado para o controle do LED.
- * 
- * Neste caso, o LED está conectado ao pino 12 do microcontrolador.
- */
-constexpr uint8_t PIN_LED = 12;
-
-
-// -----------------------------------------------------------------------------
 // Protótipos das funções públicas
 // -----------------------------------------------------------------------------
 
