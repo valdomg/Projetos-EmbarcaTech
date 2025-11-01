@@ -6,6 +6,7 @@
 #include "buttons.h"
 #include "config.h"
 #include "buzzer.h"
+#include "led.h"
 
 // flag que indica se o botão de deletar foi pressionado uma vez e está aguardando confirmação
 bool deletionConfirmation = false;
@@ -57,8 +58,8 @@ void handleDelete() {  // ===== Botão Delete
       listCalls.getInfirmaryCurrent(),
       listCalls.hasNursingCall(),
       listCalls.getTotal());  // Mostra os dados no display
-      // reseta o flag
-      deletionConfirmation = false;
+    // reseta o flag
+    deletionConfirmation = false;
   }
 }
 
@@ -78,13 +79,15 @@ void setup() {
   // Inicializa botões
   initButtons();
 
+  ledInit();
+
   // inicializa buzzer
   buzzerInit();
 
   showInfirmaryNumber(
-      listCalls.getInfirmaryCurrent(),
-      listCalls.hasNursingCall(),
-      listCalls.getTotal());  // Mostra os dados no display
+    listCalls.getInfirmaryCurrent(),
+    listCalls.hasNursingCall(),
+    listCalls.getTotal());  // Mostra os dados no display
 }
 
 void loop() {
@@ -112,18 +115,23 @@ void loop() {
       listCalls.getInfirmaryCurrent(),
       listCalls.hasNursingCall(),
       listCalls.getTotal());
-      
+
     listUpdated = false;  // reseta a flag
   }
 
   // Habilita os botões somente se houver dados na lista
+  // aciona led se houver algum chamado
   if (listCalls.hasNursingCall()) {
     if (checkButton(button_next)) handleNext();
     if (checkButton(button_prev)) handlePrev();
     if (checkButton(button_delete)) handleDelete();
+
+    toggleLed();
+  } else {
+    turnOffLed();
   }
 
-  if (doesHaveNotificationBuzzer()){
+  if (doesHaveNotificationBuzzer()) {
     toggleBuzzer();
   }
 }
