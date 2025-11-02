@@ -44,6 +44,10 @@ bool List_NursingCall::hasNursingCall() {
   return total > 0;
 }
 
+// Validação da enfermaria
+bool List_NursingCall::isValidInfirmary(int infirmary) {
+  return (infirmary > 0 && infirmary <= 9999);
+}
 
 // Função auxiliar que define o valor de "doNotRemoveCurrent" que sinaliza se pode ou não remover o current se atingir o limite
 void List_NursingCall::setDoNotRemoveCurrent(bool value) {
@@ -58,16 +62,24 @@ bool List_NursingCall::getDoNotRemoveCurrent() const {
 // =========================
 //        Add Nó
 // =========================
-void List_NursingCall::add(int infirmary, const char* id) {  // Adicionar um nó ao final da lista
+bool List_NursingCall::add(int infirmary, const char* id) {  // Adicionar um nó ao final da lista
+  // verifica se o ID do dispositivo é valido
+  if (id == nullptr || strlen(id) == 0) return false;
+
+  // verifica se o número do quarto é valido
+  if (!isValidInfirmary(infirmary)) return false;
+
   // gerencia o limite de memória
   if (total >= MAX_CALLS && !doNotRemoveCurrent) {  // Verifica se lista atingiu capacidade máxima
     // loop: apaga todos os elementos que atingiram o limite se não estiver na tela de confirmação de exclusão
     while (total >= MAX_CALLS) {
-      if (!removeOldestCall()) return;  // se atingiu o limite, tenta remover chamada mais antiga (política FIFO)
+      if (!removeOldestCall()) return false;  // se atingiu o limite, tenta remover chamada mais antiga (política FIFO)
     }
   }
 
   NursingCall* new_node = new NursingCall;  // Cria um novo nó
+  if (new_node == nullptr) return false; // verifica se alocação foi bem-sucedida
+
   new_node->infirmary = infirmary;          // O campo infirmary do novo nó recebe o valor correspondente
 
   // Copia o ID
@@ -89,6 +101,7 @@ void List_NursingCall::add(int infirmary, const char* id) {  // Adicionar um nó
   tail = new_node;
   // Incrementa total
   total++;
+  return true;  // elemento adicionado com sucesso
 }
 
 
@@ -113,16 +126,16 @@ void List_NursingCall::prev() {  // Move current para o nó anterior
 // =========================
 //        Remoção
 // =========================
-void List_NursingCall::removeCurrent() {
+bool List_NursingCall::removeCurrent() {
   // Se current é NULL, não remove.
-  if (current == nullptr) return;
+  if (current == nullptr) return false;
 
   // variável auxiliar para segurar o nó que será removido
   NursingCall* temp = current;
 
   /* ==============================
         Ajustar o ponteiro anterior
-       ==============================*/
+     ==============================*/
   // Se existe um nó anterior, faz esse nó apontar (next) para o próximo de temp
   if (temp->prev != nullptr) {
     temp->prev->next = temp->next;
@@ -150,13 +163,14 @@ void List_NursingCall::removeCurrent() {
   delete temp;
   // Decrementa o número de nós da lista
   total--;
+  return true;
 }
 
 
 // Método auxiliar para remover elemento mais antigo (primeiro)
 bool List_NursingCall::removeOldestCall() {
   if (head == nullptr) return false;  // Verifica se lista está vazia (Se vazia: retorna false (nada para remover))
-  
+
   // Salva referência ao elemento a ser removido
   NursingCall* toRemove = head;
 
@@ -180,6 +194,7 @@ bool List_NursingCall::removeOldestCall() {
   total--;          // Decrementa contador de elementos
   return true;      // Retorna sucesso - elemento removido com sucesso
 }
+
 
 // Limpar toda a lista
 void List_NursingCall::clear() {

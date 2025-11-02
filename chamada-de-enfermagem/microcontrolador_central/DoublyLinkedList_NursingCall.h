@@ -21,6 +21,9 @@ class List_NursingCall {
 
     // Flag que indica se pode ou não remover o current quando a lista atingir o limite de inserção.
     bool doNotRemoveCurrent = false;
+    
+    // verifica se a enfermaria é valida 
+    bool isValidInfirmary(int infirmary);
 
     // Função que remove se atingir o limite (lista cheia)
     bool removeOldestCall();
@@ -30,21 +33,23 @@ class List_NursingCall {
     List_NursingCall();
     ~List_NursingCall();
 
+    // Consultas
     int getTotal();
     int getInfirmaryCurrent();
     const char* getIdCurrent();
     bool hasNursingCall();
-
     // define o valor da flag (true/false) que indica se pode ou não remover o current quando a lista atingir o limite de inserção
     void setDoNotRemoveCurrent(bool value);
     // retorna o estado atual da flag que indica se pode ou não remover o current quando a lista atingir o limite de inserção
     bool getDoNotRemoveCurrent() const;
 
-    void add(int infirmary, const char* id);
+    // Navegações
     void next();
     void prev();
 
-    void removeCurrent();
+    // Modificações
+    bool add(int infirmary, const char* id);
+    bool removeCurrent();
     void clear();
 };
 

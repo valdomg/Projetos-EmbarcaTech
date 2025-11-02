@@ -70,7 +70,11 @@ void handleDelete() {  // ===== Botão Delete
     publicReponseDivice(idDevice, (float)infirmary);
 
 
-    listCalls.removeCurrent();  // Apaga o item selecionado
+    if (listCalls.removeCurrent()) {  // Apaga o item selecionado
+      Serial.println("Chamada removida com sucesso!");
+    } else {
+      Serial.println("Erro ao remover a chamada na lista!");
+    }
     fixed_data();               // Atualiza o display com os dados fixos
     showInfirmaryNumber(
       listCalls.getInfirmaryCurrent(),
