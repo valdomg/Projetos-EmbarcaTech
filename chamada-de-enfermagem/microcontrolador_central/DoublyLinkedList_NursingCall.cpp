@@ -64,7 +64,7 @@ bool List_NursingCall::getDoNotRemoveCurrent() const {
 // =========================
 bool List_NursingCall::add(int infirmary, const char* id) {  // Adicionar um nó ao final da lista
   // verifica se o ID do dispositivo é valido
-  if (id == nullptr || strlen(id) == 0) return false;
+  if (id == nullptr || id[0] == '\0') return false;
 
   // verifica se o número do quarto é valido
   if (!isValidInfirmary(infirmary)) return false;
