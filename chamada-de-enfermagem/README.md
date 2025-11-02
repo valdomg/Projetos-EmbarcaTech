@@ -68,7 +68,7 @@ git clone https://github.com/Embarcatech-Residencia-CAPEDII/Projetos
 cd ./chamada-de-enfermagem
 ```
 
-### **2. Criar o Ambiente Virtual**
+### **2. Criar o Ambiente Virtual e instale as dependências**
 ```bash
 python -m venv .venv
 ```
@@ -81,17 +81,28 @@ source .venv/bin/activate   # Linux/MacOS
 .venv\Scripts\activate      #Windows
 ```
 
-### **3. Instalar o Flask e dependências**
 ```bash
-pip install flask-pymongo
-pip install dotenv
-pip install paho-mqtt
-pip install jwt
+pip install -r requirements.txt
+```
+
+
+### **3. Instale e crie o usuário no mongodb**
+Acesse o site oficial do MongoDB e faça o tutorial de instalação, após a instalação crie o usuário de crud para a database.
+
+```bash
+mongosh
+```
+```bash
+use admin
+```
+```bash
+db.createUser({user:'<nome_user>',pwd:'<senha>', roles:[{role:'readWrite',db:'<nome-database>'}]})
 ```
 ### **4. No arquivo .env coloque as credenciais para conexão com seu Banco de dados e do broker**
 ```
-MONGO_URI = ''
-MONGO_DATABASE = ''
+MONGO_URI ='mongodb://<nome-user>:<senha>@localhost:27017/<nome-database>?authSource=admin'
+
+MONGO_DATABASE = 'nome-database'
 
 BROKER_IP = ''
 BROKER_PORT = ''
@@ -112,7 +123,7 @@ cd ./chamada-de-enfermagem/Client
 ```bash
 python -m Mqtt.main        #Windows/Linux
 ```
-### **6. Abrir o Client Flask para visualizar a tabela de chamadas**
+### **6. Abrir o Client Flask em ambiente de desenvolvimento para visualizar o software**
 ```bash
 cd ./chamada-de-enfermagem/Client
 ```
@@ -120,7 +131,24 @@ cd ./chamada-de-enfermagem/Client
 python -m Flask.app        #Windows/Linux
 ```
 
-### **7. Realizar um teste**
+### **7. Abrir o Client Flask em ambiente de produção para visualizar o software**
+```bash
+cd ./chamada-de-enfermagem/Client
+```
+```bash
+gunicorn -w 4 -b 0.0.0.0:5000 Flask.app:app        #Linux
+```
+
+### **8. Abrir a documentação da API em ambiente de produção**
+```bash
+cd ./chamada-de-enfermagem/Client
+```
+```bash
+python -m Flask.doc        #Linux
+```
+
+
+### **9. Realizar um teste**
 Em outro terminal execute o arquivo pub_test.py e veja a nova chamada dentro do app 
 ```bash
 python pub_test.py  #Windows/Linux

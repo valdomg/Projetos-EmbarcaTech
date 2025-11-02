@@ -1,111 +1,136 @@
 import json
 import os
 from dotenv import load_dotenv
-from Mqtt.application.models.MongoDBConnection import MongoDBConnection
+from MongoDB.MongoDBConnection import MongoDBConnection
+from Mqtt.application.services.utilities import register_call_mongo_db 
 from datetime import datetime
-load_dotenv()
+import logging
+from time import sleep
 
+load_dotenv()
 topic = os.getenv('BROKER_TOPIC')
 uri = os.getenv('MONGO_URI') 
 database = os.getenv('MONGO_DATABASE')
 
 mongo = MongoDBConnection(uri, database)
-'''
-Callback usado ao conectar o client a algum tópico do broker
-'''
-def on_connect(client, userdata, flags, rc):
+
+def on_connect(client, userdata, flags, rc, properties=None):
+    '''
+    Callback usado ao conectar o client a algum tópico do broker
+    '''
     if rc != 0:
-        print('Conexão mal sucedida, erro:', rc, '\n Tentando novamente...')
+        logging.error('Conexão mal sucedida, erro:', rc, '\n Tentando novamente...')
+        reconnect_mqtt(client)
 
     client.subscribe(topic)
 
-def on_disconnect(client, userdata, rc):
+def on_disconnect(client, userdata, flags, rc, properties=None):
+    '''
+    Callback para quando houver desconexões inesperadas
+    '''
     if rc != 0:
-        print('Desconexão inesperada, tentando novamente...', rc)
-
-    print('Tentando novamente...')
+        logging.error('Desconexão inesperada, tentando novamente...', rc)
+        
+    logging.info('Tentando novamente...')
+    
     try:
-        client.reconnect()
-        print('Reconexão bem sucedida!')
+        reconnect_mqtt(client)
 
     except Exception as e:
-        print('Conexão mal sucedida, erro:', rc)
+        logging.exception('Conexão mal sucedida, erro:', rc)
 
-
-'''
+def on_message(client, userdata, message, properties=None):
+    '''
     Callback para formatar as mensagens recebidas nos tópicos
 
-    Os dispositivos nas salas assim apenas o tópico em que estão,
-    dessa forma, dentro do payload podem receber comandos de desligar/ligar ou qualquer outro
-    ex: dispositivos/enfermagem/seu_id
+        Os dispositivos nas salas assinam apenas o tópico em que estão,
+        dessa forma, dentro do payload podem receber comandos de desligar/ligar ou qualquer outro
+        ex: dispositivos/enfermaria/seu_id
 
-    E publicam apenas no tópico de posto_enfermagem
-    dessa foram podem enviar seu estado ligado/timeout
-    ex:dispositivos/posto_enfermagem/seu_id
+        E publicam apenas no tópico de posto_enfermaria
+        dessa podem enviar seu estado ligado/timeout
+        ex:dispositivos/posto_enfermaria/seu_id
 
-    o formato de payload será assim: {
-        'id_dispositivo':'id_dispositivo',
-        'estado':'emergência/timeout',
-        'mensagem':'mensagem para debug',
-        'source': 'sala do dispositivo',
-        'comando': 'ligar/desligar'
-    }
-'''
-
-def on_message(client, userdata, message):
-    payload = json.loads(message.payload.decode())
-    print(f'Mensagem recebida no tópico {message.topic}: \n{payload}')
+        o formato de payload será assim: {
+            'id_dispositivo':'id_dispositivo',
+            'estado':'emergência/timeout',
+            'mensagem':'mensagem para debug',
+            'local': 'sala do dispositivo',
+            'comando': 'ligar/desligar'
+        }
+    '''
+        
+    try:
+        payload = json.loads(message.payload.decode())
+    except json.JSONDecodeError:
+        logging.error(f'Falha ao decodificar mensagem..')
+        return
+    logging.info(f'Mensagem recebida!')
 
     # Quebra o tópico em partes
-    # ['dispositivos', 'enfermagem/posto', 'id_dispositivo']
     partes = message.topic.split('/')
-    print(f'cabeçalho: {partes[0]}; local: {partes[1]}; id dispositivo: {partes[2]}')
-    
     _, local_topic, dispositivo_id = partes
 
     if mongo.start_connection() == False:
         mongo.close_connection()
+        return 
         
-    else:
-        if mongo.check_if_document_exists('devices','device', dispositivo_id) != True:
-            print('Dispositivo não encontrado')
-            mongo.close_connection() 
+    if mongo.check_if_document_exists('devices','device', dispositivo_id) == False:
+        logging.info('Dispositivo não encontrado na base de dados...')
+        mongo.close_connection() 
+        return 
         
-        else:
-            print('Dispositivo logado!')
-                
-            comando = payload.get('comando')
-            mensagem = payload.get('mensagem')
-            estado = payload.get('estado')
-            local_emergencia = payload.get('local')
-            room_number = payload.get('room_number')
+    logging.info('Dispositivo logado!')
+        
+    comando = payload.get('comando')
+    local_emergencia = payload.get('local')
+    room_number = payload.get('room_number')
+    estado = payload.get('estado')
 
-            print(comando)
-            if local_topic == 'posto_enfermagem':
-                print(f'Mensagem recebida do dispositivo: {dispositivo_id} da {local_emergencia}: {room_number}, com comando de: {comando}')
+    if local_topic == 'posto_enfermaria' and comando == 'ligar':
 
-                if comando == 'ligar':
-                    '''
-                    Laço condicional para registrar chamada no banco de dados
-                    '''
+        '''
+        Laço condicional para registrar chamada no banco de dados
+        '''
 
-                    document= {
-                        'dispositivo_id': dispositivo_id,
-                        'Local': local_emergencia,
-                        'Enfermaria': room_number,
-                        'Data': datetime.now()
-                    }
+        document= {
+            'dispositivo_id': dispositivo_id,
+            'local': local_emergencia,
+            'enfermaria': room_number,
+            'data': datetime.now()
+        }
 
-                    print(mongo.insert_document_collection('chamadas', document))
+        result = mongo.insert_document_collection('chamadas', document)
+        
+        if result:
+            logging.warning('Chamada inserida no banco de dados!')
+        
+    if local_topic == 'enfermaria':
+        logging.info(f'Mensagem do tópico: {local_topic}')
+    
+    mongo.close_connection()
+    
+    register_call_mongo_db(dispositivo_id, room_number, estado)
 
-            if local_topic == 'enfermagem':
-                print(f'Mensagem enviada para: {dispositivo_id} para a {local_emergencia}: {room_number}, com o comando de: {comando}')
+def on_subscribe(client, userdata, mid, granted_os, properties=None):
+    '''
+    Callback para conferir s'e a inscrição em algum tópico foi bem sucedida
+    '''
+    logging.info(f'Inscrito com sucesso no tópico: {topic}')
 
-        mongo.close_connection()
-        print()
 
-'''
-Callback para conferir se a inscrição em algum tópico foi bem sucedida
-'''
-def on_subscribe(client, userdata, mid, granted_os):
-    print('Inscrito com sucesso!')
+def reconnect_mqtt(client):
+    '''
+    Função de reconexão do client com mqtt
+    '''
+    delay = 1
+    while True:
+        try:
+            client.reconnect()
+            logging.info('[MQTT] Reconectado com sucesso!')
+            return
+        except Exception as e:
+            logging.exception('[MQTT] Falha ao reconectar:', e)
+            sleep(delay)
+            delay = min(delay * 2, 60)  # Máximo 60 segundos
+
