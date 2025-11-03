@@ -52,6 +52,8 @@ void handleDelete() {  // ===== Botão Delete
     showExclusionConfirm(listCalls.getInfirmaryCurrent());
     deletionConfirmation = true;
   } else {                      // Segundo clique: executa deleção
+
+    publicReponseDivice("enfermaria1", 1);
     listCalls.removeCurrent();  // Apaga o item selecionado
     fixed_data();               // Atualiza o display com os dados fixos
     showInfirmaryNumber(

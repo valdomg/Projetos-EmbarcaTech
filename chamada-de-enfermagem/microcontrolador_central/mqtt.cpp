@@ -1,21 +1,22 @@
-#include <WiFiClientSecure.h>   // Biblioteca para conexões seguras via TLS/SSL (necessária para MQTT com SSL/TLS).
-#include "mqtt.h"               // Header com as declarações das funções e variáveis MQTT usadas no projeto.
-#include "config.h"             // Arquivo de configuração com constantes (servidor, usuário, senha, tópicos, etc.).
-#include "jsonDataProcessing.h" // Header com a declaração da função que processa os dados JSON recebido do MQTT
+#include <WiFiClientSecure.h>    // Biblioteca para conexões seguras via TLS/SSL (necessária para MQTT com SSL/TLS).
+#include "mqtt.h"                // Header com as declarações das funções e variáveis MQTT usadas no projeto.
+#include "config.h"              // Arquivo de configuração com constantes (servidor, usuário, senha, tópicos, etc.).
+#include "jsonDataProcessing.h"  // Header com a declaração da função que processa os dados JSON recebido do MQTT
 #include "log.h"
 #include "buzzer.h"
+
 
 // -----------------------------------------------------------------------------
 // Objetos globais
 // -----------------------------------------------------------------------------
-WiFiClientSecure espClient;     // Cliente Wi-Fi seguro (usado pelo PubSubClient para comunicação MQTT).
-PubSubClient client(espClient); // Cliente MQTT que usa o cliente Wi-Fi seguro como transporte.
+WiFiClientSecure espClient;      // Cliente Wi-Fi seguro (usado pelo PubSubClient para comunicação MQTT).
+PubSubClient client(espClient);  // Cliente MQTT que usa o cliente Wi-Fi seguro como transporte.
 
 // -----------------------------------------------------------------------------
 // Variáveis de controle
 // -----------------------------------------------------------------------------
-static unsigned long lastAttempConnectMQTT = 0;         // Guarda o tempo da última tentativa de conexão com o broker.
-static const unsigned long reconnectIntervalMQTT = 3000; // Intervalo (ms) entre tentativas de reconexão ao broker.
+static unsigned long lastAttempConnectMQTT = 0;           // Guarda o tempo da última tentativa de conexão com o broker.
+static const unsigned long reconnectIntervalMQTT = 3000;  // Intervalo (ms) entre tentativas de reconexão ao broker.
 
 // -----------------------------------------------------------------------------
 // Funções principais
@@ -40,22 +41,22 @@ void setupMQTT() {
  * Se a conexão caiu, tenta reconectar dentro do intervalo definido.
  */
 void checkMQTTConnected() {
-  client.loop();                         // Mantém a comunicação ativa e processa mensagens recebidas.
-  if (client.connected()) return;        // Se já está conectado, sai da função.
+  client.loop();                   // Mantém a comunicação ativa e processa mensagens recebidas.
+  if (client.connected()) return;  // Se já está conectado, sai da função.
 
-  unsigned long now = millis();          // Captura o tempo atual (ms desde o boot).
+  unsigned long now = millis();  // Captura o tempo atual (ms desde o boot).
 
   // Só tenta reconectar se já passou o intervalo configurado
-  if (now - lastAttempConnectMQTT >= reconnectIntervalMQTT){
-    lastAttempConnectMQTT = now;         // Atualiza o tempo da última tentativa
+  if (now - lastAttempConnectMQTT >= reconnectIntervalMQTT) {
+    lastAttempConnectMQTT = now;  // Atualiza o tempo da última tentativa
 
     log(LOG_INFO, "Tentando conectar ao MQTT");
     // Tenta conectar ao broker usando credenciais do config.h
     if (client.connect(MQTT_DEVICE_ID, MQTT_USER, MQTT_PASS)) {
-      log(LOG_INFO,"Conectado!");
-      client.subscribe(MQTT_SUBSCRIPTION_TOPIC); // Inscreve-se no tópico para receber mensagens
+      log(LOG_INFO, "Conectado!");
+      client.subscribe(MQTT_SUBSCRIPTION_TOPIC);  // Inscreve-se no tópico para receber mensagens
     } else {
-      log(LOG_ERROR, "Falha na conexão com mqtt, rc= %d", client.state());    // Mostra o código de erro da conexão
+      log(LOG_ERROR, "Falha na conexão com mqtt, rc= %d", client.state());  // Mostra o código de erro da conexão
     }
   }
 }
@@ -68,12 +69,12 @@ void checkMQTTConnected() {
  * @param length  - Tamanho da mensagem.
  */
 void callback(char* topic, byte* payload, unsigned int length) {
-  log(LOG_DEBUG, "Mensagem recebida no tópico: %s",topic);
+  log(LOG_DEBUG, "Mensagem recebida no tópico: %s", topic);
 
   char message[140];
 
   for (unsigned int i = 0; i < length; i++) {
-    message[i] = (char)payload[i]; // Converte cada byte para caractere e imprime
+    message[i] = (char)payload[i];  // Converte cada byte para caractere e imprime
   }
   message[length] = '\0';
 
@@ -82,7 +83,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
   // Processa os dados Json recebidos
   processing_json_MQTT(payload, length);
   enableSoundAlert();
-  
 }
 
 /**
@@ -93,12 +93,16 @@ void callback(char* topic, byte* payload, unsigned int length) {
  * @param id    - Sufixo do tópico (ex.: ID do dispositivo ou sensor).
  * @param value - Valor numérico a ser enviado.
  */
-void publicReponseDivice(const char* id, float value) {
-  char payload[10];
-  snprintf(payload, sizeof(payload), "%.2f", value); // Converte float para string com 2 casas decimais.
+bool publicReponseDivice(const char* deviceId, int roomNumber) {
 
   char topic[50];
-  snprintf(topic, sizeof(topic), "%s/%s", MQTT_PUBLICATION_TOPIC, id); // Monta o tópico final (base + id).
+  snprintf(topic, sizeof(topic), "%s/%s", MQTT_PUBLICATION_TOPIC, deviceId);  // Monta o tópico final (base + id).
 
-  client.publish(topic, payload); // Publica a mensagem no broker MQTT.
+  char buffer[256];
+  if (!client.publish(topic, createJsonPayload(buffer,sizeof(buffer), roomNumber))) {
+    log(LOG_WARN, "Falha ao enviar dados ao broker MQTT");
+    return false;
+  }
+
+  return true;
 }

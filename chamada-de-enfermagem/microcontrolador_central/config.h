@@ -19,8 +19,8 @@ constexpr char* MQTT_SERVER = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 constexpr char* MQTT_USER = "xxxxxxxxxxxxxx";
 constexpr char* MQTT_PASS = "xxxxxxxxxxxxxx";
 constexpr char* MQTT_DEVICE_ID = "xxxxxxxxxxxxxx";
-constexpr  char* MQTT_PUBLICATION_TOPIC = "dispositivos/enfermagem";
-constexpr  char* MQTT_SUBSCRIPTION_TOPIC = "dispositivos/posto_enfermagem";
+constexpr  char* MQTT_PUBLICATION_TOPIC = "dispositivos/enfermaria";
+constexpr  char* MQTT_SUBSCRIPTION_TOPIC = "dispositivos/posto_enfermaria";
 constexpr  int mqtt_port = 8883;
 
 #endif
