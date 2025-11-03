@@ -9,7 +9,7 @@
 // -----------------------------------------------------------------------------
 // Objetos globais
 // -----------------------------------------------------------------------------
-WiFiClientSecure espClient;      // Cliente Wi-Fi seguro (usado pelo PubSubClient para comunicação MQTT).
+WiFiClient espClient;      // Cliente Wi-Fi seguro (usado pelo PubSubClient para comunicação MQTT).
 PubSubClient client(espClient);  // Cliente MQTT que usa o cliente Wi-Fi seguro como transporte.
 
 // -----------------------------------------------------------------------------
@@ -29,8 +29,8 @@ static const unsigned long reconnectIntervalMQTT = 3000;  // Intervalo (ms) entr
  * que será chamada ao receber mensagens.
  */
 void setupMQTT() {
-  espClient.setInsecure();              // Desabilita verificação de certificado SSL (não verifica autenticidade).
-  client.setServer(MQTT_SERVER, 8883);  // Define o servidor MQTT e a porta (8883 = padrão para MQTTs).
+  // espClient.setInsecure();              // Desabilita verificação de certificado SSL (não verifica autenticidade).
+  client.setServer(MQTT_SERVER, MQTT_PORT);  // Define o servidor MQTT e a porta (8883 = padrão para MQTTs).
   client.setCallback(callback);         // Registra a função callback para mensagens recebidas.
 }
 
@@ -70,16 +70,7 @@ void checkMQTTConnected() {
  */
 void callback(char* topic, byte* payload, unsigned int length) {
   log(LOG_DEBUG, "Mensagem recebida no tópico: %s", topic);
-
-  char message[140];
-
-  for (unsigned int i = 0; i < length; i++) {
-    message[i] = (char)payload[i];  // Converte cada byte para caractere e imprime
-  }
-  message[length] = '\0';
-
-  log(LOG_DEBUG, message);
-
+  
   // Processa os dados Json recebidos
   processing_json_MQTT(payload, length);
   enableSoundAlert();
