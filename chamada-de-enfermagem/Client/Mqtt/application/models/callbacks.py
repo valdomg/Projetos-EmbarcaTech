@@ -52,11 +52,11 @@ def on_message(client, userdata, message, properties=None):
         ex:dispositivos/posto_enfermaria/seu_id
 
         o formato de payload será assim: {
-            'id_dispositivo':'id_dispositivo',
+            'id':'id_dispositivo',
             'estado':'emergência/oscioso',
             'mensagem':'mensagem para debug',
-            'local': 'Bloco/Ala/Região',
             'room_number': 'número da sala'
+            'local': 'Bloco/Ala/Região',
             'comando': 'ligar/desligar'
         }
     '''
@@ -66,11 +66,28 @@ def on_message(client, userdata, message, properties=None):
     except json.JSONDecodeError:
         logging.error(f'Falha ao decodificar mensagem..')
         return
+    
     logging.info(f'Mensagem recebida!')
 
-    # Quebra o tópico em partes
+    '''Quebra o tópico em partes'''
     partes = message.topic.split('/')
-    _, local_topic, dispositivo_id = partes
+    print('Partes:', partes)
+    
+    if len(partes) == 2:
+        _, local_topic = partes
+
+    else:
+        _,local_topic, dispositivo_id = partes
+
+    print('Payload', payload)
+
+    dispositivo_id = payload.get('id')
+    estado = payload.get('estado')
+    mensagem = payload.get('mensagem')
+    room_number = payload.get('room_number')
+    local_emergencia = payload.get('local')
+    comando = payload.get('comando')
+
 
     if mongo.start_connection() == False:
         mongo.close_connection()
@@ -82,13 +99,12 @@ def on_message(client, userdata, message, properties=None):
         return 
         
     logging.info('Dispositivo logado!')
-        
-    comando = payload.get('comando')
-    local_emergencia = payload.get('local')
-    room_number = payload.get('room_number')
-    estado = payload.get('estado')
+    
+    logging.info(f'Mensagem do dispositivo {dispositivo_id}:{mensagem}')
 
     if local_topic == 'posto_enfermaria' and comando == 'ligar':
+
+        logging.info(f'Mensagem do tópico /{local_topic}')
 
         '''
         Laço condicional para registrar chamada no banco de dados
@@ -107,7 +123,7 @@ def on_message(client, userdata, message, properties=None):
             logging.warning('Chamada inserida no banco de dados!')
         
     if local_topic == 'enfermaria':
-        logging.info(f'Mensagem do tópico: {local_topic}')
+        logging.info(f'Mensagem para o tópico: {local_topic}')
     
     mongo.close_connection()
     
