@@ -5,6 +5,7 @@ from bson.objectid import ObjectId
 import os
 from datetime import datetime
 import logging
+import calendar
 
 
 class MongoDBConnection:
@@ -65,6 +66,43 @@ class MongoDBConnection:
             
             else:
                 logging.warning('Client is not connected')
+
+        except PyMongoError as e:
+            logging.error('Error in count documents')
+            logging.exception(e)
+
+    def return_dict_with_all_documents_per_day(self, collection:str, label_data:str, data:datetime, month:int, days:int)->list:
+        '''
+        Retorna um dicionário com todas as ocorrências por dia de algo
+        '''
+        try:
+            if self.client is not None:
+                
+                doc = []
+
+                collection_to_search = self.db[collection]
+
+                for i in range(1, days+1):    
+                    data_start = data.replace(day=i, month=month, hour=0, minute=0, microsecond= 0000)
+                    data_end = data.replace(day=i, month=month, hour=23, minute=59, microsecond= 9999)
+
+                    count = collection_to_search.count_documents({
+                        label_data:{
+                            '$gte': data_start,
+                            '$lte': data_end
+                        }
+                    })
+
+                    if count != 0:
+                        doc.append({'day': i, 'count': count})
+                
+                if len(doc) == 0:
+                    return None
+            
+                return doc
+            
+            else:
+                logging.warning('Client not connected')
 
         except PyMongoError as e:
             logging.error('Error in count documents')
