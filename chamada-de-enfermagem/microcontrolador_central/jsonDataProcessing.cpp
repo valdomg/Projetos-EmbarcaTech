@@ -13,15 +13,66 @@
   "room_number": "9",
   "local": "Enfermaria",
   "comando": "ligar"
+}*/
+
+
+// Capacidade do StaticJsonDocument
+static constexpr size_t JSON_CAPACITY = 256;
+
+
+// Converte string para número (Retorna true se conversão e limites estiverem ok e grava resultado em room_number)
+//    int& room_number: referência para variável que receberá o resultado
+//    const char* room_str: string a ser convertida
+bool roomNumberConversion(int& room_number, const char* room_str) {
+  if (room_str == nullptr) return false;  // Verifica se string é nula - retorna falha
+
+  char* endptr = nullptr;                  // ponteiro que indica onde a conversão parou
+  long v = strtol(room_str, &endptr, 10);  // conversão string para long
+
+  // Verifica se conversão foi completa
+  if (endptr == room_str) {
+    Serial.println(F("Erro: room_number string inválida"));
+    return false;
+  }
+
+  // Há caracteres extras após número
+  if (*endptr != '\0') {
+    Serial.println(F("Erro: room_number string inválida (caracteres extras)"));
+    return false;
+  }
+
+  room_number = static_cast<int>(v);  // Atribui valor convertido via referência
+  return true; // Retorna sucesso - conversão válida
 }
-*/
+
+
+// Validação básica do payload JSON bruto
+bool validateJsonFields(const char* payload, unsigned int length) {
+  if (payload == nullptr) return false;
+  if (length == 0) return false;
+
+  if (length > 1024) {  // limite de segurança
+    Serial.println(F("Erro: Payload muito grande!"));
+    return false;
+  }
+
+  // Checa formato mínimo - deve começar com '{'
+  if (payload[0] != '{') {
+    Serial.println(F("Erro: Payload não parece JSON"));
+    return false;
+  }
+
+  return true;  // Payload é válido
+}
+
+
 // processa os dados JSON recebido do MQTT
 void processing_json_MQTT(byte* payload, unsigned int length) {
   // Cria um documento JSON estático na stack (memória temporária) com capacidade de 256 bytes para armazenar o JSON parseado.
   StaticJsonDocument<256> doc;  // Ou <512>
 
   // Tenta converter (parsear) os dados brutos em estrutura JSON
-  DeserializationError error = deserializeJson(doc, payload, length);
+  DeserializationError error = deserializeJson(doc, p, length);
 
   // Verifica se ocorreu algum erro no parse do JSON
   if (error) {
@@ -44,9 +95,6 @@ void processing_json_MQTT(byte* payload, unsigned int length) {
   // // Extrai campo "mensagem" do JSON
   // const char* room_number = doc["room_number"];
 
-  // *** CONVERSÃO PARA INTEIRO ***
-  // Declara e inicializa a variável 'room_number' com 0
-  int room_number = 0;
   // Verifica se o campo "room_number" do objeto 'doc' é um número inteiro
   if (doc["room_number"].is<int>()) {
     // Se for inteiro, converte diretamente para int
@@ -80,6 +128,9 @@ void processing_json_MQTT(byte* payload, unsigned int length) {
     return;  // Valor inválido, interrompe a execução
   }
 
+  if (!roomNumberValid) {  // Verifica se conversão foi bem-sucedida
+    return; // Se falhou, sai da função
+  }
 
   // Extrai campo "mensagem" do JSON
   const char* local = doc["local"];  // Ex: "Enfermagem"
