@@ -7,3 +7,11 @@ void setupLed() {
   pinMode(LED, OUTPUT);
   digitalWrite(LED, LOW);
 }
+
+void ligarLed() {
+  digitalWrite(LED, HIGH);
+}
+
+void desligarLed() {
+  digitalWrite(LED, LOW);
+}

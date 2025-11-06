@@ -4,5 +4,7 @@
 extern const int LED;
 
 void setupLed();
+void ligarLed();
+void desligarLed();
 
 #endif
