@@ -11,7 +11,8 @@ const int MQTT_PORT = XXXXXX;
 // const char* MQTT_USER = "";
 // const char* MQTT_PASS = "";
 const char* ID_CLIENT = "XXXXXX";
-const char* TOPIC = "dispositivos/posto_enfermagem/ID_CLIENT";
+const char* TOPIC_PUBLISH = "dispositivos/posto_enfermaria";
+const char* TOPIC_SUBSCRIBE = "dispositivos/enfermaria/ESP8266";
 
 
 
@@ -29,7 +30,7 @@ void connectMQTT() {
   if (client.connect(ID_CLIENT)) {
     Serial.println("Exito na conexão");
     Serial.printf("Cliente %s conectado ao Broker\n", ID_CLIENT);
-    client.subscribe(TOPIC);
+    client.subscribe(TOPIC_SUBSCRIBE);
 
   } else {
     Serial.print("Falha ao conectar: ");
@@ -56,7 +57,7 @@ void publishData() {
   serializeJson(doc, payload);
 
   // Publicando o JSON no tópico
-  client.publish(TOPIC, payload);
+  client.publish(TOPIC_PUBLISH, payload);
 }
 
 
@@ -72,7 +73,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
       Serial.println("Comando: " + String(comando));
 
       if (String(comando) == "desligar") {
-        Serial.println("Desliado");
+        Serial.println("Desligado");
       }
     } else {
       Serial.println("Comando ausente ou nulo");
