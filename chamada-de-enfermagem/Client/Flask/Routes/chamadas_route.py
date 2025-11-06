@@ -17,7 +17,8 @@ ROTAS
 /api/chamadas/ 
 /api/chamadas/dia
 /api/chamadas/dia/contagem
-/api/contagem
+/api/chamadas/contagem
+/api/chamadas/dia/mes
 '''
 
 load_dotenv()
@@ -128,6 +129,32 @@ def return_chamadas_day_count():
     
         if count_chamadas:
             return {'Quantidade': count_chamadas}, 200
+
+    except Exception as e:
+        logging.exception('Error in return documents')
+        return jsonify({'Error': 'Falha em procurar documentos'}), 500
+    
+    finally:
+        mongo_conn.close_connection()
+
+    return {'Error': 'Docs não encontrados'}, 404
+
+'''
+Rota de api paraa retornar a quantidade de chamadas por dia no mês
+'''
+@chamadas_bp.route('/dia/mes', methods=['GET'])
+def return_chamadas_by_day_in_month():
+    try:
+        mongo_conn.start_connection()
+    except Exception as e:
+        logging.exception('Erro ao conectar ao banco de dados')
+        return jsonify({'error':'Erro interno do banco de dados'}), 500
+    
+    try:
+        count_chamadas = chamadas_db_model.return_count_chamadas_day_in_month(month_param=10)
+    
+        if count_chamadas:
+            return jsonify(count_chamadas), 200
 
     except Exception as e:
         logging.exception('Error in return documents')
