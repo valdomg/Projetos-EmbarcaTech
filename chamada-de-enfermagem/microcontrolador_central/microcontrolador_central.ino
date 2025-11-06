@@ -73,9 +73,9 @@ void handleDelete() {  // ===== Botão Delete
 
 
     if (listCalls.removeCurrent()) {  // Apaga o item selecionado
-      Serial.println("Chamada removida com sucesso!");
+      log(LOG_INFO,"Chamada removida com sucesso!");
     } else {
-      Serial.println("Erro ao remover a chamada na lista!");
+      log(LOG_ERROR,"Erro ao remover a chamada na lista!");
     }
     fixed_data();               // Atualiza o display com os dados fixos
     showInfirmaryNumber(
