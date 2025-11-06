@@ -24,11 +24,11 @@ PubSubClient client(espClient);
 void connectMQTT() {
 
   client.setServer(MQTT_BROKER, MQTT_PORT);
+  client.setCallback(callback);
 
   if (client.connect(ID_CLIENT)) {
     Serial.println("Exito na conexão");
     Serial.printf("Cliente %s conectado ao Broker\n", ID_CLIENT);
-    client.setCallback(callback);
     client.subscribe(TOPIC);
 
   } else {
@@ -38,14 +38,17 @@ void connectMQTT() {
   }
 }
 
+
+
 //funcao publicar dados no topico(para testes)
 void publishData() {
   // Criando o objeto JSON
   StaticJsonDocument<200> doc;
   doc["id"] = ID_CLIENT;
-  doc["local"] = "Enfermaria";
+  doc["estado"] = "emergencia";
+  doc["mensagem"] = "solicitar atendimento";
   doc["room_number"] = 1;
-  doc["timestamp"] = millis();
+  doc["local"] = "enfermaria";
   doc["comando"] = "ligar";
 
 
@@ -58,14 +61,25 @@ void publishData() {
 
 
 
-void callback(char* TOPIC, byte* payload, unsigned int length) {
-  Serial.print("Mensagem recebida no topico");
-  Serial.println(TOPIC);
-  Serial.print("Mensagem:");
-  for (int i = 0; i < length; i++) {
-    Serial.print((char)payload[i]);
+void callback(char* topic, byte* payload, unsigned int length) {
+  StaticJsonDocument<200> doc;
+  DeserializationError error = deserializeJson(doc, payload, length);
+
+  if (!error) {
+
+    if (doc.containsKey("comando") && !doc["comando"].isNull()) {
+      const char* comando = doc["comando"];
+      Serial.println("Comando: " + String(comando));
+
+      if (String(comando) == "desligar") {
+        Serial.println("Desliado");
+      }
+    } else {
+      Serial.println("Comando ausente ou nulo");
+    }
+  } else {
+    Serial.print("Erro ao parsear JSON: ");
+    Serial.println(error.c_str());
   }
-  Serial.println();
-  Serial.println("------------------");
 }
 
