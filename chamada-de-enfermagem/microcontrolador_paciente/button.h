@@ -1,5 +1,5 @@
-#ifndef PERIPHERALS_H
-#define PERIPHERALS_H
+#ifndef BUTTON_H
+#define BUTTON_H
 
 extern const int BUTTON;
 

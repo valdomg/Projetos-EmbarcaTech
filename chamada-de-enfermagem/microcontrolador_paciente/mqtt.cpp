@@ -7,7 +7,7 @@
 
 // MQTT Broker
 const char* MQTT_BROKER = "XXXXXX";
-const int MQTT_PORT = XXXXXX;
+const int MQTT_PORT = 0;
 // const char* MQTT_USER = "";
 // const char* MQTT_PASS = "";
 const char* ID_CLIENT = "XXXXXX";
