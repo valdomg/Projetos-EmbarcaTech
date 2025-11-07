@@ -69,6 +69,7 @@ ConfigurationData loadConfig() {
   config.mqttTopicData = doc["MQTT_TOPIC_PUBLICATION_DATA"].as<String>();
   config.mqttTopicAlert = doc["MQTT_TOPIC_PUBLICATION_ALERT"].as<String>();
   config.mqttDeviceId = doc["MQTT_DEVICE_ID"].as<String>();
+  config.mqttPort = doc["MQTT_PORT"].as<int>();
   config.wifiPass = doc["WIFI_PASS"].as<String>();
   config.wifiSSID = doc["WIFI_SSID"].as<String>();
   config.temperatureMax = doc["TEMPERATURE_MAX"].as<float>();
@@ -106,6 +107,7 @@ bool saveConfigutionData(const ConfigurationData& config) {
   doc["MQTT_TOPIC_PUBLICATION_DATA"] = config.mqttTopicData;
   doc["MQTT_TOPIC_PUBLICATION_ALERT"] = config.mqttTopicAlert;
   doc["MQTT_DEVICE_ID"] = config.mqttDeviceId;
+  doc["MQTT_PORT"] = config.mqttPort;
   doc["WIFI_PASS"] = config.wifiPass;
   doc["WIFI_SSID"] = config.wifiSSID;
   doc["TEMPERATURE_MAX"] = config.temperatureMax;
