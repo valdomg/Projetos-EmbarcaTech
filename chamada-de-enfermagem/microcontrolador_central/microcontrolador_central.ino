@@ -18,7 +18,11 @@ void handleNext() {  // ===== Botão Next (>)
   if (deletionConfirmation) {
     fixed_data();                  // Atualiza o display com os dados fixos
     deletionConfirmation = false;  // reset caso usuário navegue (cancela a exclusão)
-  } else {
+
+    // Quando clica 'next' e esta no esta no modo confirmação, garante que NÃO está bloqueado remover current (caso tenha atigido o limite de inserção na lista)
+    listCalls.setDoNotRemoveCurrent(false); // vira false -> pode remover current
+  } 
+  else {
     // Avança para o próximo item da lista
     listCalls.next();
   }
@@ -34,7 +38,11 @@ void handlePrev() {  // ===== Botão Prev (<)
   if (deletionConfirmation) {
     fixed_data();                  // Atualiza o display com os dados fixos
     deletionConfirmation = false;  // reset caso usuário navegue (cancela a exclusão)
-  } else {
+
+    // Quando clica 'prev' e esta no esta no modo confirmação, garante que NÃO está bloqueado remover current (caso tenha atigido o limite de inserção na lista)
+    listCalls.setDoNotRemoveCurrent(false); // vira false - pode remover current
+  } 
+  else {
     // Avança para o item anteriot da lista
     listCalls.prev();
   }
@@ -51,10 +59,24 @@ void handleDelete() {  // ===== Botão Delete
   if (!deletionConfirmation) {
     showExclusionConfirm(listCalls.getInfirmaryCurrent());
     deletionConfirmation = true;
-  } else {                      // Segundo clique: executa deleção
 
-    publicReponseDivice("enfermaria1", 1);
-    listCalls.removeCurrent();  // Apaga o item selecionado
+    // Quando clica 1 vez no 'del' não pode remover current, caso tenha atigido o limite de inserção na lista
+    listCalls.setDoNotRemoveCurrent(true); // Aqui diz é true, não pode remover current
+  } 
+  else {  // Segundo clique: executa deleção
+
+    /* ___Pública (marcar com concluído o chamado) via MQTT*/
+    int infirmary = listCalls.getInfirmaryCurrent();
+    const char* idDevice = listCalls.getIdCurrent();
+    // Chama a função de públicar o ID do dispositivo e o número da enfermaria (tranforma em float o infirmary)
+    publicReponseDivice(idDevice, (float)infirmary);
+
+
+    if (listCalls.removeCurrent()) {  // Apaga o item selecionado
+      log(LOG_INFO,"Chamada removida com sucesso!");
+    } else {
+      log(LOG_ERROR,"Erro ao remover a chamada na lista!");
+    }
     fixed_data();               // Atualiza o display com os dados fixos
     showInfirmaryNumber(
       listCalls.getInfirmaryCurrent(),
@@ -62,6 +84,9 @@ void handleDelete() {  // ===== Botão Delete
       listCalls.getTotal());  // Mostra os dados no display
     // reseta o flag
     deletionConfirmation = false;
+
+    // Ao marcar o chamado como resolvido, reseta a flag, indicando se atingir o limite pode remover o current
+    listCalls.setDoNotRemoveCurrent(false); // vira false - pode remover current
   }
 }
 

@@ -14,8 +14,59 @@
   "room_number": "9",
   "local": "Enfermaria",
   "comando": "ligar"
+}*/
+
+
+// Capacidade do StaticJsonDocument
+static constexpr size_t JSON_CAPACITY = 256;
+
+
+// Converte string para número (Retorna true se conversão e limites estiverem ok e grava resultado em room_number)
+//    int& room_number: referência para variável que receberá o resultado
+//    const char* room_str: string a ser convertida
+bool roomNumberConversion(int *room_number, const char* room_str) {
+  if (room_str == nullptr) return false;  // Verifica se string é nula - retorna falha
+
+  char* endptr = nullptr;                  // ponteiro que indica onde a conversão parou
+  long v = strtol(room_str, &endptr, 10);  // conversão string para long
+
+  // Verifica se conversão foi completa
+  if (endptr == room_str) {
+    log(LOG_ERROR, "room_number string inválida");
+    return false;
+  }
+
+  // Há caracteres extras após número
+  if (*endptr != '\0') {
+    log(LOG_ERROR, "room_number string inválida (caracteres extras)");
+    return false;
+  }
+
+  *room_number = (int)v;              // Atribui valor convertido via referência
+  return true;                        // Retorna sucesso - conversão válida
 }
-*/
+
+
+// Validação básica do payload JSON bruto
+bool validateJsonFields(const char* payload, unsigned int length) {
+  if (payload == nullptr) return false;
+  if (length == 0) return false;
+
+  if (length > 1024) {  // limite de segurança
+    log(LOG_ERROR, "Payload muito grande!");
+    return false;
+  }
+
+  // Checa formato mínimo - deve começar com '{'
+  if (payload[0] != '{') {
+    log(LOG_ERROR, "Payload não parece JSON");
+    return false;
+  }
+
+  return true;  // Payload é válido
+}
+
+
 // processa os dados JSON recebido do MQTT
 void processing_json_MQTT(byte* payload, unsigned int length) {
   // Cria um documento JSON estático na stack (memória temporária) com capacidade de 256 bytes para armazenar o JSON parseado.
@@ -44,32 +95,36 @@ void processing_json_MQTT(byte* payload, unsigned int length) {
 
   // // Extrai campo "mensagem" do JSON
   // const char* room_number = doc["room_number"];
+  int room_number;
 
-  // *** CONVERSÃO PARA INTEIRO ***
-  // Declara e inicializa a variável 'room_number' com 0
-  int room_number = 0;
   // Verifica se o campo "room_number" do objeto 'doc' é um número inteiro
   if (doc["room_number"].is<int>()) {
     // Se for inteiro, converte diretamente para int
     room_number = doc["room_number"].as<int>();
+    
+
   } else if (doc["room_number"].is<const char*>()) {  // Caso contrário, verifica se o campo é string (const char*)
-    // Obtém a string do campo "room_number"
-    const char* rn = doc["room_number"];
-    // Ponteiro usado por strtol() para identificar onde a conversão parou
-    char* endptr = nullptr;
-    // Converte a string para número inteiro longo (base 10)
-    long v = strtol(rn, &endptr, 10);
 
-    // Verifica se a conversão falhou:
-    // - Se endptr == rn, nenhum dígito foi convertido.
-    // - Se *endptr != '\0', há caracteres não numéricos após o número.
-    if (endptr == rn || *endptr != '\0') {
-      log(LOG_ERROR, "room_number string inválida");
-      return;  // não adiciona o dado (saída antecipada)
+    // // Obtém a string do campo "room_number"
+    const char* room_str = doc["room_number"].as<const char*>();
+    // // Ponteiro usado por strtol() para identificar onde a conversão parou
+    // char* endptr = nullptr;
+    // // Converte a string para número inteiro longo (base 10)
+    // long v = strtol(rn, &endptr, 10);
+
+    // // Verifica se a conversão falhou:
+    // // - Se endptr == rn, nenhum dígito foi convertido.
+    // // - Se *endptr != '\0', há caracteres não numéricos após o número.
+    // if (endptr == rn || *endptr != '\0') {
+    //   log(LOG_ERROR, "room_number string inválida");
+    //   return;  // não adiciona o dado (saída antecipada)
+    // }
+
+    // // Converte o valor long obtido para int
+    // room_number = (int)v;
+    if(!roomNumberConversion(&room_number, room_str)){
+      return;
     }
-
-    // Converte o valor long obtido para int
-    room_number = (int)v;
 
   } else {  // Caso o tipo de 'room_number' não seja nem inteiro nem string
     log(LOG_ERROR, "room_number não é string nem número!");
@@ -81,6 +136,9 @@ void processing_json_MQTT(byte* payload, unsigned int length) {
     return;  // Valor inválido, interrompe a execução
   }
 
+  // if (!roomNumberValid) {  // Verifica se conversão foi bem-sucedida
+  //   return;                // Se falhou, sai da função
+  // }
 
   // Extrai campo "mensagem" do JSON
   const char* local = doc["local"];  // Ex: "Enfermagem"
@@ -103,7 +161,7 @@ void processing_json_MQTT(byte* payload, unsigned int length) {
 
   
   // Adiciona na lista
-  listCalls.add(room_number);
+  listCalls.add(room_number,id);
   listUpdated = true;  // marca que a lista foi alterada
 }
 

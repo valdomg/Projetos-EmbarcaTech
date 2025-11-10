@@ -23,7 +23,7 @@ def register_call_mongo_db(device:str, room_number:int, status:str):
     mongo__conn.start_connection()
     if mongo__conn.check_if_document_exists('status_chamadas', 'device', device):
         
-        print('documento já existe, atualizando')
+        logging.info('documento já existe, atualizando')
 
         result = mongo__conn.return_document('status_chamadas', 'device', device)
 
@@ -34,7 +34,8 @@ def register_call_mongo_db(device:str, room_number:int, status:str):
 
         mongo__conn.update_document_by_id('status_chamadas', id_chamada, document)
 
-    else:    
-        mongo__conn.insert_document_collection('status_chamada', document)
+    else:
+        logging.info(f'Registrando status no mapa de {device}')    
+        mongo__conn.insert_document_collection('status_chamadas', document)
 
     mongo__conn.close_connection()
