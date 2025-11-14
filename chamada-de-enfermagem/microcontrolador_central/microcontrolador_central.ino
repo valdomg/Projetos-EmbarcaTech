@@ -20,9 +20,8 @@ void handleNext() {  // ===== Botão Next (>)
     deletionConfirmation = false;  // reset caso usuário navegue (cancela a exclusão)
 
     // Quando clica 'next' e esta no esta no modo confirmação, garante que NÃO está bloqueado remover current (caso tenha atigido o limite de inserção na lista)
-    listCalls.setDoNotRemoveCurrent(false); // vira false -> pode remover current
-  } 
-  else {
+    listCalls.setDoNotRemoveCurrent(false);  // vira false -> pode remover current
+  } else {
     // Avança para o próximo item da lista
     listCalls.next();
   }
@@ -40,9 +39,8 @@ void handlePrev() {  // ===== Botão Prev (<)
     deletionConfirmation = false;  // reset caso usuário navegue (cancela a exclusão)
 
     // Quando clica 'prev' e esta no esta no modo confirmação, garante que NÃO está bloqueado remover current (caso tenha atigido o limite de inserção na lista)
-    listCalls.setDoNotRemoveCurrent(false); // vira false - pode remover current
-  } 
-  else {
+    listCalls.setDoNotRemoveCurrent(false);  // vira false - pode remover current
+  } else {
     // Avança para o item anteriot da lista
     listCalls.prev();
   }
@@ -61,9 +59,8 @@ void handleDelete() {  // ===== Botão Delete
     deletionConfirmation = true;
 
     // Quando clica 1 vez no 'del' não pode remover current, caso tenha atigido o limite de inserção na lista
-    listCalls.setDoNotRemoveCurrent(true); // Aqui diz é true, não pode remover current
-  } 
-  else {  // Segundo clique: executa deleção
+    listCalls.setDoNotRemoveCurrent(true);  // Aqui diz é true, não pode remover current
+  } else {                                  // Segundo clique: executa deleção
 
     /* ___Pública (marcar com concluído o chamado) via MQTT*/
     int infirmary = listCalls.getInfirmaryCurrent();
@@ -73,11 +70,11 @@ void handleDelete() {  // ===== Botão Delete
 
 
     if (listCalls.removeCurrent()) {  // Apaga o item selecionado
-      log(LOG_INFO,"Chamada removida com sucesso!");
+      log(LOG_INFO, "Chamada removida com sucesso!");
     } else {
-      log(LOG_ERROR,"Erro ao remover a chamada na lista!");
+      log(LOG_ERROR, "Erro ao remover a chamada na lista!");
     }
-    fixed_data();               // Atualiza o display com os dados fixos
+    fixed_data();  // Atualiza o display com os dados fixos
     showInfirmaryNumber(
       listCalls.getInfirmaryCurrent(),
       listCalls.hasNursingCall(),
@@ -86,7 +83,7 @@ void handleDelete() {  // ===== Botão Delete
     deletionConfirmation = false;
 
     // Ao marcar o chamado como resolvido, reseta a flag, indicando se atingir o limite pode remover o current
-    listCalls.setDoNotRemoveCurrent(false); // vira false - pode remover current
+    listCalls.setDoNotRemoveCurrent(false);  // vira false - pode remover current
   }
 }
 
@@ -105,6 +102,8 @@ void setup() {
   lcd2004_init();
   // Inicializa botões
   initButtons();
+
+  enableButtonInterruptChange();
 
   ledInit();
 
@@ -130,35 +129,39 @@ void loop() {
   //   Serial.println("servidor mqtt desconectado");
   // }
 
+  if (isConfigurationMode()) {
+    // log(LOG_INFO, "modo configuraçao");
 
-  // Atualiza se tiver novos dados, mas se nenhum botão estiver pressionado
-  if (listUpdated
-      && button_next.state == HIGH
-      && button_prev.state == HIGH
-      && button_delete.state == HIGH
-      && !deletionConfirmation) {
-
-    showInfirmaryNumber(
-      listCalls.getInfirmaryCurrent(),
-      listCalls.hasNursingCall(),
-      listCalls.getTotal());
-
-    listUpdated = false;  // reseta a flag
-  }
-
-  // Habilita os botões somente se houver dados na lista
-  // aciona led se houver algum chamado
-  if (listCalls.hasNursingCall()) {
-    if (checkButton(button_next)) handleNext();
-    if (checkButton(button_prev)) handlePrev();
-    if (checkButton(button_delete)) handleDelete();
-
-    toggleLed();
   } else {
-    turnOffLed();
-  }
+    // Atualiza se tiver novos dados, mas se nenhum botão estiver pressionado
+    if (listUpdated
+        && button_next.state == HIGH
+        && button_prev.state == HIGH
+        && button_delete.state == HIGH
+        && !deletionConfirmation) {
 
-  if (doesHaveNotificationBuzzer()) {
-    toggleBuzzer();
+      showInfirmaryNumber(
+        listCalls.getInfirmaryCurrent(),
+        listCalls.hasNursingCall(),
+        listCalls.getTotal());
+
+      listUpdated = false;  // reseta a flag
+    }
+
+    // Habilita os botões somente se houver dados na lista
+    // aciona led se houver algum chamado
+    if (listCalls.hasNursingCall()) {
+      if (checkButton(button_next)) handleNext();
+      if (checkButton(button_prev)) handlePrev();
+      if (checkButton(button_delete)) handleDelete();
+
+      toggleLed();
+    } else {
+      turnOffLed();
+    }
+
+    if (doesHaveNotificationBuzzer()) {
+      toggleBuzzer();
+    }
   }
 }

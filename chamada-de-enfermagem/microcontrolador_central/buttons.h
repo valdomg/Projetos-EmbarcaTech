@@ -1,6 +1,7 @@
 #ifndef BUTTONS_H
 #define BUTTONS_H
 
+#include "log.h"
 #include <Arduino.h>
 
 // ===== Estrutura do botão =====
@@ -19,5 +20,7 @@ extern Button button_delete;
 
 extern void initButtons();
 extern bool checkButton(Button &btn);
+void enableButtonInterruptChange();
+bool isConfigurationMode();
 
 #endif

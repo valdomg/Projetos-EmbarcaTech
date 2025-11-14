@@ -11,16 +11,16 @@ const constexpr uint8_t PIN_LED = 2;           //pino para utilizaçao da led
 
 const uint8_t NUMBER_SOUND_ALERTS = 5;
 
-constexpr char* WIFI_SSID = "xxxxxxxxxxxxxx";
-constexpr char* WIFI_PASSWORD = "xxxxxxxxxxxxxx";
+constexpr const char* WIFI_SSID = "xxxxxxxxxxxxxx";
+constexpr const char* WIFI_PASSWORD = "xxxxxxxxxxxxxx";
 
 
-constexpr char* MQTT_SERVER = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-constexpr char* MQTT_USER = "xxxxxxxxxxxxxx";
-constexpr char* MQTT_PASS = "xxxxxxxxxxxxxx";
-constexpr char* MQTT_DEVICE_ID = "xxxxxxxxxxxxxx";
-constexpr  char* MQTT_PUBLICATION_TOPIC = "dispositivos/enfermaria";
-constexpr  char* MQTT_SUBSCRIPTION_TOPIC = "dispositivos/posto_enfermaria";
-constexpr  int MQTT_PORT = 1883;
+constexpr const char* MQTT_SERVER = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+constexpr const char* MQTT_USER = "xxxxxxxxxxxxxx";
+constexpr const char* MQTT_PASS = "xxxxxxxxxxxxxx";
+constexpr const char* MQTT_DEVICE_ID = "xxxxxxxxxxxxxx";
+constexpr const char* MQTT_PUBLICATION_TOPIC = "dispositivos/enfermaria";
+constexpr const char* MQTT_SUBSCRIPTION_TOPIC = "dispositivos/posto_enfermaria";
+constexpr int MQTT_PORT = 1883;
 
 #endif
