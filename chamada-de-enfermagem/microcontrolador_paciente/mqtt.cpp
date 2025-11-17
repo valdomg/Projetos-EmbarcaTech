@@ -2,8 +2,10 @@
 #include <ArduinoJson.h>
 #include "wifi.h"
 #include "mqtt.h"
+#include "led.h"
 
 
+extern bool buttonBlocked;
 
 // MQTT Broker
 const char* MQTT_BROKER = "XXXXXX";
@@ -13,6 +15,7 @@ const int MQTT_PORT = 0;
 const char* ID_CLIENT = "XXXXXX";
 const char* TOPIC_PUBLISH = "dispositivos/posto_enfermaria";
 const char* TOPIC_SUBSCRIBE = "dispositivos/enfermaria/ESP8266";
+
 
 
 
@@ -27,7 +30,7 @@ void connectMQTT() {
   client.setServer(MQTT_BROKER, MQTT_PORT);
   client.setCallback(callback);
 
-  if (client.connect(ID_CLIENT)) {
+  if (client.connect(ID_CLIENT, MQTT_USER, MQTT_PASS)) {
     Serial.println("Exito na conexão");
     Serial.printf("Cliente %s conectado ao Broker\n", ID_CLIENT);
     client.subscribe(TOPIC_SUBSCRIBE);
@@ -73,7 +76,9 @@ void callback(char* topic, byte* payload, unsigned int length) {
       Serial.println("Comando: " + String(comando));
 
       if (String(comando) == "desligar") {
-        Serial.println("Desligado");
+        desligarLed();
+        buttonBlocked = false;
+        Serial.println("Botão liberado");
       }
     } else {
       Serial.println("Comando ausente ou nulo");
