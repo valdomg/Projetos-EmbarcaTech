@@ -18,6 +18,38 @@ PubSubClient client(espClient);  // Cliente MQTT que usa o cliente Wi-Fi seguro 
 static unsigned long lastAttempConnectMQTT = 0;           // Guarda o tempo da última tentativa de conexão com o broker.
 static const unsigned long reconnectIntervalMQTT = 3000;  // Intervalo (ms) entre tentativas de reconexão ao broker.
 
+
+// -----------------------------------------------------------------------------
+// Funções auxiliares
+// -----------------------------------------------------------------------------
+
+/**
+ * @brief Reconfigura o cliente MQTT e o cliente TLS (WiFiClientSecure).
+ *
+ * Essa função é chamada quando o cliente MQTT falha repetidamente ao tentar
+ * reconectar ao broker. Em situações assim, o cliente TLS pode ficar em um
+ * estado inválido, bloqueando novas conexões. O procedimento abaixo recria
+ * ambos os clientes para restaurar a comunicação.
+ *
+ * Operações executadas:
+ * - Reinstancia o objeto `WiFiClientSecure` (limpa conexões antigas);
+ * - Redefine o servidor MQTT e a porta segura;
+ * - Reassocia o cliente TLS ao cliente MQTT.
+ *
+ * Essa rotina evita a necessidade de reiniciar o microcontrolador.
+ */
+void resetMQTTClient() {
+  log(LOG_WARN, "Reinicializando cliente MQTT e TLS...");
+
+  espClient = WiFiClient();  // recria o cliente seguro
+  client.setServer(MQTT_SERVER, MQTT_PORT);
+  client.setClient(espClient);
+
+  log(LOG_DEBUG, "Cliente MQTT reconfigurado");
+}
+
+
+
 // -----------------------------------------------------------------------------
 // Funções principais
 // -----------------------------------------------------------------------------
@@ -33,8 +65,6 @@ void setupMQTT() {
   client.setServer(MQTT_SERVER, MQTT_PORT);  // Define o servidor MQTT e a porta (8883 = padrão para MQTTs).
   client.setCallback(callback);         // Registra a função callback para mensagens recebidas.
 }
-
-
 
 
 /**
@@ -60,6 +90,15 @@ void checkMQTTConnected() {
       client.subscribe(MQTT_SUBSCRIPTION_TOPIC);  // Inscreve-se no tópico para receber mensagens
     } else {
       log(LOG_ERROR, "Falha na conexão com mqtt, rc= %d", client.state());  // Mostra o código de erro da conexão
+
+      static uint8_t connection_drop_count = 0;
+
+      connection_drop_count++;
+
+      if (connection_drop_count >= 3) {
+        resetMQTTClient();
+        connection_drop_count = 0;
+      }
     }
   }
 }
