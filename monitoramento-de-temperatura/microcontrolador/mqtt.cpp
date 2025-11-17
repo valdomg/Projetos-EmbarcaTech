@@ -55,7 +55,7 @@ static const unsigned long resendIntervalMQTT = 3000;  ///< Intervalo mínimo en
  */
 void setupMQTT() {
   // espClient.setInsecure();  // Desativa a verificação do certificado TLS
-  client.setServer(cfg.mqttServer.c_str(), 1883);
+  client.setServer(cfg.mqttServer.c_str(), cfg.mqttPort);
   log(LOG_DEBUG, "MQTT inicializado");
 }
 
@@ -81,7 +81,7 @@ void resetMQTTClient() {
 
   espClient = WiFiClient();  // recria o cliente seguro
   // espClient.setInsecure();         // desativa verificação de certificado
-  client.setServer(cfg.mqttServer.c_str(), 8883);
+  client.setServer(cfg.mqttServer.c_str(), cfg.mqttPort);
   client.setClient(espClient);
 
   log(LOG_DEBUG, "Cliente MQTT reconfigurado");
