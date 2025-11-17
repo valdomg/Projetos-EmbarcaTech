@@ -34,6 +34,9 @@ void setupMQTT() {
   client.setCallback(callback);         // Registra a função callback para mensagens recebidas.
 }
 
+
+
+
 /**
  * @brief Verifica a conexão com o broker MQTT e reconecta se necessário.
  * 
@@ -73,6 +76,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
   
   // Processa os dados Json recebidos
   processing_json_MQTT(payload, length);
+  char buffer[50];
+  publicReponseDivice(getPayloadID(payload,length),MQTT_MESSAGE_CONFIRMATION_TOPIC,creteJsonPayloadConfirmationMessage(buffer,sizeof(buffer)));
   enableSoundAlert();
 }
 
@@ -84,13 +89,14 @@ void callback(char* topic, byte* payload, unsigned int length) {
  * @param id    - Sufixo do tópico (ex.: ID do dispositivo ou sensor).
  * @param value - Valor numérico a ser enviado.
  */
-bool publicReponseDivice(const char* deviceId, int roomNumber) {
+bool publicReponseDivice(const char* deviceId, const char* topic, const char* message) {
 
-  char topic[50];
-  snprintf(topic, sizeof(topic), "%s/%s", MQTT_PUBLICATION_TOPIC, deviceId);  // Monta o tópico final (base + id).
+  char fullTopic[50];
+  snprintf(fullTopic, sizeof(fullTopic), "%s/%s", topic, deviceId);  // Monta o tópico final (base + id).
 
-  char buffer[256];
-  if (!client.publish(topic, createJsonPayload(buffer,sizeof(buffer), roomNumber))) {
+
+  // char buffer[256];
+  if (!client.publish(fullTopic, message)) {
     log(LOG_WARN, "Falha ao enviar dados ao broker MQTT");
     return false;
   }

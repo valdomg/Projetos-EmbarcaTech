@@ -3,6 +3,7 @@
 
 #include "display_LCD-2004_I2C.h"
 #include "listNursingCall_utils.h"
+#include "jsonDataProcessing.h"
 #include "buttons.h"
 #include "config.h"
 #include "buzzer.h"
@@ -69,7 +70,8 @@ void handleDelete() {  // ===== Botão Delete
     int infirmary = listCalls.getInfirmaryCurrent();
     const char* idDevice = listCalls.getIdCurrent();
     // Chama a função de públicar o ID do dispositivo e o número da enfermaria (tranforma em float o infirmary)
-    publicReponseDivice(idDevice, infirmary);
+    char buffer[256];
+    publicReponseDivice(idDevice, MQTT_PUBLICATION_TOPIC, createJsonPayload(buffer,sizeof(buffer),infirmary));
 
 
     if (listCalls.removeCurrent()) {  // Apaga o item selecionado

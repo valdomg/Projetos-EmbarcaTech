@@ -24,7 +24,7 @@ static constexpr size_t JSON_CAPACITY = 256;
 // Converte string para número (Retorna true se conversão e limites estiverem ok e grava resultado em room_number)
 //    int& room_number: referência para variável que receberá o resultado
 //    const char* room_str: string a ser convertida
-bool roomNumberConversion(int *room_number, const char* room_str) {
+bool roomNumberConversion(int* room_number, const char* room_str) {
   if (room_str == nullptr) return false;  // Verifica se string é nula - retorna falha
 
   char* endptr = nullptr;                  // ponteiro que indica onde a conversão parou
@@ -42,8 +42,8 @@ bool roomNumberConversion(int *room_number, const char* room_str) {
     return false;
   }
 
-  *room_number = (int)v;              // Atribui valor convertido via referência
-  return true;                        // Retorna sucesso - conversão válida
+  *room_number = (int)v;  // Atribui valor convertido via referência
+  return true;            // Retorna sucesso - conversão válida
 }
 
 
@@ -101,7 +101,7 @@ void processing_json_MQTT(byte* payload, unsigned int length) {
   if (doc["room_number"].is<int>()) {
     // Se for inteiro, converte diretamente para int
     room_number = doc["room_number"].as<int>();
-    
+
 
   } else if (doc["room_number"].is<const char*>()) {  // Caso contrário, verifica se o campo é string (const char*)
 
@@ -122,7 +122,7 @@ void processing_json_MQTT(byte* payload, unsigned int length) {
 
     // // Converte o valor long obtido para int
     // room_number = (int)v;
-    if(!roomNumberConversion(&room_number, room_str)){
+    if (!roomNumberConversion(&room_number, room_str)) {
       return;
     }
 
@@ -159,24 +159,52 @@ void processing_json_MQTT(byte* payload, unsigned int length) {
       local,
       comando);
 
-  
+
   // Adiciona na lista
-  listCalls.add(room_number,id);
+  listCalls.add(room_number, id);
   listUpdated = true;  // marca que a lista foi alterada
 }
 
 
-const char* createJsonPayload(char *buffer, size_t bufferSize, int roomNumber){
+const char* createJsonPayload(char* buffer, size_t length,int roomNumber) {
   StaticJsonDocument<256> doc;
 
-  doc["id"] = MQTT_DEVICE_ID; //ID do proprio dispositivo
+  doc["id"] = MQTT_DEVICE_ID;  //ID do proprio dispositivo
   doc["estado"] = "ocioso";
   doc["mensagem"] = "Desligar LED";
   doc["room_number"] = roomNumber;
   doc["local"] = "posto_enfermaria";
   doc["comando"] = "desligar";
 
-  serializeJson(doc, buffer, bufferSize);
+  serializeJson(doc, buffer, length);
+
+  return buffer;
+}
+
+
+const char* getPayloadID(byte* payload, unsigned int length) {
+  StaticJsonDocument<256> doc;
+
+  DeserializationError error = deserializeJson(doc, payload, length);
+
+  if (error) {
+    log(LOG_ERROR, "Erro no parse: ");
+    // converte o erro em string legível e a imprimi no monitor serial
+    log(LOG_ERROR, error.c_str());
+    // Sai da função prematuramente se houve erro no parse
+    return error.c_str();
+  }
+  const char* id = doc["id"].as<const char*>();
+
+  return id;
+}
+
+const char* creteJsonPayloadConfirmationMessage(char* buffer, size_t length){
+  StaticJsonDocument<50> doc;
+
+  doc["status"] = "ok"; 
+
+  serializeJson(doc, buffer, length);
 
   return buffer;
 }
