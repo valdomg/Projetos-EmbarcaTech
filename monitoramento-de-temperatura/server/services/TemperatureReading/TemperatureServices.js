@@ -1,6 +1,7 @@
 import RoomServices from "../Room/RoomServices.js";
 import RoomModel from '../../models/Room.js';
 import ApiError from "../../utils/errors.js";
+import mongoose from "mongoose";
 
 class TemperatureService {
   constructor(temperatureModel) {
@@ -95,6 +96,48 @@ class TemperatureService {
 
     return readings;
   }
+
+  getReport = async (roomId, startDate, endDate) => {
+  if (!roomId) {
+    throw ApiError.badRequest("ID da sala é obrigatório");
+  }
+
+  await this.validateInterval(startDate, endDate);
+
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  start.setHours(0, 0, 0, 0);
+  end.setHours(23, 59, 59, 999);
+
+  const readings = await this.temperatureModel.aggregate([
+    {
+      $match: {
+        room: new mongoose.Types.ObjectId(roomId),
+        timestamp: { $gte: start, $lte: end }
+      }
+    },
+    {
+      $group: {
+        _id: {
+          year: { $year: "$timestamp" },
+          month: { $month: "$timestamp" },
+          day: { $dayOfMonth: "$timestamp" },
+          hour: { $hour: "$timestamp" }
+        },
+        averageTemperature: { $avg: "$temperature" },
+        averageHumidity: { $avg: "$humidity" },
+        maxTemperature: { $max: "$temperature" },
+        minTemperature: { $min: "$temperature" },
+        maxHumidity: { $max: "$humidity" },
+        minHumidity: { $min: "$humidity" }
+      }
+    },
+    { $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1, "_id.hour": 1 } }
+  ]);
+
+  return readings ?? [];
+};
+
 
   getTemperatureReadingById = async (id) => {
     if (!id) {
