@@ -3,29 +3,33 @@ const verde = "#87c454"
 const azul = "#4384c4"
 
 function renderMapa(dados, containerId) {
-    const div = document.getElementById(containerId);
-    div.className = 'celula-enfermaria'
-    div.id = dados._id;
-    div.innerHTML = '';
-
-    dados.forEach(dado => {
-        div.appendChild(Object.assign(document.createElement("p"), {
-          textContent: `Dispositivo: ${dado.device}`
-        }));
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
     
-        div.appendChild(Object.assign(document.createElement("p"), {
-          textContent: `Sala: ${dado.room_number}`
-        }));
+    dados.forEach(dado => {
+      div = document.createElement("div")
+      div.className = 'celula-enfermaria'
+      div.id = dado._id;
 
-        div.appendChild(Object.assign(document.createElement("p"), {
-          textContent: `Estado: ${dado.status}`
-        }));
+      div.appendChild(Object.assign(document.createElement("p"), {
+        textContent: `Dispositivo: ${dado.device}`
+      }));
+  
+      div.appendChild(Object.assign(document.createElement("p"), {
+        textContent: `Sala: ${dado.room_number}`
+      }));
 
-        data = new Date(dado.updateAt)
+      div.appendChild(Object.assign(document.createElement("p"), {
+        textContent: `Estado: ${dado.status}`
+      }));
 
-        div.appendChild(Object.assign(document.createElement("p"), {
-          textContent: `Última atualização: ${data.toLocaleString("pt-BR")}`
-        }));
+      data = new Date(dado.updateAt)
+
+      div.appendChild(Object.assign(document.createElement("p"), {
+        textContent: `Última atualização: ${data.toLocaleString("pt-BR")}`
+      }));
+
+      container.appendChild(div);
 
     });
 }
