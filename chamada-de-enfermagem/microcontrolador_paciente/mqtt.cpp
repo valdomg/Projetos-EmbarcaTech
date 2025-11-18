@@ -8,16 +8,14 @@
 extern bool buttonBlocked;
 
 // MQTT Broker
-const char* MQTT_BROKER = "XXXXXX";
+const char* MQTT_BROKER = "xxx";
 const int MQTT_PORT = 0;
-// const char* MQTT_USER = "";
-// const char* MQTT_PASS = "";
-const char* ID_CLIENT = "XXXXXX";
+const char* MQTT_USER = "enfermaria1";
+const char* MQTT_PASS = "123";
+const char* ID_CLIENT = "enfermaria1";
 const char* TOPIC_PUBLISH = "dispositivos/posto_enfermaria";
-const char* TOPIC_SUBSCRIBE = "dispositivos/enfermaria/ESP8266";
-
-
-
+const char* TOPIC_SUBSCRIBE = "dispositivos/enfermaria/enfermaria1";
+const char* TOPIC_SUBSCRIBE_CONFIRM = "dispositivo/confirmacao/enfermaria1";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -34,6 +32,7 @@ void connectMQTT() {
     Serial.println("Exito na conexão");
     Serial.printf("Cliente %s conectado ao Broker\n", ID_CLIENT);
     client.subscribe(TOPIC_SUBSCRIBE);
+    client.subscribe(TOPIC_SUBSCRIBE_CONFIRM);
 
   } else {
     Serial.print("Falha ao conectar: ");
@@ -69,7 +68,14 @@ void callback(char* topic, byte* payload, unsigned int length) {
   StaticJsonDocument<200> doc;
   DeserializationError error = deserializeJson(doc, payload, length);
 
-  if (!error) {
+  if (error) {
+    Serial.print("Erro ao parsear JSON: ");
+    Serial.println(error.c_str());
+    return;
+  }
+
+
+  if (String(topic) == TOPIC_SUBSCRIBE) {
 
     if (doc.containsKey("comando") && !doc["comando"].isNull()) {
       const char* comando = doc["comando"];
@@ -83,9 +89,22 @@ void callback(char* topic, byte* payload, unsigned int length) {
     } else {
       Serial.println("Comando ausente ou nulo");
     }
-  } else {
-    Serial.print("Erro ao parsear JSON: ");
-    Serial.println(error.c_str());
+
+  }
+
+  else if (String(topic) == TOPIC_SUBSCRIBE_CONFIRM) {
+
+    if (doc.containsKey("status") && !doc["status"].isNull()) {
+      const char* status = doc["status"];
+      Serial.println("Status: " + String(status));
+
+      if (String(status) == "ok") {
+        ligarLed();
+        buttonBlocked = true;
+        Serial.println("Botão bloqueado");
+      }
+    } else {
+      Serial.println("Comando ausente ou nulo");
+    }
   }
 }
-
