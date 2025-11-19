@@ -42,7 +42,7 @@ retorna um token para acessar o sistema ou uma mensagem de credenciais inválida
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
 
-    alert_message=None
+    error=None
 
     if request.method == 'POST':
 
@@ -71,13 +71,13 @@ def login():
 
                 return resp
 
-            alert_message ='Credenciais inválidas'
+            error ='Credenciais inválidas'
         
         except Exception as e:
             logging.exception(e)
-            alert_message= 'Erro ao processar login'
+            error= 'Erro ao processar login'
 
-    return render_template('login.html', alert_message=alert_message)
+    return render_template('login.html', error=error)
 
 '''
 Função para deslogar usuário
