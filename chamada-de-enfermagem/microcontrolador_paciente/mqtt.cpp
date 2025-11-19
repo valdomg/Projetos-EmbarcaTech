@@ -7,15 +7,17 @@
 
 extern bool buttonBlocked;
 
-// MQTT Broker
-const char* MQTT_BROKER = "xxx";
+MQTT Broker
+const char* MQTT_BROKER = "XXXXXX";
 const int MQTT_PORT = 0;
-const char* MQTT_USER = "enfermaria1";
-const char* MQTT_PASS = "123";
-const char* ID_CLIENT = "enfermaria1";
+// const char* MQTT_USER = "";
+// const char* MQTT_PASS = "";
+const char* ID_CLIENT = "XXXXXX";
 const char* TOPIC_PUBLISH = "dispositivos/posto_enfermaria";
-const char* TOPIC_SUBSCRIBE = "dispositivos/enfermaria/enfermaria1";
-const char* TOPIC_SUBSCRIBE_CONFIRM = "dispositivo/confirmacao/enfermaria1";
+const char* TOPIC_SUBSCRIBE = "dispositivos/enfermaria/ESP8266";
+
+
+
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -42,10 +44,9 @@ void connectMQTT() {
 }
 
 
+// Criando o objeto JSON
+const char* createJsonPayload() {
 
-//funcao publicar dados no topico(para testes)
-void publishData() {
-  // Criando o objeto JSON
   StaticJsonDocument<200> doc;
   doc["id"] = ID_CLIENT;
   doc["estado"] = "emergencia";
@@ -54,12 +55,10 @@ void publishData() {
   doc["local"] = "enfermaria";
   doc["comando"] = "ligar";
 
-
-  char payload[200];
+  static char payload[200];
   serializeJson(doc, payload);
+  return payload;
 
-  // Publicando o JSON no tópico
-  client.publish(TOPIC_PUBLISH, payload);
 }
 
 

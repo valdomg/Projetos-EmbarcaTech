@@ -12,8 +12,8 @@ void setup() {
   setupLed();
   connectWiFi();
   connectMQTT();
-
 }
+
 
 void loop() {
 
@@ -24,12 +24,16 @@ void loop() {
   client.loop();
   checkConnection();
 
-  //se o botao for pressionado, ficará indisponível até que o enfermeiro libere o recurso novamente
-  if (!buttonBlocked && !readButton()) {
-      Serial.println("Botão pressionado!");
-
-      ligarLed();
-      publishData();
-      buttonBlocked = true;
+  //se estiver conectado no broker entra no loop de leitura do botao
+  if (client.connected()) {
+    //se o botao estiver false e for pressionado publica no broker
+    if (!buttonBlocked && !readButton()) {
+      delay(50);
+      if (client.publish(TOPIC_PUBLISH, createJsonPayload())) {
+        Serial.println("Solicitação enviada");
+      } else {
+        Serial.println("Falha ao enviar solicitação");
+      }
     }
-  }
+  } 
+}
