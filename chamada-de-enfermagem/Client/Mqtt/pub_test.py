@@ -35,9 +35,9 @@ def pub_posto_enfermaria_de_enfermaria(dispositivo_id: str, estado: str, mensage
 
     publish_message(topic, payload)
 
-def pub_enfermaria_de_posto_enfermaria(dispositivo_id: str, estado: str, mensagem: str, room_number: str, local:str, comando: str):
+def pub_enfermaria_de_posto_enfermaria(dispositivo_topic:str, dispositivo_id: str, estado: str, mensagem: str, room_number: str, local:str, comando: str):
     """Publica um evento vindo do posto de enfermaria no tópico local."""
-    topic = f"dispositivos/enfermaria/{dispositivo_id}"
+    topic = f"dispositivos/enfermaria/{dispositivo_topic}"
 
     payload = {
         "id": dispositivo_id,
@@ -51,6 +51,7 @@ def pub_enfermaria_de_posto_enfermaria(dispositivo_id: str, estado: str, mensage
     publish_message(topic, payload)
 
 # ====== EXEMPLOS DE USO ======
+
 pub_posto_enfermaria_de_enfermaria(
 
         dispositivo_id="enfermaria1",
@@ -62,11 +63,13 @@ pub_posto_enfermaria_de_enfermaria(
         
 )
 
-sleep(20)
+
+sleep(25)
 
 
 pub_enfermaria_de_posto_enfermaria(
-        dispositivo_id="enfermaria1",
+        dispositivo_topic="enfermaria1",
+        dispositivo_id="posto_enfermaria",
         estado="ocioso",
         mensagem="desligar LED",
         room_number="1",
