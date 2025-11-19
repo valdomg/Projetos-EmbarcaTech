@@ -1,5 +1,6 @@
 #include "wifi_utils.h"
 #include "mqtt.h"
+#include "server.h"
 
 #include "display_LCD-2004_I2C.h"
 #include "listNursingCall_utils.h"
@@ -7,10 +8,12 @@
 #include "config.h"
 #include "buzzer.h"
 #include "led.h"
+#include "config_storage.h"
 
 // flag que indica se o botão de deletar foi pressionado uma vez e está aguardando confirmação
 bool deletionConfirmation = false;
 
+ESP8266WebServer server(80);
 
 // ===== Funções de navegação =====
 void handleNext() {  // ===== Botão Next (>)
@@ -92,11 +95,6 @@ void setup() {
   // Serial.begin(115200);
   logInit(LOG_MODE);
 
-  if (!connectToWiFi()) {
-    // Serial.println("WiFi não conectado.");
-    log(LOG_WARN, "Falha ao conectar com WiFI.");
-  }
-  setupMQTT();
 
   // inicializa o display
   lcd2004_init();
@@ -110,6 +108,16 @@ void setup() {
   // inicializa buzzer
   buzzerInit();
 
+  initConfigStorage();
+  cfg = loadConfig();
+
+  if (!connectToWiFi()) {
+    // Serial.println("WiFi não conectado.");
+    log(LOG_WARN, "Falha ao conectar com WiFI.");
+  }
+  
+  setupMQTT();
+
   showInfirmaryNumber(
     listCalls.getInfirmaryCurrent(),
     listCalls.hasNursingCall(),
@@ -118,21 +126,21 @@ void setup() {
 
 void loop() {
 
-  checkAndReconnectWifi();
-  checkMQTTConnected();
 
-  // A função delay atrapalha o funcionamento dos botões
-  // delay(1000);
+  if (isConfigurationMode() || !cfg.valid) {
 
-  // client.disconnect();
-  // if (!client.connected()){
-  //   Serial.println("servidor mqtt desconectado");
-  // }
+    turnOnLed();
+    createAccessPoint();
+    startServer(&server);
+    server_handle_loop(&server);
 
-  if (isConfigurationMode()) {
     // log(LOG_INFO, "modo configuraçao");
 
   } else {
+
+    stopServer(&server);
+    checkAndReconnectWifi();
+    checkMQTTConnected();
     // Atualiza se tiver novos dados, mas se nenhum botão estiver pressionado
     if (listUpdated
         && button_next.state == HIGH

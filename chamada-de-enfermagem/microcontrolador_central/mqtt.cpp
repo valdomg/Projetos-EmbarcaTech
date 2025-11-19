@@ -4,7 +4,7 @@
 #include "jsonDataProcessing.h"  // Header com a declaração da função que processa os dados JSON recebido do MQTT
 #include "log.h"
 #include "buzzer.h"
-
+#include "config_storage.h"
 
 // -----------------------------------------------------------------------------
 // Objetos globais
@@ -30,7 +30,7 @@ static const unsigned long reconnectIntervalMQTT = 3000;  // Intervalo (ms) entr
  */
 void setupMQTT() {
   // espClient.setInsecure();              // Desabilita verificação de certificado SSL (não verifica autenticidade).
-  client.setServer(MQTT_SERVER, MQTT_PORT);  // Define o servidor MQTT e a porta (8883 = padrão para MQTTs).
+  client.setServer(cfg.mqttServer.c_str(), cfg.mqttPort);  // Define o servidor MQTT e a porta (8883 = padrão para MQTTs).
   client.setCallback(callback);         // Registra a função callback para mensagens recebidas.
 }
 
@@ -52,7 +52,7 @@ void checkMQTTConnected() {
 
     log(LOG_INFO, "Tentando conectar ao MQTT");
     // Tenta conectar ao broker usando credenciais do config.h
-    if (client.connect(MQTT_DEVICE_ID, MQTT_USER, MQTT_PASS)) {
+    if (client.connect(cfg.mqttDeviceId.c_str(), cfg.mqttUser.c_str(), cfg.mqttPass.c_str())) {
       log(LOG_INFO, "Conectado!");
       client.subscribe(MQTT_SUBSCRIPTION_TOPIC);  // Inscreve-se no tópico para receber mensagens
     } else {

@@ -4,6 +4,7 @@
 #include <cstring>
 #include "log.h"
 #include "config.h"
+#include "config_storage.h"
 
 
 /*  Exemplo JSON (payload) recebido:
@@ -169,7 +170,7 @@ void processing_json_MQTT(byte* payload, unsigned int length) {
 const char* createJsonPayload(char *buffer, size_t bufferSize, int roomNumber){
   StaticJsonDocument<256> doc;
 
-  doc["id"] = MQTT_DEVICE_ID; //ID do proprio dispositivo
+  doc["id"] = cfg.mqttDeviceId.c_str(); //ID do proprio dispositivo
   doc["estado"] = "ocioso";
   doc["mensagem"] = "Desligar LED";
   doc["room_number"] = roomNumber;

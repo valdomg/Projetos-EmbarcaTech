@@ -2,10 +2,13 @@
 #include "wifi_utils.h"   // Declarações das funções públicas do módulo Wi-Fi
 #include "config.h"       // Constantes globais do projeto (SSID e senha)
 #include "log.h"
+#include "config_storage.h"
 
 // ------------------------------------------------------------
 // Variáveis internas do módulo
 // ------------------------------------------------------------
+
+char ipBuffer[16];  ///< Armazena o endereço IP do dispositivo em formato de string (ex: "192.168.1.10")
 
 // ------------------------------------------------------------
 // Funções uteis para o módulo
@@ -43,7 +46,7 @@ static const unsigned long reconnectInterval = 2000;  // 10 segundos
  * @return true se a conexão foi bem sucedida, false caso contrário.
  */
 bool connectToWiFi() {
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);  // inicia conexão
+  WiFi.begin(cfg.wifiSSID.c_str(), cfg.wifiPass.c_str());  // inicia conexão
   log(LOG_INFO, "Conctandoo ao wifi");
 
   // Define um timeout de 10 segundos
@@ -59,7 +62,7 @@ bool connectToWiFi() {
 
   // Verifica se a conexão foi bem sucedida
   if (WiFi.status() == WL_CONNECTED) {
-    log(LOG_INFO, "Conectado ao Wi-Fi: %s", WIFI_SSID);
+    log(LOG_INFO, "Conectado ao Wi-Fi: %s", cfg.wifiSSID.c_str());
     log(LOG_INFO, "IP: %s", IPparserToConstChar(WiFi.localIP()));  // mostra o IP atribuído
     return true;
   }
@@ -88,13 +91,40 @@ void checkAndReconnectWifi() {
     log(LOG_INFO, "WiFi desconectado");
     WiFi.disconnect();  // garante que está desconectado
     log(LOG_INFO, "Conectando ao wifi ");
-    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);  // inicia reconexão
+    // WiFi.begin(cfg.wifiSSID.c_str(), cfg.wifiSSID.c_str());  // inicia reconexão
+    connectToWiFi();
 
     // Se reconectar com sucesso, exibe informações
     if (WiFi.status() == WL_CONNECTED) {
       log(LOG_INFO, "Conectado ao Wi-Fi");
       log(LOG_INFO, "IP: %s", IPparserToConstChar(WiFi.localIP()));  // mostra o IP atribuído
     }
+  }
+}
+
+/**
+ * @brief Cria um ponto de acesso (Access Point) para configuração local.
+ * 
+ * Caso o dispositivo não esteja em modo AP, esta função:
+ * - Desconecta o Wi-Fi atual.
+ * - Configura o modo `WIFI_AP`.
+ * - Inicializa um Access Point com o SSID e senha definidos nas constantes
+ *   `SSID_ACCESS_POINT` e `PASSWORD_ACCESS_POINT`.
+ * 
+ * Também imprime o endereço IP do AP via `Serial`.
+ */
+void createAccessPoint() {
+  WiFiMode_t mode = WiFi.getMode();
+
+  if (mode != WIFI_AP) {
+    WiFi.disconnect();
+    WiFi.mode(WIFI_AP);
+    WiFi.softAP(SSID_ACCESS_POINT, PASSWORD_ACCESS_POINT);
+    IPAddress ip = WiFi.softAPIP();
+    
+    snprintf(ipBuffer, sizeof(ipBuffer), "%u.%u.%u.%u",
+             ip[0], ip[1], ip[2], ip[3]);
+    log(LOG_INFO, "Endereço IP: %s", ipBuffer);
   }
 }
 
