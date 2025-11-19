@@ -69,7 +69,7 @@ void handleDelete() {  // ===== Botão Delete
     int infirmary = listCalls.getInfirmaryCurrent();
     const char* idDevice = listCalls.getIdCurrent();
     // Chama a função de públicar o ID do dispositivo e o número da enfermaria (tranforma em float o infirmary)
-    publicReponseDivice(idDevice, (float)infirmary);
+    publicReponseDivice(idDevice, infirmary);
 
 
     if (listCalls.removeCurrent()) {  // Apaga o item selecionado

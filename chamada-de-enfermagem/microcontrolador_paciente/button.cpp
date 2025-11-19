@@ -1,9 +1,9 @@
-#include "peripherals.h"
+#include "button.h"
 #include <Arduino.h>
 
 const int BUTTON = 5;
 
-void setupPeripherals(){
+void setupButton(){
   pinMode(BUTTON, INPUT_PULLUP);
 }
 
