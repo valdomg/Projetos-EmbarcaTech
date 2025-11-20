@@ -6,6 +6,7 @@
 
 
 extern bool buttonBlocked;
+extern bool confirm;
 
 MQTT Broker
 const char* MQTT_BROKER = "XXXXXX";
@@ -30,7 +31,7 @@ void connectMQTT() {
   client.setServer(MQTT_BROKER, MQTT_PORT);
   client.setCallback(callback);
 
-  if (client.connect(ID_CLIENT, MQTT_USER, MQTT_PASS)) {
+  if (client.connect(ID_CLIENT)) {
     Serial.println("Exito na conexão");
     Serial.printf("Cliente %s conectado ao Broker\n", ID_CLIENT);
     client.subscribe(TOPIC_SUBSCRIBE);
@@ -83,7 +84,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
       if (String(comando) == "desligar") {
         desligarLed();
         buttonBlocked = false;
-        Serial.println("Botão liberado");
+        confirm = true;
+        Serial.println("Solicitação finalizada. Botão liberado!");
       }
     } else {
       Serial.println("Comando ausente ou nulo");
@@ -98,9 +100,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
       Serial.println("Status: " + String(status));
 
       if (String(status) == "ok") {
+        Serial.println("Solicitação recebida pelo enfermeiro");
         ligarLed();
         buttonBlocked = true;
-        Serial.println("Botão bloqueado");
+        confirm = true;
+        
       }
     } else {
       Serial.println("Comando ausente ou nulo");

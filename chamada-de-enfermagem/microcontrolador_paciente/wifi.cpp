@@ -6,7 +6,6 @@ const char* WIFI_SSID = "XXXXXXX";
 const char* WIFI_PASSWORD = "XXXXXXX";
 
 
-
 unsigned long lastReconnectAttempt = 0;
 const unsigned long reconnectInterval = 10000;
 
