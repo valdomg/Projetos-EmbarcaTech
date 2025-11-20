@@ -16,8 +16,8 @@ void setup() {
   Serial.begin(115200);
   setupButton();
   setupLed();
+  setupMQTT();
   connectWiFi();
-  connectMQTT();
 }
 
 

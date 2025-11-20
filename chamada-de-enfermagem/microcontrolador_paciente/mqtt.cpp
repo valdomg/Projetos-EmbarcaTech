@@ -5,17 +5,20 @@
 #include "led.h"
 
 
-extern bool buttonBlocked;
-extern bool confirm;
+// Variáveis de controle
+static unsigned long lastAttempConnectMQTT = 0;           // Guarda o tempo da última tentativa de conexão com o broker.
+static const unsigned long reconnectIntervalMQTT = 3000;  // Intervalo (ms) entre tentativas de reconexão ao broker.
+extern bool buttonBlocked;   // Indica se o botão está bloqueado para novos acionamentos (true = bloqueado, false = liberado)
+extern bool confirm; // Indica se o dispositivo recebeu confirmação via callback (status: "ok")
 
-MQTT Broker
-const char* MQTT_BROKER = "XXXXXX";
+MQTT Broker const char* MQTT_BROKER = "XXXXXX";
 const int MQTT_PORT = 0;
 // const char* MQTT_USER = "";
 // const char* MQTT_PASS = "";
 const char* ID_CLIENT = "XXXXXX";
 const char* TOPIC_PUBLISH = "dispositivos/posto_enfermaria";
-const char* TOPIC_SUBSCRIBE = "dispositivos/enfermaria/ESP8266";
+const char* TOPIC_SUBSCRIBE = "dispositivos/enfermaria/{id cliente dispositvo}";
+const char* TOPIC_SUBSCRIBE_CONFIRM = "dispositivo/confirmacao/{id cliente dispositivo}";
 
 
 
@@ -24,23 +27,31 @@ WiFiClient espClient;
 PubSubClient client(espClient);
 
 
+void setupMQTT() {
+  
+  client.setServer(MQTT_BROKER, MQTT_PORT);
+  client.setCallback(callback);
+}
 
 
 void connectMQTT() {
 
-  client.setServer(MQTT_BROKER, MQTT_PORT);
-  client.setCallback(callback);
+  unsigned long now = millis();  // Captura o tempo atual (ms desde o boot).
+  // Só tenta reconectar se já passou o intervalo configurado
+  if (now - lastAttempConnectMQTT >= reconnectIntervalMQTT) {
+    lastAttempConnectMQTT = now;  // Atualiza o tempo da última tentativa
 
-  if (client.connect(ID_CLIENT)) {
-    Serial.println("Exito na conexão");
-    Serial.printf("Cliente %s conectado ao Broker\n", ID_CLIENT);
-    client.subscribe(TOPIC_SUBSCRIBE);
-    client.subscribe(TOPIC_SUBSCRIBE_CONFIRM);
-
-  } else {
-    Serial.print("Falha ao conectar: ");
-    Serial.println(client.state());
-    Serial.println();
+    Serial.println("Tentando conectar ao MQTT");
+    // Tenta conectar ao broker
+    if (client.connect(ID_CLIENT)) {
+      Serial.println("Exito na conexão");
+      client.subscribe(TOPIC_SUBSCRIBE);
+      client.subscribe(TOPIC_SUBSCRIBE_CONFIRM);  // Inscreve-se no tópico para receber mensagens
+    } else {
+      Serial.print("Falha ao conectar: ");
+      Serial.println(client.state());
+      Serial.println();  // Mostra o código de erro da conexão
+    }
   }
 }
 
@@ -59,7 +70,6 @@ const char* createJsonPayload() {
   static char payload[200];
   serializeJson(doc, payload);
   return payload;
-
 }
 
 
@@ -104,7 +114,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
         ligarLed();
         buttonBlocked = true;
         confirm = true;
-        
       }
     } else {
       Serial.println("Comando ausente ou nulo");

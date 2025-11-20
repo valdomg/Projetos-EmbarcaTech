@@ -8,6 +8,7 @@ extern const char* TOPIC_PUBLISH;
 const char* createJsonPayload();
 
 
+void setupMQTT();
 void connectMQTT();
 void callback(char *topic, byte * payload, unsigned int length);
 
