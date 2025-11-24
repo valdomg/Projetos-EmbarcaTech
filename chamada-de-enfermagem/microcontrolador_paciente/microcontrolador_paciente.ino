@@ -1,18 +1,18 @@
 #include "wifi.h"
 #include "mqtt.h"
-#include "peripherals.h"
+#include "button.h"
+#include "led.h"
 
-unsigned long lastPublish = 0;
-const long interval = 60000;
+bool buttonBlocked = false;
 
 void setup() {
 
   Serial.begin(115200);
-  setupPeripherals();
+  setupButton();
+  setupLed();
   connectWiFi();
   connectMQTT();
 
-  lastPublish = millis() - interval;
 }
 
 void loop() {
@@ -24,10 +24,12 @@ void loop() {
   client.loop();
   checkConnection();
 
-  //se o botao for pressionado, aguarda 1 minuto para libera-lo(para testes, posteriormente sera condicionado a resposta da enfermeira)
-  if ((millis() - lastPublish > interval) && !readButton()) {
+  //se o botao for pressionado, ficará indisponível até que o enfermeiro libere o recurso novamente
+  if (!buttonBlocked && !readButton()) {
       Serial.println("Botão pressionado!");
+
+      ligarLed();
       publishData();
-      lastPublish = millis();
+      buttonBlocked = true;
     }
   }
