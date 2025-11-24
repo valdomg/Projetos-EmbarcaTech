@@ -39,6 +39,9 @@ def on_disconnect(client, userdata, flags, rc, properties=None):
     except Exception as e:
         logging.exception('Conexão mal sucedida, erro:', rc)
 
+'''
+Colocar nova função para registar se 
+'''
 def on_message(client, userdata, message, properties=None):
     '''
     Callback para formatar as mensagens recebidas nos tópicos
@@ -73,11 +76,13 @@ def on_message(client, userdata, message, properties=None):
     partes = message.topic.split('/')
     print('Partes:', partes)
     
+    dispositivo_topic = None
+
     if len(partes) == 2:
         _, local_topic = partes
 
     else:
-        _,local_topic, dispositivo_id = partes
+        _,local_topic, dispositivo_topic = partes
 
     print('Payload', payload)
 
@@ -127,7 +132,13 @@ def on_message(client, userdata, message, properties=None):
     
     mongo.close_connection()
     
-    register_call_mongo_db(dispositivo_id, room_number, estado)
+    device = dispositivo_id
+    if dispositivo_topic:
+        device = dispositivo_topic
+    
+    register_call_mongo_db(device, room_number, estado)
+
+    
 
 def on_subscribe(client, userdata, mid, granted_os, properties=None):
     '''
