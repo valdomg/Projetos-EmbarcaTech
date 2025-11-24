@@ -4,7 +4,7 @@
 #include "led.h"
 
 bool buttonBlocked = false;
-bool confirm = true;
+bool confirmMsg = false;
 
 unsigned long timeLastRequest = 0;
 const unsigned long TIMEOUT_ACK = 6000;
@@ -32,13 +32,12 @@ void loop() {
 
   //se estiver conectado no broker entra no loop de leitura do botao
   if (client.connected()) {
-    //se o botao estiver false e for pressionado publica no broker
+    //se o botao estiver liberado e for pressionado, publica no broker
     if (!buttonBlocked && !readButton()) {
 
 
       retryCount = 0;
-      confirm = false;
-
+      confirmMsg = false;
 
       if (client.publish(TOPIC_PUBLISH, createJsonPayload())) {
         Serial.println("Solicitação enviada");
@@ -52,6 +51,7 @@ void loop() {
     }
   }
 
+  // Controle de timeout e tentativas de reenviar
   if (!confirm && millis() - timeLastRequest > TIMEOUT_ACK) {
 
     if (retryCount < MAX_RETRY) {

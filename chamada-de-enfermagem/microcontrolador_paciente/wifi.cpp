@@ -2,8 +2,10 @@
 #include "wifi.h"
 
 
-const char* WIFI_SSID = "XXXXXXX";
-const char* WIFI_PASSWORD = "XXXXXXX";
+// const char* WIFI_SSID = "XXXXXXX";
+// const char* WIFI_PASSWORD = "XXXXXXX";
+const char* WIFI_SSID = "{id-redeWifi}";
+const char* WIFI_PASSWORD = "{senha}";
 
 
 unsigned long lastReconnectAttempt = 0;
