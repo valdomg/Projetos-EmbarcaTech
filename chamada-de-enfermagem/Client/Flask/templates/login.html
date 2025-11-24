@@ -26,7 +26,9 @@
             <div class="row">
                 <h1 class="text-login text-danger text-center">Login</h1>
             </div>
-
+            {% if error %}
+                <div class="alert alert-danger" role="alert"><p>{{ error }}</p></div>
+            {% endif %}
             <div>
                 <form action="/auth/login" method="POST">
                     <div class="row mt-3">

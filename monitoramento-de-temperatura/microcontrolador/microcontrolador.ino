@@ -26,12 +26,16 @@ struct ErrorStatus {
   bool sensorError;
 };
 
+bool hasError = false;
+
 ErrorStatus
 checkErrors(const EnvironmentData& data) {
   ErrorStatus status{ false, false, false };
+  hasError = false;
 
   if (!data.valid) {
     status.sensorError = true;
+    hasError = true;
     publishAlert(data.temperature, data.humidity);
     log(LOG_WARN, "Erro na leitura do sensor");
     return status;
@@ -39,12 +43,14 @@ checkErrors(const EnvironmentData& data) {
 
   if (data.temperature > cfg.temperatureMax || data.temperature < cfg.temperatureMin) {
     status.temperatureError = true;
+    hasError = true;
     publishAlert(data.temperature, data.humidity);
     log(LOG_WARN, "Temperatura fora do intervalo estipulado");
   }
 
   if (data.humidity > cfg.humidityMax || data.humidity < cfg.humidityMin) {
     status.humidityError = true;
+    hasError = true;
     publishAlert(data.temperature, data.humidity);
     log(LOG_WARN, "Humidade fora do intervalo estipulado");
   }
@@ -142,6 +148,9 @@ void setup() {
 }
 
 void loop() {
+
+
+  handleBacklightLCD(hasError, wasButtonShortPress());
 
   if (wasButtonLongPressed() || !cfg.valid) {
     disableSoundAlert();
