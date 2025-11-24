@@ -68,7 +68,7 @@ bool validateJsonFields(const char* payload, unsigned int length) {
 
 
 // processa os dados JSON recebido do MQTT
-void processing_json_MQTT(byte* payload, unsigned int length) {
+bool processing_json_MQTT(byte* payload, unsigned int length) {
   // Cria um documento JSON estático na stack (memória temporária) com capacidade de 256 bytes para armazenar o JSON parseado.
   StaticJsonDocument<256> doc;  // Ou <512>
 
@@ -81,7 +81,7 @@ void processing_json_MQTT(byte* payload, unsigned int length) {
     // converte o erro em string legível e a imprimi no monitor serial
     log(LOG_ERROR, error.c_str());
     // Sai da função prematuramente se houve erro no parse
-    return;
+    return false;
   }
 
   // ____Extração dos Dados do JSON
@@ -123,17 +123,17 @@ void processing_json_MQTT(byte* payload, unsigned int length) {
     // // Converte o valor long obtido para int
     // room_number = (int)v;
     if (!roomNumberConversion(&room_number, room_str)) {
-      return;
+      return false;
     }
 
   } else {  // Caso o tipo de 'room_number' não seja nem inteiro nem string
     log(LOG_ERROR, "room_number não é string nem número!");
-    return;  // não adiciona o dado
+    return false;  // não adiciona o dado
   }
   // Verificação adicional: garante que o número esteja dentro do intervalo aceitável (Modificar de acordo com o números dos quartos)
   if (room_number <= 0 || room_number > 9999) {
     log(LOG_ERROR, "room_number fora dos limites aceitáveis");
-    return;  // Valor inválido, interrompe a execução
+    return false;  // Valor inválido, interrompe a execução
   }
 
   // if (!roomNumberValid) {  // Verifica se conversão foi bem-sucedida
@@ -163,6 +163,7 @@ void processing_json_MQTT(byte* payload, unsigned int length) {
   // Adiciona na lista
   listCalls.add(room_number, id);
   listUpdated = true;  // marca que a lista foi alterada
+  return true;
 }
 
 

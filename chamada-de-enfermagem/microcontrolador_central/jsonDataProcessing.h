@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-extern void processing_json_MQTT(byte* payload, unsigned int length);
+extern bool processing_json_MQTT(byte* payload, unsigned int length);
 
 const char* createJsonPayload(char* buffer, size_t length, int roomNumber);
 

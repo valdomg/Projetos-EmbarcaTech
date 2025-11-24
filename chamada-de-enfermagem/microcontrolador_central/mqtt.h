@@ -7,6 +7,8 @@
 // Declarações globais
 // -----------------------------------------------------------------------------
 
+extern bool hasOKMessage;
+
 /**
  * @brief Objeto global do cliente MQTT.
  * 

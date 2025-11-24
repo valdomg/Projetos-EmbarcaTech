@@ -9,7 +9,7 @@
 // -----------------------------------------------------------------------------
 // Objetos globais
 // -----------------------------------------------------------------------------
-WiFiClient espClient;      // Cliente Wi-Fi seguro (usado pelo PubSubClient para comunicação MQTT).
+WiFiClient espClient;            // Cliente Wi-Fi seguro (usado pelo PubSubClient para comunicação MQTT).
 PubSubClient client(espClient);  // Cliente MQTT que usa o cliente Wi-Fi seguro como transporte.
 
 // -----------------------------------------------------------------------------
@@ -18,7 +18,7 @@ PubSubClient client(espClient);  // Cliente MQTT que usa o cliente Wi-Fi seguro 
 static unsigned long lastAttempConnectMQTT = 0;           // Guarda o tempo da última tentativa de conexão com o broker.
 static const unsigned long reconnectIntervalMQTT = 3000;  // Intervalo (ms) entre tentativas de reconexão ao broker.
 
-
+bool hasOKMessage = false;
 // -----------------------------------------------------------------------------
 // Funções auxiliares
 // -----------------------------------------------------------------------------
@@ -63,7 +63,7 @@ void resetMQTTClient() {
 void setupMQTT() {
   // espClient.setInsecure();              // Desabilita verificação de certificado SSL (não verifica autenticidade).
   client.setServer(MQTT_SERVER, MQTT_PORT);  // Define o servidor MQTT e a porta (8883 = padrão para MQTTs).
-  client.setCallback(callback);         // Registra a função callback para mensagens recebidas.
+  client.setCallback(callback);              // Registra a função callback para mensagens recebidas.
 }
 
 
@@ -88,6 +88,7 @@ void checkMQTTConnected() {
     if (client.connect(MQTT_DEVICE_ID, MQTT_USER, MQTT_PASS)) {
       log(LOG_INFO, "Conectado!");
       client.subscribe(MQTT_SUBSCRIPTION_TOPIC);  // Inscreve-se no tópico para receber mensagens
+      client.subscribe(MQTT_SUB_CONFIRMATION_TOPIC);
     } else {
       log(LOG_ERROR, "Falha na conexão com mqtt, rc= %d", client.state());  // Mostra o código de erro da conexão
 
@@ -112,12 +113,27 @@ void checkMQTTConnected() {
  */
 void callback(char* topic, byte* payload, unsigned int length) {
   log(LOG_DEBUG, "Mensagem recebida no tópico: %s", topic);
-  
-  // Processa os dados Json recebidos
-  processing_json_MQTT(payload, length);
-  char buffer[50];
-  publicReponseDivice(getPayloadID(payload,length),MQTT_MESSAGE_CONFIRMATION_TOPIC,creteJsonPayloadConfirmationMessage(buffer,sizeof(buffer)));
-  enableSoundAlert();
+
+
+  if (strcmp(topic, MQTT_SUB_CONFIRMATION_TOPIC) == 0) {
+    // Serial.println("recebeu ok");
+    hasOKMessage = true;
+  }
+
+  else if (strcmp(topic, MQTT_SUBSCRIPTION_TOPIC) == 0) {
+    // Processa os dados Json recebidos
+
+    if (processing_json_MQTT(payload, length)) {
+
+      char buffer[50];
+      publicReponseDivice(
+        getPayloadID(payload, length),
+        MQTT_PUB_CONFIRMATION_TOPIC,
+        creteJsonPayloadConfirmationMessage(buffer, sizeof(buffer)));
+
+      enableSoundAlert();
+    }
+  }
 }
 
 /**
