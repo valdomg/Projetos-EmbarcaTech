@@ -3,6 +3,7 @@
 
 #include "display_LCD-2004_I2C.h"
 #include "listNursingCall_utils.h"
+#include "jsonDataProcessing.h"
 #include "buttons.h"
 #include "config.h"
 #include "buzzer.h"
@@ -20,9 +21,8 @@ void handleNext() {  // ===== Botão Next (>)
     deletionConfirmation = false;  // reset caso usuário navegue (cancela a exclusão)
 
     // Quando clica 'next' e esta no esta no modo confirmação, garante que NÃO está bloqueado remover current (caso tenha atigido o limite de inserção na lista)
-    listCalls.setDoNotRemoveCurrent(false); // vira false -> pode remover current
-  } 
-  else {
+    listCalls.setDoNotRemoveCurrent(false);  // vira false -> pode remover current
+  } else {
     // Avança para o próximo item da lista
     listCalls.next();
   }
@@ -40,9 +40,8 @@ void handlePrev() {  // ===== Botão Prev (<)
     deletionConfirmation = false;  // reset caso usuário navegue (cancela a exclusão)
 
     // Quando clica 'prev' e esta no esta no modo confirmação, garante que NÃO está bloqueado remover current (caso tenha atigido o limite de inserção na lista)
-    listCalls.setDoNotRemoveCurrent(false); // vira false - pode remover current
-  } 
-  else {
+    listCalls.setDoNotRemoveCurrent(false);  // vira false - pode remover current
+  } else {
     // Avança para o item anteriot da lista
     listCalls.prev();
   }
@@ -61,33 +60,22 @@ void handleDelete() {  // ===== Botão Delete
     deletionConfirmation = true;
 
     // Quando clica 1 vez no 'del' não pode remover current, caso tenha atigido o limite de inserção na lista
-    listCalls.setDoNotRemoveCurrent(true); // Aqui diz é true, não pode remover current
-  } 
-  else {  // Segundo clique: executa deleção
+    listCalls.setDoNotRemoveCurrent(true);  // Aqui diz é true, não pode remover current
+  } else {                                  // Segundo clique: executa deleção
+
 
     /* ___Pública (marcar com concluído o chamado) via MQTT*/
     int infirmary = listCalls.getInfirmaryCurrent();
     const char* idDevice = listCalls.getIdCurrent();
     // Chama a função de públicar o ID do dispositivo e o número da enfermaria (tranforma em float o infirmary)
-    publicReponseDivice(idDevice, infirmary);
+    char buffer[256];
+    publicReponseDivice(idDevice, MQTT_PUBLICATION_TOPIC, createJsonPayload(buffer, sizeof(buffer), infirmary));
 
-
-    if (listCalls.removeCurrent()) {  // Apaga o item selecionado
-      log(LOG_INFO,"Chamada removida com sucesso!");
-    } else {
-      log(LOG_ERROR,"Erro ao remover a chamada na lista!");
-    }
-    fixed_data();               // Atualiza o display com os dados fixos
-    showInfirmaryNumber(
-      listCalls.getInfirmaryCurrent(),
-      listCalls.hasNursingCall(),
-      listCalls.getTotal());  // Mostra os dados no display
-    // reseta o flag
-    deletionConfirmation = false;
-
-    // Ao marcar o chamado como resolvido, reseta a flag, indicando se atingir o limite pode remover o current
-    listCalls.setDoNotRemoveCurrent(false); // vira false - pode remover current
   }
+}
+
+void deleteMessage(){
+ 
 }
 
 
@@ -119,8 +107,9 @@ void setup() {
 
 void loop() {
 
-  checkAndReconnectWifi();
-  checkMQTTConnected();
+  if (checkAndReconnectWifi()) {
+    checkMQTTConnected();
+  }
 
   // A função delay atrapalha o funcionamento dos botões
   // delay(1000);
@@ -129,6 +118,25 @@ void loop() {
   // if (!client.connected()){
   //   Serial.println("servidor mqtt desconectado");
   // }
+
+   if (hasOKMessage){
+    // log(LOG_INFO,listCalls.getIdCurrent());
+    if (listCalls.removeCurrent()) {  // Apaga o item selecionado
+      log(LOG_INFO, "Chamada removida com sucesso!");
+    } else {
+      log(LOG_ERROR, "Erro ao remover a chamada na lista!");
+    }
+    fixed_data();  // Atualiza o display com os dados fixos
+    showInfirmaryNumber(
+      listCalls.getInfirmaryCurrent(),
+      listCalls.hasNursingCall(),
+      listCalls.getTotal());  // Mostra os dados no display
+
+    // Ao marcar o chamado como resolvido, reseta a flag, indicando se atingir o limite pode remover o current
+    deletionConfirmation = false;
+    listCalls.setDoNotRemoveCurrent(false);  // vira false - pode remover current
+    hasOKMessage = false;
+  }
 
 
   // Atualiza se tiver novos dados, mas se nenhum botão estiver pressionado

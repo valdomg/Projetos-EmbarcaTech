@@ -35,7 +35,7 @@ bool connectToWiFi();
  * 
  * O intervalo de reconexão é definido internamente (10 segundos).
  */
-void checkAndReconnectWifi();
+bool checkAndReconnectWifi();
 
 /**
  * @brief Retorna o status da conexão Wi-Fi.
