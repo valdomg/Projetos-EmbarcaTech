@@ -35,6 +35,7 @@ chamadas_bp = Blueprint('chamadas', __name__, url_prefix='/api/chamadas')
 Rota de api para retorno de todas as chamadas
 '''
 @chamadas_bp.route('/', methods=['GET'])
+@token_required
 def return_all_documents_chamadas():
     try:
         mongo_conn.start_connection()
@@ -62,6 +63,7 @@ def return_all_documents_chamadas():
 Rota de api para contagem de todas as chamadas
 '''
 @chamadas_bp.route('/contagem', methods=['GET'])
+@token_required
 def return_all_chamadas_count():
     try:
         mongo_conn.start_connection()
@@ -88,6 +90,7 @@ def return_all_chamadas_count():
 Rota de api para retorno das chamadas do dia
 '''
 @chamadas_bp.route('/dia', methods=['GET'])
+@token_required
 def return_documents_chamadas_day():
 
     try:
@@ -116,6 +119,7 @@ def return_documents_chamadas_day():
 Rota de api para contagem de chamadas diárias
 '''
 @chamadas_bp.route('/dia/contagem', methods=['GET'])
+@token_required
 def return_chamadas_day_count():
 
     try:
@@ -143,6 +147,7 @@ def return_chamadas_day_count():
 Rota de api paraa retornar a quantidade de chamadas por dia no mês
 '''
 @chamadas_bp.route('/dia/mes', methods=['GET'])
+@token_required
 def return_chamadas_by_day_in_month():
     try:
         mongo_conn.start_connection()
@@ -151,7 +156,7 @@ def return_chamadas_by_day_in_month():
         return jsonify({'error':'Erro interno do banco de dados'}), 500
     
     try:
-        count_chamadas = chamadas_db_model.return_count_chamadas_day_in_month(month_param=10)
+        count_chamadas = chamadas_db_model.return_count_chamadas_day_in_month()
     
         if count_chamadas:
             return jsonify(count_chamadas), 200

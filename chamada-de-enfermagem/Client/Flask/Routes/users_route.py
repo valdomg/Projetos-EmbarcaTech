@@ -4,7 +4,7 @@ from Flask.Services.convert_objectdID import convert_all_id_to_string, convert_o
 from Flask.Models.user_db_model import UserDBModel
 from Flask.Models.user_model import User
 from Flask.auth import SECRET_KEY
-from Flask.auth import token_required 
+from Flask.auth import token_required, admin_required
 from MongoDB.MongoDBConnection import MongoDBConnection
 from dotenv import load_dotenv
 import os
@@ -41,6 +41,7 @@ Rota de api para retornar todos os usuários
 APENAS PARA ADMINS
 '''
 @user_bp.route('/', methods=['GET'])
+@admin_required
 def return_all_users():
 
     try:
@@ -76,6 +77,7 @@ json = {
 APENAS PARA ADMINS
 '''
 @user_bp.route('/register', methods=['POST'])
+@admin_required
 def register():
 
     
@@ -115,6 +117,7 @@ json = {
 APENAS PARA ADMINS
 '''
 @user_bp.route('/delete', methods=['DELETE'])
+@admin_required
 def delete_user():
 
     try:
@@ -146,6 +149,7 @@ Rota de remoção de usuário por url
 APENAS PARA ADMINS
 '''
 @user_bp.route('/delete/<string:document_id>', methods=['DELETE'])
+@admin_required
 def delete_user_by_id(document_id):
 
     try:
@@ -181,6 +185,7 @@ json = {
 APENAS PARA ADMINS
 '''
 @user_bp.route('/update', methods=['PUT'])
+@admin_required
 def update_user_by():
     
     try:
