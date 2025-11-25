@@ -4,10 +4,12 @@
 
 extern PubSubClient client;
 
+extern const char* TOPIC_PUBLISH;
+const char* createJsonPayload();
 
 
+void setupMQTT();
 void connectMQTT();
-void publishData();
 void callback(char *topic, byte * payload, unsigned int length);
 
 #endif
