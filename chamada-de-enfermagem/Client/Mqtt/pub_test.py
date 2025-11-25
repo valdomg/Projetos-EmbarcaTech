@@ -50,30 +50,46 @@ def pub_enfermaria_de_posto_enfermaria(dispositivo_topic:str, dispositivo_id: st
 
     publish_message(topic, payload)
 
+def pub_confirmacao_devices(dispositivo_topic:str, status:str):
+    """Publica um evento vindo do posto de enfermaria no tópico local."""
+    topic = f"dispositivos/confirmacao/{dispositivo_topic}"
+
+    payload = {
+        'status': status
+    }
+
+    publish_message(topic, payload)
 # ====== EXEMPLOS DE USO ======
 
 pub_posto_enfermaria_de_enfermaria(
 
-        dispositivo_id="enfermaria1",
+        dispositivo_id="enfermaria5",
         estado="emergencia",
         mensagem="ligar LED",
-        room_number="1",
+        room_number="5",
         local="enfermaria",
         comando="ligar"
         
 )
 
+sleep(30)
 
-sleep(25)
+pub_confirmacao_devices(
+    dispositivo_topic='enfermaria5',
+    status='ok'
+)
 
+sleep(30)
 
 pub_enfermaria_de_posto_enfermaria(
-        dispositivo_topic="enfermaria1",
+        dispositivo_topic="enfermaria5",
         dispositivo_id="posto_enfermaria",
         estado="ocioso",
         mensagem="desligar LED",
-        room_number="1",
+        room_number="5",
         local="enfermaria",
         comando="desligar"
 )
+
+
 
