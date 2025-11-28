@@ -3,6 +3,7 @@ from flask import Blueprint, jsonify, request
 import logging
 from dotenv import load_dotenv
 import os
+from Flask.auth import token_required, admin_required
 from Flask.Models.chamadas_status_model import ChamadasStatusModel
 from Flask.Services.convert_objectdID import convert_all_id_to_string, convert_object_id_to_string
 from MongoDB.MongoDBConnection import MongoDBConnection
@@ -27,6 +28,7 @@ status_chamadas = ChamadasStatusModel(mongo_conn)
 
 
 @mapa_bp.route('/status', methods=['GET'])
+@token_required
 def get_status():
 
     try:
@@ -53,6 +55,7 @@ def get_status():
 
 
 @mapa_bp.route('/status/oscioso', methods=['GET'])
+@token_required
 def get_status_oscioso():
 
     try:
@@ -78,6 +81,7 @@ def get_status_oscioso():
     return {'Error': 'Chamadas não encontradas'},404
 
 @mapa_bp.route('/status/emergencia', methods=['GET'])
+@token_required
 def get_status_emergencia():
 
     try:

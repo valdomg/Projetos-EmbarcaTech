@@ -13,6 +13,9 @@ const uint8_t NUMBER_SOUND_ALERTS = 5;
 
 constexpr const char* MQTT_PUBLICATION_TOPIC = "dispositivos/enfermaria";
 constexpr const char* MQTT_SUBSCRIPTION_TOPIC = "dispositivos/posto_enfermaria";
+
+constexpr const char* MQTT_PUB_CONFIRMATION_TOPIC = "dispositivo/confirmacao";
+constexpr const char* MQTT_SUB_CONFIRMATION_TOPIC = "dispositivo/confirmacao/posto_enfermaria";
 constexpr int MQTT_PORT = 1883;
 
 // -----------------------------------------------------------------------------

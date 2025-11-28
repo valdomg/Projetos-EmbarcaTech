@@ -9,7 +9,7 @@
 // -----------------------------------------------------------------------------
 // Objetos globais
 // -----------------------------------------------------------------------------
-WiFiClient espClient;      // Cliente Wi-Fi seguro (usado pelo PubSubClient para comunicação MQTT).
+WiFiClient espClient;            // Cliente Wi-Fi seguro (usado pelo PubSubClient para comunicação MQTT).
 PubSubClient client(espClient);  // Cliente MQTT que usa o cliente Wi-Fi seguro como transporte.
 
 // -----------------------------------------------------------------------------
@@ -17,6 +17,38 @@ PubSubClient client(espClient);  // Cliente MQTT que usa o cliente Wi-Fi seguro 
 // -----------------------------------------------------------------------------
 static unsigned long lastAttempConnectMQTT = 0;           // Guarda o tempo da última tentativa de conexão com o broker.
 static const unsigned long reconnectIntervalMQTT = 3000;  // Intervalo (ms) entre tentativas de reconexão ao broker.
+
+bool hasOKMessage = false;
+// -----------------------------------------------------------------------------
+// Funções auxiliares
+// -----------------------------------------------------------------------------
+
+/**
+ * @brief Reconfigura o cliente MQTT e o cliente TLS (WiFiClientSecure).
+ *
+ * Essa função é chamada quando o cliente MQTT falha repetidamente ao tentar
+ * reconectar ao broker. Em situações assim, o cliente TLS pode ficar em um
+ * estado inválido, bloqueando novas conexões. O procedimento abaixo recria
+ * ambos os clientes para restaurar a comunicação.
+ *
+ * Operações executadas:
+ * - Reinstancia o objeto `WiFiClientSecure` (limpa conexões antigas);
+ * - Redefine o servidor MQTT e a porta segura;
+ * - Reassocia o cliente TLS ao cliente MQTT.
+ *
+ * Essa rotina evita a necessidade de reiniciar o microcontrolador.
+ */
+void resetMQTTClient() {
+  log(LOG_WARN, "Reinicializando cliente MQTT e TLS...");
+
+  espClient = WiFiClient();  // recria o cliente seguro
+  client.setServer(cfg.mqttServer.c_str(), cfg.mqttPort);
+  client.setClient(espClient);
+
+  log(LOG_DEBUG, "Cliente MQTT reconfigurado");
+}
+
+
 
 // -----------------------------------------------------------------------------
 // Funções principais
@@ -33,6 +65,7 @@ void setupMQTT() {
   client.setServer(cfg.mqttServer.c_str(), cfg.mqttPort);  // Define o servidor MQTT e a porta (8883 = padrão para MQTTs).
   client.setCallback(callback);         // Registra a função callback para mensagens recebidas.
 }
+
 
 /**
  * @brief Verifica a conexão com o broker MQTT e reconecta se necessário.
@@ -55,8 +88,18 @@ void checkMQTTConnected() {
     if (client.connect(cfg.mqttDeviceId.c_str(), cfg.mqttUser.c_str(), cfg.mqttPass.c_str())) {
       log(LOG_INFO, "Conectado!");
       client.subscribe(MQTT_SUBSCRIPTION_TOPIC);  // Inscreve-se no tópico para receber mensagens
+      client.subscribe(MQTT_SUB_CONFIRMATION_TOPIC);
     } else {
       log(LOG_ERROR, "Falha na conexão com mqtt, rc= %d", client.state());  // Mostra o código de erro da conexão
+
+      static uint8_t connection_drop_count = 0;
+
+      connection_drop_count++;
+
+      if (connection_drop_count >= 3) {
+        resetMQTTClient();
+        connection_drop_count = 0;
+      }
     }
   }
 }
@@ -70,10 +113,27 @@ void checkMQTTConnected() {
  */
 void callback(char* topic, byte* payload, unsigned int length) {
   log(LOG_DEBUG, "Mensagem recebida no tópico: %s", topic);
-  
-  // Processa os dados Json recebidos
-  processing_json_MQTT(payload, length);
-  enableSoundAlert();
+
+
+  if (strcmp(topic, MQTT_SUB_CONFIRMATION_TOPIC) == 0) {
+    // Serial.println("recebeu ok");
+    hasOKMessage = true;
+  }
+
+  else if (strcmp(topic, MQTT_SUBSCRIPTION_TOPIC) == 0) {
+    // Processa os dados Json recebidos
+
+    if (processing_json_MQTT(payload, length)) {
+
+      char buffer[50];
+      publicReponseDivice(
+        getPayloadID(payload, length),
+        MQTT_PUB_CONFIRMATION_TOPIC,
+        creteJsonPayloadConfirmationMessage(buffer, sizeof(buffer)));
+
+      enableSoundAlert();
+    }
+  }
 }
 
 /**
@@ -84,13 +144,14 @@ void callback(char* topic, byte* payload, unsigned int length) {
  * @param id    - Sufixo do tópico (ex.: ID do dispositivo ou sensor).
  * @param value - Valor numérico a ser enviado.
  */
-bool publicReponseDivice(const char* deviceId, int roomNumber) {
+bool publicReponseDivice(const char* deviceId, const char* topic, const char* message) {
 
-  char topic[50];
-  snprintf(topic, sizeof(topic), "%s/%s", MQTT_PUBLICATION_TOPIC, deviceId);  // Monta o tópico final (base + id).
+  char fullTopic[50];
+  snprintf(fullTopic, sizeof(fullTopic), "%s/%s", topic, deviceId);  // Monta o tópico final (base + id).
 
-  char buffer[256];
-  if (!client.publish(topic, createJsonPayload(buffer,sizeof(buffer), roomNumber))) {
+
+  // char buffer[256];
+  if (!client.publish(fullTopic, message)) {
     log(LOG_WARN, "Falha ao enviar dados ao broker MQTT");
     return false;
   }

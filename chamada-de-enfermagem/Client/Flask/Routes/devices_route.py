@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from datetime import datetime
-from Flask.auth import token_required 
+from Flask.auth import token_required, admin_required
 from MongoDB.MongoDBConnection import MongoDBConnection
 from Flask.Services.device_service import DeviceService
 from Flask.Services.convert_objectdID import convert_all_id_to_string, convert_object_id_to_string
@@ -40,6 +40,7 @@ devices_bp = Blueprint('devices', __name__, url_prefix='/api/devices')
 Rota que retorna uma lista com todos os dispositivos
 '''
 @devices_bp.route('/', methods=['GET'])
+@admin_required
 def return_all_devices():
 
     try:
@@ -68,6 +69,7 @@ def return_all_devices():
 Rota que retorna a quantidade com todos os dispositivos cadastrados
 '''
 @devices_bp.route('/quantidade', methods=['GET'])
+@admin_required
 def return_count_devices():
     try:
         mongo_conn.start_connection()
@@ -97,6 +99,7 @@ json = {
 APENAS PARA ADMINS
 '''
 @devices_bp.route('/register', methods=['POST'])
+@admin_required
 def register_device():
     data = request.get_json()
 
@@ -135,6 +138,7 @@ json = {
 APENA PARA ADMINS
 '''
 @devices_bp.route('/delete', methods=['DELETE'])
+@admin_required
 def delete_device():
 
     try:
@@ -166,6 +170,7 @@ Rota para deletar um dispositivo com seu nome de dispositivo por url
 APENA PARA ADMINS
 '''
 @devices_bp.route('/delete/<string:document_id>', methods=['DELETE'])
+@admin_required
 def delete_device_by_id(document_id):
 
     try:
@@ -200,6 +205,7 @@ json{
 APENAS PARA ADMINS
 '''
 @devices_bp.route('/update', methods=['PUT'])
+@admin_required
 def update_device_by_id():
 
     try:

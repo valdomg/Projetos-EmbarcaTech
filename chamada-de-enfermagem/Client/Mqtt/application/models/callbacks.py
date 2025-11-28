@@ -1,18 +1,13 @@
 import json
 import os
 from dotenv import load_dotenv
-from MongoDB.MongoDBConnection import MongoDBConnection
-from Mqtt.application.services.utilities import register_call_mongo_db 
+from Mqtt.application.services.utilities import register_chamada_mongodb, register_status_chamada_mongo_db, check_if_device_exists, register_status_device_mongodb
 from datetime import datetime
 import logging
 from time import sleep
 
 load_dotenv()
 topic = os.getenv('BROKER_TOPIC')
-uri = os.getenv('MONGO_URI') 
-database = os.getenv('MONGO_DATABASE')
-
-mongo = MongoDBConnection(uri, database)
 
 def on_connect(client, userdata, flags, rc, properties=None):
     '''
@@ -39,6 +34,9 @@ def on_disconnect(client, userdata, flags, rc, properties=None):
     except Exception as e:
         logging.exception('Conexão mal sucedida, erro:', rc)
 
+'''
+Colocar nova função para registar se 
+'''
 def on_message(client, userdata, message, properties=None):
     '''
     Callback para formatar as mensagens recebidas nos tópicos
@@ -51,13 +49,17 @@ def on_message(client, userdata, message, properties=None):
         dessa podem enviar seu estado ligado/timeout
         ex:dispositivos/posto_enfermaria/seu_id
 
-        o formato de payload será assim: {
+        o formato de payload será assim para os microcontroladores: {
             'id':'id_dispositivo',
             'estado':'emergência/oscioso',
             'mensagem':'mensagem para debug',
             'room_number': 'número da sala'
             'local': 'Bloco/Ala/Região',
             'comando': 'ligar/desligar'
+        }
+
+        formato para status: {
+            'status': 'ok/error'
         }
     '''
         
@@ -71,63 +73,44 @@ def on_message(client, userdata, message, properties=None):
 
     '''Quebra o tópico em partes'''
     partes = message.topic.split('/')
-    print('Partes:', partes)
+    logging.info(f'Partes:{partes}')
     
+    dispositivo_topic = None
+
     if len(partes) == 2:
         _, local_topic = partes
 
     else:
-        _,local_topic, dispositivo_id = partes
+        _,local_topic, dispositivo_topic = partes
 
-    print('Payload', payload)
+    device = payload.get('id')
+    logging.info(f'Payload: {payload}')
 
-    dispositivo_id = payload.get('id')
-    estado = payload.get('estado')
-    mensagem = payload.get('mensagem')
-    room_number = payload.get('room_number')
-    local_emergencia = payload.get('local')
-    comando = payload.get('comando')
+    if dispositivo_topic != None:
+        device = dispositivo_topic
 
+    if check_if_device_exists(device) == False:
+        logging.warning(f'Device com id {device} não encontrado!')
+        return
 
-    if mongo.start_connection() == False:
-        mongo.close_connection()
-        return 
-        
-    if mongo.check_if_document_exists('devices','device', dispositivo_id) == False:
-        logging.info('Dispositivo não encontrado na base de dados...')
-        mongo.close_connection() 
-        return 
-        
-    logging.info('Dispositivo logado!')
-    
-    logging.info(f'Mensagem do dispositivo {dispositivo_id}:{mensagem}')
+    if local_topic == 'confirmacao':
+        register_status_device_mongodb(dispositivo_topic, payload)
 
-    if local_topic == 'posto_enfermaria' and comando == 'ligar':
-
-        logging.info(f'Mensagem do tópico /{local_topic}')
-
+    if local_topic == 'posto_enfermaria':
         '''
         Laço condicional para registrar chamada no banco de dados
         '''
-
-        document= {
-            'dispositivo_id': dispositivo_id,
-            'local': local_emergencia,
-            'sala': room_number,
-            'data': datetime.now()
-        }
-
-        result = mongo.insert_document_collection('chamadas', document)
-        
-        if result:
-            logging.warning('Chamada inserida no banco de dados!')
+        register_chamada_mongodb(payload)
         
     if local_topic == 'enfermaria':
         logging.info(f'Mensagem para o tópico: {local_topic}')
+
     
-    mongo.close_connection()
+    register_status_chamada_mongo_db(device, payload)
+
+    return None
+
     
-    register_call_mongo_db(dispositivo_id, room_number, estado)
 
 def on_subscribe(client, userdata, mid, granted_os, properties=None):
     '''

@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template
 from MongoDB.MongoDBConnection import MongoDBConnection
 from dotenv import load_dotenv
-from Flask.auth import token_required 
+from Flask.auth import token_required, admin_required
 import os
 
 '''
@@ -36,6 +36,7 @@ def relatorio_page():
     return render_template('relatorio.html')
 
 @pages_bp.route('/usuarios')
+@admin_required
 def usuario_page():
 
     return render_template('usuarios.html')
@@ -44,6 +45,7 @@ def usuario_page():
 Rota protegida apenas para admins
 '''
 @pages_bp.route('/dispositivos')
+@admin_required
 def dispositivos_page():
 
     return render_template('dispositivos.html')
@@ -55,6 +57,7 @@ Rota de mapa das enfermarias
 acesso para users/admins
 '''
 @pages_bp.route('/mapa')
+@token_required
 def mapa_page():
 
     return render_template('mapa_enfermarias.html')

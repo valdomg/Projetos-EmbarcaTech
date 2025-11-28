@@ -50,7 +50,7 @@ bool connectToWiFi() {
   log(LOG_INFO, "Conctandoo ao wifi");
 
   // Define um timeout de 10 segundos
-  unsigned long timeout = millis() + 10000;
+  unsigned long timeout = millis() + 5000;
 
   // Aguarda até a conexão ou até o timeout
   while (WiFi.status() != WL_CONNECTED && millis() < timeout) {
@@ -78,9 +78,9 @@ bool connectToWiFi() {
  * Se o Wi-Fi estiver desconectado, ela espera o intervalo definido
  * em reconnectInterval antes de tentar reconectar.
  */
-void checkAndReconnectWifi() {
+bool checkAndReconnectWifi() {
   // Se já está conectado, não faz nada
-  if (WiFi.status() == WL_CONNECTED) return;
+  if (WiFi.status() == WL_CONNECTED) return true;
 
   unsigned long now = millis();
 
@@ -95,11 +95,13 @@ void checkAndReconnectWifi() {
     connectToWiFi();
 
     // Se reconectar com sucesso, exibe informações
-    if (WiFi.status() == WL_CONNECTED) {
+    if (connectToWiFi()) {
       log(LOG_INFO, "Conectado ao Wi-Fi");
       log(LOG_INFO, "IP: %s", IPparserToConstChar(WiFi.localIP()));  // mostra o IP atribuído
+      return true;
     }
   }
+  return false;
 }
 
 /**
@@ -113,6 +115,8 @@ void checkAndReconnectWifi() {
  * 
  * Também imprime o endereço IP do AP via `Serial`.
  */
+
+
 void createAccessPoint() {
   WiFiMode_t mode = WiFi.getMode();
 
@@ -127,6 +131,7 @@ void createAccessPoint() {
     log(LOG_INFO, "Endereço IP: %s", ipBuffer);
   }
 }
+
 
 /**
  * @brief Retorna se o ESP32 está conectado ao Wi-Fi.
