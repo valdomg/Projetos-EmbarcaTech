@@ -8,8 +8,8 @@ extern void lcd2004_init();
 // Para as mensagens fixas
 extern void fixed_data();
 // Mostra dados já preparados
-extern void showInfirmaryNumber(int infirmary, bool hasNursingCall, int total_items);
-extern void showExclusionConfirm(int infirmary);
+extern void showInfirmaryNumber(const char* infirmary, bool hasNursingCall, int total_items);
+extern void showExclusionConfirm(const char* infirmary);
 
 
 #endif // Final da diretiva de proteção contra múltiplas inclusões

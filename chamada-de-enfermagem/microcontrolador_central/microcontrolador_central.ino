@@ -65,7 +65,7 @@ void handleDelete() {  // ===== Botão Delete
 
 
     /* ___Pública (marcar com concluído o chamado) via MQTT*/
-    int infirmary = listCalls.getInfirmaryCurrent();
+    const char* infirmary = listCalls.getInfirmaryCurrent();
     const char* idDevice = listCalls.getIdCurrent();
     // Chama a função de públicar o ID do dispositivo e o número da enfermaria (tranforma em float o infirmary)
     char buffer[256];
@@ -132,8 +132,8 @@ void loop() {
       listCalls.hasNursingCall(),
       listCalls.getTotal());  // Mostra os dados no display
 
-    // Ao marcar o chamado como resolvido, reseta a flag, indicando se atingir o limite pode remover o current
     deletionConfirmation = false;
+    // Ao marcar o chamado como resolvido, reseta a flag, indicando se atingir o limite pode remover o current
     listCalls.setDoNotRemoveCurrent(false);  // vira false - pode remover current
     hasOKMessage = false;
   }
