@@ -29,6 +29,24 @@ void clearLine(uint8_t column, uint8_t line, uint8_t count) {
 }
 
 
+// Mostra a mensagem de falha
+void showFailureMessage(const char* msgType){
+  lcd.clear(); // Limpa a área
+  lcd.setCursor(6, 0); // Posiciona o cursor na coluna 6, linha 0  
+  lcd.print(F("Falha!!!"));
+
+  lcd.setCursor(0, 1);  // Posiciona o cursor na coluna 0, linha 1
+  lcd.print(F("--------------------"));
+
+  lcd.setCursor(4, 2);
+  lcd.print(F("Confira "));
+  lcd.print(msgType);
+
+  lcd.setCursor(4, 3);
+  lcd.print(F("< > = voltar"));
+}
+
+
 // Mostra a mensagem de confirmação da exclusão dos dados
 void showExclusionConfirm(const char* infirmary) {
   lcd.clear();

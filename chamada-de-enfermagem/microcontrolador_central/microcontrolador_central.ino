@@ -9,8 +9,12 @@
 #include "buzzer.h"
 #include "led.h"
 
+
 // flag que indica se o botão de deletar foi pressionado uma vez e está aguardando confirmação
 bool deletionConfirmation = false;
+
+// flag que indica se a mensagem de falha ddo wifi já foi exibida.
+bool wifiFailureDisplayed = false;  // Usada para evitar desenhar a tela de erro repetidamente a cada iteração do loop
 
 
 // ===== Funções de navegação =====
@@ -69,13 +73,18 @@ void handleDelete() {  // ===== Botão Delete
     const char* idDevice = listCalls.getIdCurrent();
     // Chama a função de públicar o ID do dispositivo e o número da enfermaria (tranforma em float o infirmary)
     char buffer[256];
-    publicReponseDivice(idDevice, MQTT_PUBLICATION_TOPIC, createJsonPayload(buffer, sizeof(buffer), infirmary));
 
+    // flag qu indica se deu certo publicar ou não
+    bool wasPublished = publicReponseDivice(idDevice, MQTT_PUBLICATION_TOPIC, createJsonPayload(buffer, sizeof(buffer), infirmary));
+
+    // Caso tenha falhado publicar o chamado, mostra a tela indicando a falha
+    if (!wasPublished) {
+      showFailureMessage(MESSAGE_MQTT);
+    }
   }
 }
 
-void deleteMessage(){
- 
+void deleteMessage() {
 }
 
 
@@ -84,7 +93,6 @@ void setup() {
   logInit(LOG_MODE);
 
   if (!connectToWiFi()) {
-    // Serial.println("WiFi não conectado.");
     log(LOG_WARN, "Falha ao conectar com WiFI.");
   }
   setupMQTT();
@@ -107,8 +115,27 @@ void setup() {
 
 void loop() {
 
-  if (checkAndReconnectWifi()) {
+  if (checkAndReconnectWifi()) {  // Retorna true se conseguir conectar/reconectar ao wifi
+    /* se a flag for true, indica que estava em estado de falha (wifi) e agora "checkAndReconnectWifi()" retornou true, 
+        ou seja, acabou de ocorrer a reconexão. Portanto precisa restaurar a tela. */
+    if (wifiFailureDisplayed) {      // Se o Wi-Fi acabou de voltar, restaura a tela
+      wifiFailureDisplayed = false;  // Marca que não esta mais em estado de falha
+      fixed_data();                  // Atualiza o display com os dados fixos
+      showInfirmaryNumber(
+        listCalls.getInfirmaryCurrent(),
+        listCalls.hasNursingCall(),
+        listCalls.getTotal());  // Mostra os dados no display
+    }
+
     checkMQTTConnected();
+  } else {  // não há conexão
+    // Só entra se ainda não mostrou a mensagem de falha. Ou seja, evita mostrar repetidamente.
+    if (!wifiFailureDisplayed) {
+      showFailureMessage(MESSAGE_WIFI);  // Mensagem que indica que não há conexão Wi-Fi
+      /* Marca que já mostrou a mensagem de falha, então em iterações seguintes do loop não vai redesenhar a mensagem repetidamente.
+          Garante ainda que, quando o wifi voltar, o "if (wifiFailureDisplayed)" detectará a transição e restaurará a tela.*/
+      wifiFailureDisplayed = true;
+    }
   }
 
   // A função delay atrapalha o funcionamento dos botões
@@ -119,7 +146,7 @@ void loop() {
   //   Serial.println("servidor mqtt desconectado");
   // }
 
-   if (hasOKMessage){
+  if (hasOKMessage) {
     // log(LOG_INFO,listCalls.getIdCurrent());
     if (listCalls.removeCurrent()) {  // Apaga o item selecionado
       log(LOG_INFO, "Chamada removida com sucesso!");

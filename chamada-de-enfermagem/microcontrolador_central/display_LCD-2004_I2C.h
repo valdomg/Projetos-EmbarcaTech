@@ -2,11 +2,16 @@
 #define DISPLAY_LCD_2004_I2C_H // Define o identificador do cabeçalho para evitar inclusões múltiplas
 
 
+constexpr const char* MESSAGE_WIFI = "Wi-Fi";
+constexpr const char* MESSAGE_MQTT = "MQTT";
+
 // Declara a função que inicializa o  LCD 2004 via interface I2C
 // Deve ser chamada no setup() para configurar o didisplaysplay
 extern void lcd2004_init();
 // Para as mensagens fixas
 extern void fixed_data();
+// Mostra a mensagem de falha
+extern void showFailureMessage(const char* msgType);
 // Mostra dados já preparados
 extern void showInfirmaryNumber(const char* infirmary, bool hasNursingCall, int total_items);
 extern void showExclusionConfirm(const char* infirmary);
