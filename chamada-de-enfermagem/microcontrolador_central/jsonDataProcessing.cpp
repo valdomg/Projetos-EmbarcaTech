@@ -52,15 +52,23 @@ bool processing_json_MQTT(byte* payload, unsigned int length) {
   }
 
   // --- leitura de room_number ---
-  if (!doc["room_number"].is<const char*>()) { // verifica se o campo existir e se é uma string JSON
-    log(LOG_ERROR, "Campo 'room_number' ausente ou não é string");
+  JsonVariant rn = doc["room_number"];
+  if (rn.isNull()) {
+    log(LOG_ERROR, "Campo 'room_number' ausente");
     return false;
   }
-  const char* room_number = doc["room_number"];  // Ex: "A4H143"
-  if (room_number[0] == '\0') { // verifica se a string está vazia
+
+  // Converte para String temporária
+  static String room_number_str; 
+  room_number_str = rn.as<String>();
+
+  if (room_number_str.length() == 0) { // verifica se a string está vazia
     log(LOG_ERROR, "Campo 'room_number' vazio");
     return false;
   }
+
+  // Obtem const char* seguro (aponta para buffer interno estático)
+  const char* room_number = room_number_str.c_str();
 
   // Extrai campo "estado" do JSON
   const char* estado = doc["estado"];  // Ex: "emergencia"
@@ -75,7 +83,7 @@ bool processing_json_MQTT(byte* payload, unsigned int length) {
       " -> ID: %s\n"
       " -> estado: %s\n"
       " -> mensagem: %s\n"
-      " -> Num. enfermaria: %d\n"
+      " -> Num. enfermaria: %s\n"
       " -> local: %s\n"
       " -> comando: %s\n",
       id,

@@ -135,6 +135,8 @@ void loop() {
       /* Marca que já mostrou a mensagem de falha, então em iterações seguintes do loop não vai redesenhar a mensagem repetidamente.
           Garante ainda que, quando o wifi voltar, o "if (wifiFailureDisplayed)" detectará a transição e restaurará a tela.*/
       wifiFailureDisplayed = true;
+
+      deletionConfirmation = false;  // reset caso a internet falhe quando tiver na tela de confirrmação de exclusão (cancela a exclusão)
     }
   }
 
