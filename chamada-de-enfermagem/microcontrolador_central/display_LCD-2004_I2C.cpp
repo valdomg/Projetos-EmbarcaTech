@@ -9,6 +9,10 @@ const uint8_t LCD_COLUMNS = 20;
 const uint8_t LCD_LINES = 4;
 
 
+// Estado atual da tela
+DisplayState currentScreen = SCREEN_NONE;
+
+
 // Instancia do LCD
 LiquidCrystal_I2C lcd(I2C_ADDR, LCD_COLUMNS, LCD_LINES);
 
@@ -29,10 +33,30 @@ void clearLine(uint8_t column, uint8_t line, uint8_t count) {
 }
 
 
+// Dados fixos do Display
+void fixed_data() {
+  lcd.clear(); // Limpa a tela
+  lcd.setCursor(1, 0);  // Posiciona o cursor na coluna 1, linha 0
+  lcd.print(F("Chamada Enfermagem"));
+
+  lcd.setCursor(0, 1);  // Posiciona o cursor na coluna 0, linha 1
+  lcd.print(F("--------------------"));
+
+  lcd.setCursor(0, 2);  // Posiciona o cursor na coluna 0, linha 2
+  lcd.print(F("Enfermaria: "));
+
+  lcd.setCursor(0, 3);  // Posiciona o cursor na coluna 0, linha 3
+  lcd.print(F("Quant. Chamados:"));
+}
+
+
 // Mostra a mensagem de falha
-void showFailureMessage(const char* msgType){
-  lcd.clear(); // Limpa a área
-  lcd.setCursor(6, 0); // Posiciona o cursor na coluna 6, linha 0  
+void showFailureMessage(const char* msgType) {
+  // Indica que está na tela de falha
+  currentScreen = SCREEN_FAILURE;
+
+  lcd.clear();          // Limpa a área
+  lcd.setCursor(6, 0);  // Posiciona o cursor na coluna 6, linha 0
   lcd.print(F("Falha!!!"));
 
   lcd.setCursor(0, 1);  // Posiciona o cursor na coluna 0, linha 1
@@ -49,8 +73,10 @@ void showFailureMessage(const char* msgType){
 
 // Mostra a mensagem de confirmação da exclusão dos dados
 void showExclusionConfirm(const char* infirmary) {
-  lcd.clear();
-  lcd.setCursor(1, 0);  
+  // Indica que está na tela de confirmação de exclusão
+  currentScreen = SCREEN_EXCLUSION_CONFIRM;
+  lcd.clear(); // Limpa a tela toda
+  lcd.setCursor(1, 0);
   lcd.print(F("Finalizar Chamada"));
 
   lcd.setCursor(2, 1);
@@ -68,20 +94,27 @@ void showExclusionConfirm(const char* infirmary) {
 
 // Função que mostra os dados no display
 void showInfirmaryNumber(const char* infirmary, bool hasNursingCall, int total_items) {
-  // Limpa 8 espaços na coluna/linha escolhida - ENFERMARIA
-  clearLine(12, 2, 8);
-  // Limpa 3 espaços na coluna/linha escolhida - QUANT. CHAMADAS
-  clearLine(17, 3, 3);
+  // Se não estiver na tela MAIN (esta tela)
+  if (currentScreen != SCREEN_MAIN) {
+    fixed_data(); // Mostra os dados Fixos
+  } else { // se já tiver nessa tela, limpa só a região necessária
+    // Limpa 8 espaços na coluna/linha escolhida - ENFERMARIA
+    clearLine(12, 2, 8);
+    // Limpa 3 espaços na coluna/linha escolhida - QUANT. CHAMADAS
+    clearLine(17, 3, 3);
+  }
+
+  currentScreen = SCREEN_MAIN;
 
   // Linha 3 - mostrando o número da enfermaria
   lcd.setCursor(12, 2);
   if (hasNursingCall) {
     // Se tiver mais de um chamado não resolvido, mostra "< num >"
-    if (total_items > 1){
+    if (total_items > 1) {
       lcd.print(F("< "));
       lcd.print(infirmary);
       lcd.print(F(" >"));
-    } else{
+    } else {
       lcd.print(infirmary);
     }
 
@@ -95,28 +128,9 @@ void showInfirmaryNumber(const char* infirmary, bool hasNursingCall, int total_i
 }
 
 
-// Dados fixos do Display
-void fixed_data() {
-  lcd.setCursor(1, 0);  // Posiciona o cursor na coluna 1, linha 0
-  lcd.print(F("Chamada Enfermagem"));
-
-  lcd.setCursor(0, 1);  // Posiciona o cursor na coluna 0, linha 1
-  lcd.print(F("--------------------"));
-
-  lcd.setCursor(0, 2);  // Posiciona o cursor na coluna 0, linha 2
-  lcd.print(F("Enfermaria: "));
-
-  lcd.setCursor(0, 3);  // Posiciona o cursor na coluna 0, linha 3
-  lcd.print(F("Quant. Chamados:"));
-}
-
-
 // Função que inicializa o Display
 void lcd2004_init() {
   Wire.begin();     // para garantir que I2C foi inicializada
   lcd.init();       // Inicializa o display e a comunicação I2C
   lcd.backlight();  // Liga a luz de fundo do display
-
-  // Mostrar os dados fixos
-  fixed_data();
 }

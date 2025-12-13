@@ -13,7 +13,7 @@
 // flag que indica se o botão de deletar foi pressionado uma vez e está aguardando confirmação
 bool deletionConfirmation = false;
 
-// flag que indica se a mensagem de falha ddo wifi já foi exibida.
+// flag que indica se a mensagem de falha ddo wifi já foi exibida (detectar transição de falha para normal).
 bool wifiFailureDisplayed = false;  // Usada para evitar desenhar a tela de erro repetidamente a cada iteração do loop
 
 
@@ -21,7 +21,6 @@ bool wifiFailureDisplayed = false;  // Usada para evitar desenhar a tela de erro
 void handleNext() {  // ===== Botão Next (>)
   // Se estava em modo confirmação de deleção, atualiza o display, mostrando que a ação foi cancelada
   if (deletionConfirmation) {
-    fixed_data();                  // Atualiza o display com os dados fixos
     deletionConfirmation = false;  // reset caso usuário navegue (cancela a exclusão)
 
     // Quando clica 'next' e esta no esta no modo confirmação, garante que NÃO está bloqueado remover current (caso tenha atigido o limite de inserção na lista)
@@ -40,7 +39,6 @@ void handleNext() {  // ===== Botão Next (>)
 void handlePrev() {  // ===== Botão Prev (<)
   // Se estava em modo confirmação de deleção, atualiza o display, mostrando que a ação foi cancelada
   if (deletionConfirmation) {
-    fixed_data();                  // Atualiza o display com os dados fixos
     deletionConfirmation = false;  // reset caso usuário navegue (cancela a exclusão)
 
     // Quando clica 'prev' e esta no esta no modo confirmação, garante que NÃO está bloqueado remover current (caso tenha atigido o limite de inserção na lista)
@@ -60,6 +58,12 @@ void handlePrev() {  // ===== Botão Prev (<)
 void handleDelete() {  // ===== Botão Delete
   // Primeiro clique: apenas exibe a mensagem de confirmação
   if (!deletionConfirmation) {
+    
+    // Se a tela anterior não for a MAIN, não pode mostrar a tela de confirmação de exclusão
+    if (currentScreen != SCREEN_MAIN) {
+      return;
+    }
+
     showExclusionConfirm(listCalls.getInfirmaryCurrent());
     deletionConfirmation = true;
 
@@ -67,6 +71,10 @@ void handleDelete() {  // ===== Botão Delete
     listCalls.setDoNotRemoveCurrent(true);  // Aqui diz é true, não pode remover current
   } else {                                  // Segundo clique: executa deleção
 
+    // Se a tela anterior não for a de confirmação de exclusão, não pode continuar
+    if (currentScreen != SCREEN_EXCLUSION_CONFIRM) {
+      return;
+    }
 
     /* ___Pública (marcar com concluído o chamado) via MQTT*/
     const char* infirmary = listCalls.getInfirmaryCurrent();
@@ -91,14 +99,14 @@ void deleteMessage() {
 void setup() {
   // Serial.begin(115200);
   logInit(LOG_MODE);
+  // inicializa o display
+  lcd2004_init();
 
   if (!connectToWiFi()) {
     log(LOG_WARN, "Falha ao conectar com WiFI.");
   }
   setupMQTT();
 
-  // inicializa o display
-  lcd2004_init();
   // Inicializa botões
   initButtons();
 
@@ -106,27 +114,21 @@ void setup() {
 
   // inicializa buzzer
   buzzerInit();
-
-  showInfirmaryNumber(
-    listCalls.getInfirmaryCurrent(),
-    listCalls.hasNursingCall(),
-    listCalls.getTotal());  // Mostra os dados no display
 }
 
 void loop() {
 
   if (checkAndReconnectWifi()) {  // Retorna true se conseguir conectar/reconectar ao wifi
-    /* se a flag for true, indica que estava em estado de falha (wifi) e agora "checkAndReconnectWifi()" retornou true, 
-        ou seja, acabou de ocorrer a reconexão. Portanto precisa restaurar a tela. */
-    if (wifiFailureDisplayed) {      // Se o Wi-Fi acabou de voltar, restaura a tela
-      wifiFailureDisplayed = false;  // Marca que não esta mais em estado de falha
-      fixed_data();                  // Atualiza o display com os dados fixos
-      showInfirmaryNumber(
-        listCalls.getInfirmaryCurrent(),
-        listCalls.hasNursingCall(),
-        listCalls.getTotal());  // Mostra os dados no display
+    /* Se esta flag estiver true, significa que:
+        - O Wi-Fi estava desconectado anteriormente
+        - A mensagem de erro já foi exibida
+        - O Wi-Fi acabou de ser restabelecido*/
+    if (wifiFailureDisplayed) {
+      wifiFailureDisplayed = false;  // Sai do estado de falha
     }
 
+    // Garante que a conexão MQTT esteja ativa.
+    // Só é chamada quando há Wi-Fi disponível.
     checkMQTTConnected();
   } else {  // não há conexão
     // Só entra se ainda não mostrou a mensagem de falha. Ou seja, evita mostrar repetidamente.
@@ -135,8 +137,6 @@ void loop() {
       /* Marca que já mostrou a mensagem de falha, então em iterações seguintes do loop não vai redesenhar a mensagem repetidamente.
           Garante ainda que, quando o wifi voltar, o "if (wifiFailureDisplayed)" detectará a transição e restaurará a tela.*/
       wifiFailureDisplayed = true;
-
-      deletionConfirmation = false;  // reset caso a internet falhe quando tiver na tela de confirrmação de exclusão (cancela a exclusão)
     }
   }
 
@@ -155,7 +155,6 @@ void loop() {
     } else {
       log(LOG_ERROR, "Erro ao remover a chamada na lista!");
     }
-    fixed_data();  // Atualiza o display com os dados fixos
     showInfirmaryNumber(
       listCalls.getInfirmaryCurrent(),
       listCalls.hasNursingCall(),
@@ -168,11 +167,12 @@ void loop() {
   }
 
 
-  // Atualiza se tiver novos dados, mas se nenhum botão estiver pressionado
+  // Atualiza se tiver novos dados, mas se nenhum botão estiver pressionado e se tiver na tela de navegação
   if (listUpdated
       && button_next.state == HIGH
       && button_prev.state == HIGH
       && button_delete.state == HIGH
+      && currentScreen == SCREEN_MAIN
       && !deletionConfirmation) {
 
     showInfirmaryNumber(
