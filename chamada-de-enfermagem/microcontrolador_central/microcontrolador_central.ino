@@ -26,8 +26,10 @@ void handleNext() {  // ===== Botão Next (>)
     // Quando clica 'next' e esta no esta no modo confirmação, garante que NÃO está bloqueado remover current (caso tenha atigido o limite de inserção na lista)
     listCalls.setDoNotRemoveCurrent(false);  // vira false -> pode remover current
   } else {
-    // Avança para o próximo item da lista
-    listCalls.next();
+    if (listCalls.hasNursingCall()) {
+      // Avança para o próximo item da lista
+      listCalls.next();
+    }
   }
   // Mostra o item atual
   showInfirmaryNumber(
@@ -44,8 +46,10 @@ void handlePrev() {  // ===== Botão Prev (<)
     // Quando clica 'prev' e esta no esta no modo confirmação, garante que NÃO está bloqueado remover current (caso tenha atigido o limite de inserção na lista)
     listCalls.setDoNotRemoveCurrent(false);  // vira false - pode remover current
   } else {
-    // Avança para o item anteriot da lista
-    listCalls.prev();
+    if (listCalls.hasNursingCall()) {
+      // Avança para o item anteriot da lista
+      listCalls.prev();
+    }
   }
   // Mostra o item atual
   showInfirmaryNumber(
@@ -58,7 +62,7 @@ void handlePrev() {  // ===== Botão Prev (<)
 void handleDelete() {  // ===== Botão Delete
   // Primeiro clique: apenas exibe a mensagem de confirmação
   if (!deletionConfirmation) {
-    
+
     // Se a tela anterior não for a MAIN, não pode mostrar a tela de confirmação de exclusão
     if (currentScreen != SCREEN_MAIN) {
       return;
@@ -89,6 +93,21 @@ void handleDelete() {  // ===== Botão Delete
     if (!wasPublished) {
       showFailureMessage(MESSAGE_MQTT);
     }
+
+    // log(LOG_INFO,listCalls.getIdCurrent());
+    if (listCalls.removeCurrent()) {  // Apaga o item selecionado
+      log(LOG_INFO, "Chamada removida com sucesso!");
+    } else {
+      log(LOG_ERROR, "Erro ao remover a chamada na lista!");
+    }
+    showInfirmaryNumber(
+      listCalls.getInfirmaryCurrent(),
+      listCalls.hasNursingCall(),
+      listCalls.getTotal());  // Mostra os dados no display
+
+    deletionConfirmation = false;
+    // Ao marcar o chamado como resolvido, reseta a flag, indicando se atingir o limite pode remover o current
+    listCalls.setDoNotRemoveCurrent(false);  // vira false - pode remover current
   }
 }
 
@@ -183,11 +202,15 @@ void loop() {
     listUpdated = false;  // reseta a flag
   }
 
-  // Habilita os botões somente se houver dados na lista
+  // Verificações para poder sair das telas IP/Erro wifi/MQTT 
+  if (checkButton(button_next)) handleNext();
+  if (checkButton(button_prev)) handlePrev();
+
+  // Habilita o botão de delete somente se houver dados na lista
   // aciona led se houver algum chamado
   if (listCalls.hasNursingCall()) {
-    if (checkButton(button_next)) handleNext();
-    if (checkButton(button_prev)) handlePrev();
+    // if (checkButton(button_next)) handleNext();
+    // if (checkButton(button_prev)) handlePrev();
     if (checkButton(button_delete)) handleDelete();
 
     toggleLed();

@@ -130,6 +130,10 @@ void List_NursingCall::prev() {  // Move current para o nó anterior
 //        Remoção
 // =========================
 bool List_NursingCall::removeCurrent() {
+
+  if (!hasNursingCall()){
+    return false;
+  }
   // Se current é NULL, não remove.
   if (current == nullptr) return false;
 

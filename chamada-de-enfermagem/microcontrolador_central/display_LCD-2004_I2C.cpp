@@ -128,6 +128,26 @@ void showInfirmaryNumber(const char* infirmary, bool hasNursingCall, int total_i
 }
 
 
+// Mostra o IP da rede
+void showIPAddress(const char* msg_IPAddress) {
+  // Indica que está na tela de IP
+  currentScreen = SCREEN_IPADDRESS;
+  lcd.clear(); // Limpa a tela toda
+  lcd.setCursor(2, 0);  // Posiciona o cursor na coluna 2, linha 0
+  lcd.print(F("Wi-Fi Conectado"));
+
+  lcd.setCursor(0, 1);  // Posiciona o cursor na coluna 0, linha 1
+  lcd.print(F("--------------------"));
+
+  lcd.setCursor(0, 2);  // Posiciona o cursor na coluna 0, linha 2
+  lcd.print(F("IP: "));
+  lcd.print(msg_IPAddress);
+
+  lcd.setCursor(0, 3);
+  lcd.print(F("< > = voltar"));
+}
+
+
 // Função que inicializa o Display
 void lcd2004_init() {
   Wire.begin();     // para garantir que I2C foi inicializada

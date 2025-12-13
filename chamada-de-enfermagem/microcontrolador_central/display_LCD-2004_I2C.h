@@ -13,6 +13,7 @@ enum DisplayState {
     SCREEN_MAIN,                // Tela: showInfirmaryNumber()
     SCREEN_FAILURE,             // Tela: showFailureMessage()
     SCREEN_EXCLUSION_CONFIRM,   // Tela: showExclusionConfirm()
+    SCREEN_IPADDRESS            // Tela: showIPAddress()
 };
 extern DisplayState currentScreen;
 
@@ -25,6 +26,8 @@ extern void showFailureMessage(const char* msgType);
 // Mostra dados já preparados
 extern void showInfirmaryNumber(const char* infirmary, bool hasNursingCall, int total_items);
 extern void showExclusionConfirm(const char* infirmary);
+// Mostra o IP da rede
+extern void showIPAddress(const char* msg_IPAddress);
 
 
 #endif // Final da diretiva de proteção contra múltiplas inclusões
