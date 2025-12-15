@@ -22,7 +22,7 @@ def publish_message(topic: str, payload: dict):
 
 def pub_posto_enfermaria_de_enfermaria(dispositivo_id: str, estado: str, mensagem: str, room_number: str, local:str, comando: str):
     """Publica um evento vindo da enfermaria."""
-    topic = f"dispositivos/posto_enfermaria"
+    topic = f"dispositivos/posto_enfermaria/{dispositivo_id}"
 
     payload = {
         "id": dispositivo_id,

@@ -4,8 +4,14 @@ from dotenv import load_dotenv
 import os
 from MongoDB.mongo_conn import mongo_conn 
 from datetime import datetime
+import paho.mqtt.client as mqtt
 
 load_dotenv()
+
+broker = os.getenv('BROKER_IP')
+port = int(os.getenv('BROKER_PORT'))
+user_name = os.getenv('PUB_USERNAME')
+password = os.getenv('PUB_PASS')
 
 def check_if_device_exists(device:str) -> bool:
     '''
@@ -61,12 +67,17 @@ def register_status_device_mongodb(device:str, payload:dict):
 
     if 'room_number' in payload:
         return
+    
+    
      
     document_to_save = {
         'device': device,
         'status': payload.get('status'),
         'updateAt': datetime.now()
     }
+
+    topic_to_publish = f'dispositivos/posto_enfermaria/{device}'
+
     try:
 
         result = mongo_conn.return_document('status_device', 'device', device)
@@ -84,6 +95,8 @@ def register_status_device_mongodb(device:str, payload:dict):
         id_status_device = str(result['_id'])
         mongo_conn.update_document_by_id('status_device', id_status_device, document_to_save)
 
+        publish_message_on_topic_avoid_retain_messages(topic_to_publish)
+
     except Exception as e:
         logging.exception(e)
 
@@ -94,9 +107,10 @@ def register_status_chamada_mongo_db(device:str, payload:dict):
     Função para registrar/atualizar uma chamada na tabela de status_chamadas
     '''
 
-    
     if not ('room_number' in payload) and ('estado' not in payload):
         return 
+    
+    print(payload)
 
     room_number = payload.get('room_number')
     estado = payload.get('estado')
@@ -111,7 +125,7 @@ def register_status_chamada_mongo_db(device:str, payload:dict):
     try:
         result = mongo_conn.return_document('status_chamadas', 'device', device)
 
-        print(result)
+        print(f':RESULTADO:{result}')
 
         if not result:        
             logging.warning(f'Device [{device}] não encontrado no status de chamada!')
@@ -129,5 +143,12 @@ def register_status_chamada_mongo_db(device:str, payload:dict):
     except Exception as e:
         print(e)
 
+def publish_message_on_topic_avoid_retain_messages(topic: str):
+    """Publica uma mensagem MQTT no tópico especificado."""
+    client = mqtt.Client(client_id=user_name)
+    client.username_pw_set(user_name, password)
+    client.connect(broker, port)
 
-
+    client.publish(topic, payload=None, retain=True)
+    client.disconnect()
+    logging.info(f'Mensagem publicada em {topic}')
