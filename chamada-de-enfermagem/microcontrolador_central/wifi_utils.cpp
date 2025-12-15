@@ -3,6 +3,9 @@
 #include "config.h"       // Constantes globais do projeto (SSID e senha)
 #include "log.h"
 
+#include "display_LCD-2004_I2C.h" // Para mostrar o IP da rede
+
+
 // ------------------------------------------------------------
 // Variáveis internas do módulo
 // ------------------------------------------------------------
@@ -52,15 +55,20 @@ bool connectToWiFi() {
   // Aguarda até a conexão ou até o timeout
   while (WiFi.status() != WL_CONNECTED && millis() < timeout) {
     delay(500);  // aguarda meio segundo entre tentativas
-    // Serial.print(".");     // imprime ponto para indicar progresso
+    Serial.print(".");     // imprime ponto para indicar progresso
   }
 
-  // Serial.println();
+  Serial.println();
 
   // Verifica se a conexão foi bem sucedida
   if (WiFi.status() == WL_CONNECTED) {
     log(LOG_INFO, "Conectado ao Wi-Fi: %s", WIFI_SSID);
-    log(LOG_INFO, "IP: %s", IPparserToConstChar(WiFi.localIP()));  // mostra o IP atribuído
+    const char* network_ipAddress = IPparserToConstChar(WiFi.localIP());
+    // log(LOG_INFO, "IP: %s", IPparserToConstChar(WiFi.localIP()));  // mostra o IP atribuído
+    log(LOG_INFO, "IP: %s", network_ipAddress);  // mostra o IP atribuído
+
+    // Mostrar no display o IP da rede
+    showIPAddress(network_ipAddress);
     return true;
   }
 

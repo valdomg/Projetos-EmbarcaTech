@@ -27,10 +27,10 @@ int List_NursingCall::getTotal() {  // retorna o número de nós
   return total;
 }
 
-// retorna o campo infirmary do nó current ou -1 se não houver
-int List_NursingCall::getInfirmaryCurrent() {
+// retorna o campo infirmary (texto) do nó current ou nullptr se não houver
+const char* List_NursingCall::getInfirmaryCurrent() {
   if (current != nullptr) return current->infirmary;
-  return -1;
+  return nullptr;
 }
 
 // retorna o campo ID do nó current
@@ -45,8 +45,9 @@ bool List_NursingCall::hasNursingCall() {
 }
 
 // Validação da enfermaria
-bool List_NursingCall::isValidInfirmary(int infirmary) {
-  return (infirmary > 0 && infirmary <= 9999);
+bool List_NursingCall::isValidInfirmary(const char* infirmary) {
+  if (infirmary == nullptr || infirmary[0] == '\0') return false;
+  return true;
 }
 
 // Função auxiliar que define o valor de "doNotRemoveCurrent" que sinaliza se pode ou não remover o current se atingir o limite
@@ -62,7 +63,7 @@ bool List_NursingCall::getDoNotRemoveCurrent() const {
 // =========================
 //        Add Nó
 // =========================
-bool List_NursingCall::add(int infirmary, const char* id) {  // Adicionar um nó ao final da lista
+bool List_NursingCall::add(const char* infirmary, const char* id) {  // Adicionar um nó ao final da lista
   // verifica se o ID do dispositivo é valido
   if (id == nullptr || id[0] == '\0') return false;
 
@@ -80,8 +81,10 @@ bool List_NursingCall::add(int infirmary, const char* id) {  // Adicionar um nó
   NursingCall* new_node = new NursingCall;  // Cria um novo nó
   if (new_node == nullptr) return false; // verifica se alocação foi bem-sucedida
 
-  new_node->infirmary = infirmary;          // O campo infirmary do novo nó recebe o valor correspondente
-
+  // Copia a enfermaria
+  strncpy(new_node->infirmary, infirmary, sizeof(new_node->infirmary) - 1);
+  new_node->infirmary[sizeof(new_node->infirmary) - 1] = '\0';
+  
   // Copia o ID
   strncpy(new_node->id, id, sizeof(new_node->id) - 1);
   new_node->id[sizeof(new_node->id) - 1] = '\0';
@@ -127,6 +130,10 @@ void List_NursingCall::prev() {  // Move current para o nó anterior
 //        Remoção
 // =========================
 bool List_NursingCall::removeCurrent() {
+
+  if (!hasNursingCall()){
+    return false;
+  }
   // Se current é NULL, não remove.
   if (current == nullptr) return false;
 

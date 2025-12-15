@@ -9,22 +9,27 @@
 #include "buzzer.h"
 #include "led.h"
 
+
 // flag que indica se o botão de deletar foi pressionado uma vez e está aguardando confirmação
 bool deletionConfirmation = false;
+
+// flag que indica se a mensagem de falha ddo wifi já foi exibida (detectar transição de falha para normal).
+bool wifiFailureDisplayed = false;  // Usada para evitar desenhar a tela de erro repetidamente a cada iteração do loop
 
 
 // ===== Funções de navegação =====
 void handleNext() {  // ===== Botão Next (>)
   // Se estava em modo confirmação de deleção, atualiza o display, mostrando que a ação foi cancelada
   if (deletionConfirmation) {
-    fixed_data();                  // Atualiza o display com os dados fixos
     deletionConfirmation = false;  // reset caso usuário navegue (cancela a exclusão)
 
     // Quando clica 'next' e esta no esta no modo confirmação, garante que NÃO está bloqueado remover current (caso tenha atigido o limite de inserção na lista)
     listCalls.setDoNotRemoveCurrent(false);  // vira false -> pode remover current
   } else {
-    // Avança para o próximo item da lista
-    listCalls.next();
+    if (listCalls.hasNursingCall()) {
+      // Avança para o próximo item da lista
+      listCalls.next();
+    }
   }
   // Mostra o item atual
   showInfirmaryNumber(
@@ -36,14 +41,15 @@ void handleNext() {  // ===== Botão Next (>)
 void handlePrev() {  // ===== Botão Prev (<)
   // Se estava em modo confirmação de deleção, atualiza o display, mostrando que a ação foi cancelada
   if (deletionConfirmation) {
-    fixed_data();                  // Atualiza o display com os dados fixos
     deletionConfirmation = false;  // reset caso usuário navegue (cancela a exclusão)
 
     // Quando clica 'prev' e esta no esta no modo confirmação, garante que NÃO está bloqueado remover current (caso tenha atigido o limite de inserção na lista)
     listCalls.setDoNotRemoveCurrent(false);  // vira false - pode remover current
   } else {
-    // Avança para o item anteriot da lista
-    listCalls.prev();
+    if (listCalls.hasNursingCall()) {
+      // Avança para o item anteriot da lista
+      listCalls.prev();
+    }
   }
   // Mostra o item atual
   showInfirmaryNumber(
@@ -56,6 +62,12 @@ void handlePrev() {  // ===== Botão Prev (<)
 void handleDelete() {  // ===== Botão Delete
   // Primeiro clique: apenas exibe a mensagem de confirmação
   if (!deletionConfirmation) {
+
+    // Se a tela anterior não for a MAIN, não pode mostrar a tela de confirmação de exclusão
+    if (currentScreen != SCREEN_MAIN) {
+      return;
+    }
+
     showExclusionConfirm(listCalls.getInfirmaryCurrent());
     deletionConfirmation = true;
 
@@ -63,34 +75,57 @@ void handleDelete() {  // ===== Botão Delete
     listCalls.setDoNotRemoveCurrent(true);  // Aqui diz é true, não pode remover current
   } else {                                  // Segundo clique: executa deleção
 
+    // Se a tela anterior não for a de confirmação de exclusão, não pode continuar
+    if (currentScreen != SCREEN_EXCLUSION_CONFIRM) {
+      return;
+    }
 
     /* ___Pública (marcar com concluído o chamado) via MQTT*/
-    int infirmary = listCalls.getInfirmaryCurrent();
+    const char* infirmary = listCalls.getInfirmaryCurrent();
     const char* idDevice = listCalls.getIdCurrent();
     // Chama a função de públicar o ID do dispositivo e o número da enfermaria (tranforma em float o infirmary)
     char buffer[256];
-    publicReponseDivice(idDevice, MQTT_PUBLICATION_TOPIC, createJsonPayload(buffer, sizeof(buffer), infirmary));
 
+    // flag qu indica se deu certo publicar ou não
+    bool wasPublished = publicReponseDivice(idDevice, MQTT_PUBLICATION_TOPIC, createJsonPayload(buffer, sizeof(buffer), infirmary));
+
+    // Caso tenha falhado publicar o chamado, mostra a tela indicando a falha
+    if (!wasPublished) {
+      showFailureMessage(MESSAGE_MQTT);
+    }
+
+    // log(LOG_INFO,listCalls.getIdCurrent());
+    if (listCalls.removeCurrent()) {  // Apaga o item selecionado
+      log(LOG_INFO, "Chamada removida com sucesso!");
+    } else {
+      log(LOG_ERROR, "Erro ao remover a chamada na lista!");
+    }
+    showInfirmaryNumber(
+      listCalls.getInfirmaryCurrent(),
+      listCalls.hasNursingCall(),
+      listCalls.getTotal());  // Mostra os dados no display
+
+    deletionConfirmation = false;
+    // Ao marcar o chamado como resolvido, reseta a flag, indicando se atingir o limite pode remover o current
+    listCalls.setDoNotRemoveCurrent(false);  // vira false - pode remover current
   }
 }
 
-void deleteMessage(){
- 
+void deleteMessage() {
 }
 
 
 void setup() {
   // Serial.begin(115200);
   logInit(LOG_MODE);
+  // inicializa o display
+  lcd2004_init();
 
   if (!connectToWiFi()) {
-    // Serial.println("WiFi não conectado.");
     log(LOG_WARN, "Falha ao conectar com WiFI.");
   }
   setupMQTT();
 
-  // inicializa o display
-  lcd2004_init();
   // Inicializa botões
   initButtons();
 
@@ -98,17 +133,30 @@ void setup() {
 
   // inicializa buzzer
   buzzerInit();
-
-  showInfirmaryNumber(
-    listCalls.getInfirmaryCurrent(),
-    listCalls.hasNursingCall(),
-    listCalls.getTotal());  // Mostra os dados no display
 }
 
 void loop() {
 
-  if (checkAndReconnectWifi()) {
+  if (checkAndReconnectWifi()) {  // Retorna true se conseguir conectar/reconectar ao wifi
+    /* Se esta flag estiver true, significa que:
+        - O Wi-Fi estava desconectado anteriormente
+        - A mensagem de erro já foi exibida
+        - O Wi-Fi acabou de ser restabelecido*/
+    if (wifiFailureDisplayed) {
+      wifiFailureDisplayed = false;  // Sai do estado de falha
+    }
+
+    // Garante que a conexão MQTT esteja ativa.
+    // Só é chamada quando há Wi-Fi disponível.
     checkMQTTConnected();
+  } else {  // não há conexão
+    // Só entra se ainda não mostrou a mensagem de falha. Ou seja, evita mostrar repetidamente.
+    if (!wifiFailureDisplayed) {
+      showFailureMessage(MESSAGE_WIFI);  // Mensagem que indica que não há conexão Wi-Fi
+      /* Marca que já mostrou a mensagem de falha, então em iterações seguintes do loop não vai redesenhar a mensagem repetidamente.
+          Garante ainda que, quando o wifi voltar, o "if (wifiFailureDisplayed)" detectará a transição e restaurará a tela.*/
+      wifiFailureDisplayed = true;
+    }
   }
 
   // A função delay atrapalha o funcionamento dos botões
@@ -119,31 +167,31 @@ void loop() {
   //   Serial.println("servidor mqtt desconectado");
   // }
 
-   if (hasOKMessage){
+  if (hasOKMessage) {
     // log(LOG_INFO,listCalls.getIdCurrent());
     if (listCalls.removeCurrent()) {  // Apaga o item selecionado
       log(LOG_INFO, "Chamada removida com sucesso!");
     } else {
       log(LOG_ERROR, "Erro ao remover a chamada na lista!");
     }
-    fixed_data();  // Atualiza o display com os dados fixos
     showInfirmaryNumber(
       listCalls.getInfirmaryCurrent(),
       listCalls.hasNursingCall(),
       listCalls.getTotal());  // Mostra os dados no display
 
-    // Ao marcar o chamado como resolvido, reseta a flag, indicando se atingir o limite pode remover o current
     deletionConfirmation = false;
+    // Ao marcar o chamado como resolvido, reseta a flag, indicando se atingir o limite pode remover o current
     listCalls.setDoNotRemoveCurrent(false);  // vira false - pode remover current
     hasOKMessage = false;
   }
 
 
-  // Atualiza se tiver novos dados, mas se nenhum botão estiver pressionado
+  // Atualiza se tiver novos dados, mas se nenhum botão estiver pressionado e se tiver na tela de navegação
   if (listUpdated
       && button_next.state == HIGH
       && button_prev.state == HIGH
       && button_delete.state == HIGH
+      && currentScreen == SCREEN_MAIN
       && !deletionConfirmation) {
 
     showInfirmaryNumber(
@@ -154,11 +202,15 @@ void loop() {
     listUpdated = false;  // reseta a flag
   }
 
-  // Habilita os botões somente se houver dados na lista
+  // Verificações para poder sair das telas IP/Erro wifi/MQTT 
+  if (checkButton(button_next)) handleNext();
+  if (checkButton(button_prev)) handlePrev();
+
+  // Habilita o botão de delete somente se houver dados na lista
   // aciona led se houver algum chamado
   if (listCalls.hasNursingCall()) {
-    if (checkButton(button_next)) handleNext();
-    if (checkButton(button_prev)) handlePrev();
+    // if (checkButton(button_next)) handleNext();
+    // if (checkButton(button_prev)) handlePrev();
     if (checkButton(button_delete)) handleDelete();
 
     toggleLed();

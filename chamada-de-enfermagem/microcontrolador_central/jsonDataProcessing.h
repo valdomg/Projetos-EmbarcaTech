@@ -5,7 +5,7 @@
 
 extern bool processing_json_MQTT(byte* payload, unsigned int length);
 
-const char* createJsonPayload(char* buffer, size_t length, int roomNumber);
+const char* createJsonPayload(char* buffer, size_t length, const char* roomNumber);
 
 const char* getPayloadID(byte* payload, unsigned int length);
 
