@@ -3,6 +3,9 @@
 #include "config.h"       // Constantes globais do projeto (SSID e senha)
 #include "log.h"
 
+#include "display_LCD-2004_I2C.h" // Para mostrar o IP da rede
+
+
 // ------------------------------------------------------------
 // Variáveis internas do módulo
 // ------------------------------------------------------------
@@ -47,20 +50,25 @@ bool connectToWiFi() {
   log(LOG_INFO, "Conctandoo ao wifi");
 
   // Define um timeout de 10 segundos
-  unsigned long timeout = millis() + 10000;
+  unsigned long timeout = millis() + 5000;
 
   // Aguarda até a conexão ou até o timeout
   while (WiFi.status() != WL_CONNECTED && millis() < timeout) {
     delay(500);  // aguarda meio segundo entre tentativas
-    // Serial.print(".");     // imprime ponto para indicar progresso
+    Serial.print(".");     // imprime ponto para indicar progresso
   }
 
-  // Serial.println();
+  Serial.println();
 
   // Verifica se a conexão foi bem sucedida
   if (WiFi.status() == WL_CONNECTED) {
     log(LOG_INFO, "Conectado ao Wi-Fi: %s", WIFI_SSID);
-    log(LOG_INFO, "IP: %s", IPparserToConstChar(WiFi.localIP()));  // mostra o IP atribuído
+    const char* network_ipAddress = IPparserToConstChar(WiFi.localIP());
+    // log(LOG_INFO, "IP: %s", IPparserToConstChar(WiFi.localIP()));  // mostra o IP atribuído
+    log(LOG_INFO, "IP: %s", network_ipAddress);  // mostra o IP atribuído
+
+    // Mostrar no display o IP da rede
+    showIPAddress(network_ipAddress);
     return true;
   }
 
@@ -75,9 +83,9 @@ bool connectToWiFi() {
  * Se o Wi-Fi estiver desconectado, ela espera o intervalo definido
  * em reconnectInterval antes de tentar reconectar.
  */
-void checkAndReconnectWifi() {
+bool checkAndReconnectWifi() {
   // Se já está conectado, não faz nada
-  if (WiFi.status() == WL_CONNECTED) return;
+  if (WiFi.status() == WL_CONNECTED) return true;
 
   unsigned long now = millis();
 
@@ -88,14 +96,16 @@ void checkAndReconnectWifi() {
     log(LOG_INFO, "WiFi desconectado");
     WiFi.disconnect();  // garante que está desconectado
     log(LOG_INFO, "Conectando ao wifi ");
-    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);  // inicia reconexão
+    // WiFi.begin(WIFI_SSID, WIFI_PASSWORD);  // inicia reconexão
 
     // Se reconectar com sucesso, exibe informações
-    if (WiFi.status() == WL_CONNECTED) {
+    if (connectToWiFi()) {
       log(LOG_INFO, "Conectado ao Wi-Fi");
       log(LOG_INFO, "IP: %s", IPparserToConstChar(WiFi.localIP()));  // mostra o IP atribuído
+      return true;
     }
   }
+  return false;
 }
 
 /**

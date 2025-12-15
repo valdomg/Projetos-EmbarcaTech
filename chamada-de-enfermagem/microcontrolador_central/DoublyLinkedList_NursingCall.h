@@ -4,7 +4,7 @@
 
 // NursingCall: nó
 struct NursingCall {
-  int infirmary;      // número do quarto valor armazenado
+  char infirmary[32]; // identificador textual da enfermaria
   char id[32];        // id da chamada (tamanho fixo)
   NursingCall* next;  // ponteiro para próximo nó
   NursingCall* prev;  // ponteiro para nó anterior
@@ -23,7 +23,7 @@ class List_NursingCall {
     bool doNotRemoveCurrent = false;
     
     // verifica se a enfermaria é valida 
-    bool isValidInfirmary(int infirmary);
+    bool isValidInfirmary(const char* infirmary);
 
     // Função que remove se atingir o limite (lista cheia)
     bool removeOldestCall();
@@ -35,7 +35,8 @@ class List_NursingCall {
 
     // Consultas
     int getTotal();
-    int getInfirmaryCurrent();
+    // retorna o campo infirmary do nó current (texto) ou nullptr se não houver
+    const char* getInfirmaryCurrent();
     const char* getIdCurrent();
     bool hasNursingCall();
     // define o valor da flag (true/false) que indica se pode ou não remover o current quando a lista atingir o limite de inserção
@@ -48,7 +49,7 @@ class List_NursingCall {
     void prev();
 
     // Modificações
-    bool add(int infirmary, const char* id);
+    bool add(const char* infirmary, const char* id);
     bool removeCurrent();
     void clear();
 };

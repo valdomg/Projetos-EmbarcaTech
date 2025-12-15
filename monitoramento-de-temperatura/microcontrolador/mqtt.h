@@ -85,6 +85,9 @@ void resendMqttData();
  *
  * @param alert Mensagem de alerta a ser publicada.
  */
-void publishAlert(const char* alert);
+void publishAlert(float temperature, float humidity);
+
+
+void resetStateSendAlert();
 
 #endif

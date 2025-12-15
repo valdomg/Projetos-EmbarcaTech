@@ -5,6 +5,7 @@ from Flask.Routes.chamadas_route import chamadas_bp
 from Flask.Routes.devices_route import devices_bp
 from Flask.Routes.users_route import user_bp
 from Flask.Routes.mapa_routes import mapa_bp
+from Flask.Routes.error_routes import error_bp
 import logging
 
 app = Flask(__name__)
@@ -16,10 +17,11 @@ app.register_blueprint(chamadas_bp)
 app.register_blueprint(devices_bp)
 app.register_blueprint(user_bp)
 app.register_blueprint(mapa_bp)
+app.register_blueprint(error_bp)
 
 logging.basicConfig(
     level=logging.INFO,
-    format='Data: %(asctime)s - %(message)s '
+    format='Data: %(levelname)s - %(asctime)s - %(filename)s - %(message)s'
 )
 
 if __name__ == "__main__":

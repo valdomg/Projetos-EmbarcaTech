@@ -36,6 +36,7 @@ checkErrors(const EnvironmentData& data) {
   if (!data.valid) {
     status.sensorError = true;
     hasError = true;
+    publishAlert(data.temperature, data.humidity);
     log(LOG_WARN, "Erro na leitura do sensor");
     return status;
   }
@@ -43,12 +44,14 @@ checkErrors(const EnvironmentData& data) {
   if (data.temperature > cfg.temperatureMax || data.temperature < cfg.temperatureMin) {
     status.temperatureError = true;
     hasError = true;
+    publishAlert(data.temperature, data.humidity);
     log(LOG_WARN, "Temperatura fora do intervalo estipulado");
   }
 
   if (data.humidity > cfg.humidityMax || data.humidity < cfg.humidityMin) {
     status.humidityError = true;
     hasError = true;
+    publishAlert(data.temperature, data.humidity);
     log(LOG_WARN, "Humidade fora do intervalo estipulado");
   }
 
@@ -90,6 +93,7 @@ void handleSensorData(EnvironmentData& data, unsigned long now) {
 void maybeHandleAlerts(const ErrorStatus& errors, unsigned long now) {
   if (errors.humidityError || errors.temperatureError || errors.sensorError) {
 
+
     enableButtonInterruptRising(PIN_BUTTON_MUTE);
 
     if (wasMuted()) {
@@ -98,11 +102,11 @@ void maybeHandleAlerts(const ErrorStatus& errors, unsigned long now) {
     } else {
       toggleBuzzer(now);
     }
-    toggleLed(now);
-  } else {
+    toggleLed(now);  } else {
 
     disableButtonInterruptRising(PIN_BUTTON_MUTE);
     resetButtonState();
+    resetStateSendAlert();
     disableSoundAlert();
     turnOffLed();
   }

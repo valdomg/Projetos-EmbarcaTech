@@ -4,8 +4,9 @@ from Flask.Services.convert_objectdID import convert_all_id_to_string, convert_o
 from Flask.Models.user_db_model import UserDBModel
 from Flask.Models.user_model import User
 from Flask.auth import SECRET_KEY
-from Flask.auth import token_required 
+from Flask.auth import token_required, admin_required
 from MongoDB.MongoDBConnection import MongoDBConnection
+from MongoDB.mongo_conn import mongo_conn
 from dotenv import load_dotenv
 import os
 import json
@@ -26,10 +27,6 @@ ROTAS
 
 load_dotenv()
 
-uri = os.getenv('MONGO_URI')
-database = os.getenv('MONGO_DATABASE')
-
-mongo_conn = MongoDBConnection(uri, database)
 user_db_model = UserDBModel(mongo_conn)
 user_service = UserService(user_db_model)
 
@@ -41,13 +38,9 @@ Rota de api para retornar todos os usuários
 APENAS PARA ADMINS
 '''
 @user_bp.route('/', methods=['GET'])
+@admin_required
 def return_all_users():
 
-    try:
-        mongo_conn.start_connection()
-    except Exception as e:
-        logging.exception('Error in connect to database')
-        return {'Error': 'Erro interno do banco de dados'}, 500
     try:
         users = mongo_conn.list_all_documents_from_collection('users')
 
@@ -59,9 +52,6 @@ def return_all_users():
     except Exception as e:
         logging.exception('Error in return documents')
         return jsonify({'Error': 'falha ao procurar documentos'})
-
-    finally:
-        mongo_conn.close_connection()
     
     return {'Error': 'Usuários não encontrados'}, 404
 
@@ -76,14 +66,8 @@ json = {
 APENAS PARA ADMINS
 '''
 @user_bp.route('/register', methods=['POST'])
+@admin_required
 def register():
-
-    
-    try:
-        mongo_conn.start_connection()
-    except Exception as e:
-        logging.exception('Error in connect to database')
-        return jsonify({'Error': 'Erro interno do banco de dados'}), 500
     
     try:
         data = request.get_json()
@@ -101,9 +85,6 @@ def register():
         logging.exception('Error in register user')
         result = jsonify({'Error': 'falha em registrar usuário'}), 500
 
-    finally:
-        mongo_conn.close_connection()
-
     return result
  
 '''
@@ -115,13 +96,8 @@ json = {
 APENAS PARA ADMINS
 '''
 @user_bp.route('/delete', methods=['DELETE'])
+@admin_required
 def delete_user():
-
-    try:
-        mongo_conn.start_connection()
-    except Exception as e:
-        logging.exception('Error in connect to database')
-        return jsonify({'Error': 'Erro interno do banco de dados'}),500
     
     try:
         data = request.get_json()
@@ -134,9 +110,6 @@ def delete_user():
     except Exception as e:
         logging.exception('Error in delete user')
         result = jsonify({'Error': 'Falha ao deletar usuário'}), 500
-    
-    finally:
-        mongo_conn.close_connection()
 
     return result
 
@@ -146,14 +119,9 @@ Rota de remoção de usuário por url
 APENAS PARA ADMINS
 '''
 @user_bp.route('/delete/<string:document_id>', methods=['DELETE'])
+@admin_required
 def delete_user_by_id(document_id):
-
-    try:
-        mongo_conn.start_connection()
-    except Exception as e:
-        logging.exception('Error in connect to database')
-        return jsonify({'Error': 'Erro interno do banco de dados'}),500
-    
+  
     try:
         if not document_id:
             return jsonify({'Error': 'ID inválido'}), 400
@@ -163,9 +131,6 @@ def delete_user_by_id(document_id):
     except Exception as e:
         logging.exception('Error in delete user')
         result = jsonify({'Error': 'Falha ao deletar usuário'}), 500
-    
-    finally:
-        mongo_conn.close_connection()
 
     return result
 
@@ -181,14 +146,9 @@ json = {
 APENAS PARA ADMINS
 '''
 @user_bp.route('/update', methods=['PUT'])
+@admin_required
 def update_user_by():
-    
-    try:
-        mongo_conn.start_connection()
-    except Exception as e:
-        logging.exception('Error in connect to database')
-        return jsonify({'Error': 'Erro interno do banco de dados'}),500
-    
+  
     try:
         data = request.get_json()
 
@@ -201,7 +161,4 @@ def update_user_by():
         logging.exception('Error in update user')
         result = jsonify({'Error': 'Falha ao atualizar usuário'}), 500
     
-    finally:
-        mongo_conn.close_connection()
-
     return result

@@ -8,6 +8,11 @@ import logging
 import calendar
 
 
+logging.basicConfig(
+    level=logging.INFO,
+    format='Data: %(levelname)s - %(asctime)s - %(filename)s - %(message)s'
+)
+
 class MongoDBConnection:
     '''
     Classe para conexão com banco de dados MongoDB
@@ -17,6 +22,9 @@ class MongoDBConnection:
         self.database_name = database_name
         self.client = None
         self.db = None
+
+    def __enter__(self):
+        self.start_connection()
 
     def start_connection(self):
         '''
@@ -367,4 +375,3 @@ class MongoDBConnection:
         if self.client:
             self.client.close()
             logging.info("Conexão fechada.")
-            

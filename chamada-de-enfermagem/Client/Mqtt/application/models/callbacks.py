@@ -1,18 +1,13 @@
 import json
 import os
 from dotenv import load_dotenv
-from MongoDB.MongoDBConnection import MongoDBConnection
-from Mqtt.application.services.utilities import register_call_mongo_db 
+from Mqtt.application.services.utilities import register_chamada_mongodb, register_status_chamada_mongo_db, check_if_device_exists, register_status_device_mongodb
 from datetime import datetime
 import logging
 from time import sleep
 
 load_dotenv()
 topic = os.getenv('BROKER_TOPIC')
-uri = os.getenv('MONGO_URI') 
-database = os.getenv('MONGO_DATABASE')
-
-mongo = MongoDBConnection(uri, database)
 
 def on_connect(client, userdata, flags, rc, properties=None):
     '''
@@ -44,6 +39,7 @@ Colocar nova função para registar se
 '''
 def on_message(client, userdata, message, properties=None):
     '''
+    
     Callback para formatar as mensagens recebidas nos tópicos
 
         Os dispositivos nas salas assinam apenas o tópico em que estão,
@@ -54,7 +50,7 @@ def on_message(client, userdata, message, properties=None):
         dessa podem enviar seu estado ligado/timeout
         ex:dispositivos/posto_enfermaria/seu_id
 
-        o formato de payload será assim: {
+        o formato de payload será assim para os microcontroladores: {
             'id':'id_dispositivo',
             'estado':'emergência/oscioso',
             'mensagem':'mensagem para debug',
@@ -62,9 +58,27 @@ def on_message(client, userdata, message, properties=None):
             'local': 'Bloco/Ala/Região',
             'comando': 'ligar/desligar'
         }
+
+        formato para status: {
+            'status': 'ok/error'
+        }
+    
+    Tópicos = {
+        dispositivos/enfermaria/enfermaria<id>        - para o dispositivo central enviar uma mensagem
+            neste tópico os disposito de enfermaria se inscreve e espera receber
+            mensagens do dispositivo central
+
+        dispositivos/posto_enfermaria/enfermaria<id>  - para o dispositivo na enfermaria enviar uma mensagem
+            neste tópico o dispositivo central se inscreve e espera mensagens 
+            dos dispositivos de enfermaria
+
+        dispositivos/confirmacao/enfermaria<id>       - para o dispositivo central confirmar o recebimento da mensagem
+            neste tópico o disposito central confirma o recebimento das mensagens e envia 
+            uma mensagem nula para retirar possíveis mensagens retidas
+    }
     '''
         
-    try:
+    try:    
         payload = json.loads(message.payload.decode())
     except json.JSONDecodeError:
         logging.error(f'Falha ao decodificar mensagem..')
@@ -74,69 +88,41 @@ def on_message(client, userdata, message, properties=None):
 
     '''Quebra o tópico em partes'''
     partes = message.topic.split('/')
-    print('Partes:', partes)
+    logging.info(f'Partes:{partes}')
     
     dispositivo_topic = None
 
-    if len(partes) == 2:
-        _, local_topic = partes
-
-    else:
-        _,local_topic, dispositivo_topic = partes
-
-    print('Payload', payload)
-
-    dispositivo_id = payload.get('id')
-    estado = payload.get('estado')
-    mensagem = payload.get('mensagem')
-    room_number = payload.get('room_number')
-    local_emergencia = payload.get('local')
-    comando = payload.get('comando')
-
-
-    if mongo.start_connection() == False:
-        mongo.close_connection()
-        return 
-        
-    if mongo.check_if_document_exists('devices','device', dispositivo_id) == False:
-        logging.info('Dispositivo não encontrado na base de dados...')
-        mongo.close_connection() 
-        return 
-        
-    logging.info('Dispositivo logado!')
+    if len(partes) != 3:
+        return
     
-    logging.info(f'Mensagem do dispositivo {dispositivo_id}:{mensagem}')
+    _, local_topic, dispositivo_topic = partes
 
-    if local_topic == 'posto_enfermaria' and comando == 'ligar':
+    device = payload.get('id')
+    logging.info(f'Payload: {payload}')
 
-        logging.info(f'Mensagem do tópico /{local_topic}')
+    if dispositivo_topic != None:
+        device = dispositivo_topic
 
+    if check_if_device_exists(device) == False:
+        logging.warning(f'Device com id {device} não encontrado!')
+        return
+
+    if local_topic == 'confirmacao':
+        register_status_device_mongodb(dispositivo_topic, payload)
+
+    if local_topic == 'posto_enfermaria':
         '''
         Laço condicional para registrar chamada no banco de dados
         '''
-
-        document= {
-            'dispositivo_id': dispositivo_id,
-            'local': local_emergencia,
-            'sala': room_number,
-            'data': datetime.now()
-        }
-
-        result = mongo.insert_document_collection('chamadas', document)
-        
-        if result:
-            logging.warning('Chamada inserida no banco de dados!')
+        register_chamada_mongodb(payload)
         
     if local_topic == 'enfermaria':
         logging.info(f'Mensagem para o tópico: {local_topic}')
+
     
-    mongo.close_connection()
-    
-    device = dispositivo_id
-    if dispositivo_topic:
-        device = dispositivo_topic
-    
-    register_call_mongo_db(device, room_number, estado)
+    register_status_chamada_mongo_db(device, payload)
+
+    return None
 
     
 

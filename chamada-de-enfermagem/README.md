@@ -112,6 +112,9 @@ CLIENT_NAME = ''
 CLIENT_USERNAME = ''
 CLIENT_PASS = ''
 
+PUB_USERNAME = ''
+PUB_PASS = ''
+
 SK = ''
 
 ```

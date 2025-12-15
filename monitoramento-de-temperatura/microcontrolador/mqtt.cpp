@@ -39,6 +39,7 @@ static const unsigned long reconnectIntervalMQTT = 3000;  ///< Intervalo mínimo
 static unsigned long lastConnectionDataSent = 0;       ///< Tempo da última tentativa de envio de mensagem armazenada.
 static const unsigned long resendIntervalMQTT = 3000;  ///< Intervalo mínimo entre reenvios de mensagens (ms).
 
+bool wasSendAlert = false;
 
 // -----------------------------------------------------------------------------
 // Funções de inicialização e conexão
@@ -223,13 +224,23 @@ void resendMqttData() {
  *
  * @param alert Mensagem de alerta a ser enviada.
  */
-void publishAlert(const char* alert) {
-  StaticJsonDocument<96> doc;
-  doc["Microcontrollerid"] = cfg.mqttDeviceId.c_str();
-  doc["alert"] = alert;
+void publishAlert(float temperature, float humidity) {
 
-  char buffer[96];
-  serializeJson(doc, buffer);
-  client.publish(cfg.mqttTopicAlert.c_str(), buffer);
+  if (!wasSendAlert) {
+    StaticJsonDocument<128> doc;
+    doc["microcontrollerId"] = cfg.mqttDeviceId.c_str();
+    doc["temperature"] = temperature;
+    doc["humidity"] = humidity;
+
+    char buffer[128];
+    serializeJson(doc, buffer);
+    client.publish(cfg.mqttTopicAlert.c_str(), buffer);
+    wasSendAlert = true;
+    log(LOG_INFO, "alerta publicado no mqtt");
+  }
 }
 
+
+void resetStateSendAlert() {
+  wasSendAlert = false;
+}
