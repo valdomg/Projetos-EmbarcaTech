@@ -89,25 +89,11 @@ void handleDelete() {  // ===== Botão Delete
     // flag qu indica se deu certo publicar ou não
     bool wasPublished = publicReponseDivice(idDevice, MQTT_PUBLICATION_TOPIC, createJsonPayload(buffer, sizeof(buffer), infirmary));
 
+
     // Caso tenha falhado publicar o chamado, mostra a tela indicando a falha
     if (!wasPublished) {
       showFailureMessage(MESSAGE_MQTT);
     }
-
-    // log(LOG_INFO,listCalls.getIdCurrent());
-    if (listCalls.removeCurrent()) {  // Apaga o item selecionado
-      log(LOG_INFO, "Chamada removida com sucesso!");
-    } else {
-      log(LOG_ERROR, "Erro ao remover a chamada na lista!");
-    }
-    showInfirmaryNumber(
-      listCalls.getInfirmaryCurrent(),
-      listCalls.hasNursingCall(),
-      listCalls.getTotal());  // Mostra os dados no display
-
-    deletionConfirmation = false;
-    // Ao marcar o chamado como resolvido, reseta a flag, indicando se atingir o limite pode remover o current
-    listCalls.setDoNotRemoveCurrent(false);  // vira false - pode remover current
   }
 }
 
