@@ -85,6 +85,7 @@ def on_message(client, userdata, message, properties=None):
         return
     
     logging.info(f'Mensagem recebida!')
+    logging.info(f'Payload: {payload}')
 
     '''Quebra o tópico em partes'''
     partes = message.topic.split('/')
@@ -98,7 +99,6 @@ def on_message(client, userdata, message, properties=None):
     _, local_topic, dispositivo_topic = partes
 
     device = payload.get('id')
-    logging.info(f'Payload: {payload}')
 
     if dispositivo_topic != None:
         device = dispositivo_topic

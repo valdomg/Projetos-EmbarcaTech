@@ -77,7 +77,7 @@ def register_status_device_mongodb(device:str, payload:dict):
     }
 
     topic_to_publish = f'dispositivos/posto_enfermaria/{device}'
-
+    topic_to_publish_confirm = f'dispostivos/confirmacao/{device}'
     try:
 
         result = mongo_conn.return_document('status_device', 'device', device)
@@ -96,6 +96,7 @@ def register_status_device_mongodb(device:str, payload:dict):
         mongo_conn.update_document_by_id('status_device', id_status_device, document_to_save)
 
         publish_message_on_topic_avoid_retain_messages(topic_to_publish)
+        publish_message_on_topic_avoid_retain_messages(topic_to_publish_confirm)
 
     except Exception as e:
         logging.exception(e)
