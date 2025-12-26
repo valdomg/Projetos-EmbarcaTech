@@ -174,6 +174,7 @@ links.forEach(link => {
         relatorio.classList.add("relatorio");
         relatorio.innerHTML = `
                 <h3>Emitir Relatório</h3>
+                <p id="alertRelatorio" class="alert"></p>
                 <div>
                     <label>Escolha o local</label>
                     <select name="room" id="room-select">
@@ -185,8 +186,9 @@ links.forEach(link => {
                     <input id="start" class="date" type="date">
                     <label>à </label>
                     <input id="end" class="date" type="date">
-                    <button  type="button" class="btn emitirRelatorio">Baixar</button>
+                    <button type="button" class="btn emitirRelatorio">Baixar</button>
                 </div>
+                
                 `;
 
         grid.appendChild(relatorio);
@@ -497,7 +499,7 @@ async function editarUsuario(id) {
 
     try {
       const nome = document.getElementById("nameEdit").value;
-      const micro = document.getElementById("emailEdit").value;
+      const email = document.getElementById("emailEdit").value;
       const senha = document.getElementById('senhaEdit').value;
       const senha2 = document.getElementById('senha2Edit').value;
       //requisicao da API para editar sala
