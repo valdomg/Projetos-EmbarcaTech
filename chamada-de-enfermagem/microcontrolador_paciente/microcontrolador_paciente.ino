@@ -40,7 +40,7 @@ void loop() {
       confirmMsg = false;
 
 
-      if (client.publish(TOPIC_PUBLISH, createJsonPayload(), false)) {
+      if (client.publish(TOPIC_PUBLISH, createJsonPayload(), true)) {
         Serial.println("Solicitação enviada");
 
         buttonBlocked = true;
@@ -60,7 +60,7 @@ void loop() {
         retryCount++;
         Serial.printf("Tentando novamente... (%d/%d)\n", retryCount, MAX_RETRY);
 
-        client.publish(TOPIC_PUBLISH, createJsonPayload(), false);
+        client.publish(TOPIC_PUBLISH, createJsonPayload(), true);
 
         timeLastRequest = millis();
 
