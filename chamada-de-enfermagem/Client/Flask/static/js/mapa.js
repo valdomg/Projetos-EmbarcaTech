@@ -27,7 +27,7 @@ function renderMapa(dados, containerId) {
       data = new Date(dataRAW);
 
       div.appendChild(Object.assign(document.createElement("p"), {
-        textContent: `Última atualização: ${data.toLocaleString("pt-BR")}`
+        textContent: `Última atualização: ${data.toLocaleString("pt-BR", { timeZone: "UTC" })}`
       }));
 
       container.appendChild(div);

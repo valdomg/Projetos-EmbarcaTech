@@ -36,6 +36,8 @@
 .chamada-exibir {
     width: 14vw;
     padding: 6px;
+    border: solid #636363 1px;
+    border-radius: 4px;
 }
 
 
@@ -46,12 +48,11 @@
 .chamada-exibir p {
     margin-top: 0;
     margin-bottom: 0;
-    
 }
 
 #chamadas-lista {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* duas colunas iguais */
+    grid-template-columns: repeat(3, 1fr); /* duas colunas iguais */
     gap: 10px; /* espaço entre os itens */
 }
 
