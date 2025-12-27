@@ -76,8 +76,11 @@ def register_status_device_mongodb(device:str, payload:dict):
         'updateAt': datetime.now()
     }
 
-    topic_to_publish = f'dispositivos/posto_enfermaria/{device}'
-    #topic_to_publish_confirm = f'dispostivos/confirmacao/{device}'
+    '''
+    Removendo implementação de publicação de mensagem vazia para apagar mensagens retidas
+    '''
+    #topic_to_publish = f'dispositivos/posto_enfermaria/{device}'
+    #topic_to_publish_on_enfermaria = f'dispostivos/enfermaria/{device}'
     try:
 
         result = mongo_conn.return_document('status_device', 'device', device)
@@ -95,8 +98,8 @@ def register_status_device_mongodb(device:str, payload:dict):
         id_status_device = str(result['_id'])
         mongo_conn.update_document_by_id('status_device', id_status_device, document_to_save)
 
-        publish_message_on_topic_avoid_retain_messages(topic_to_publish)
-        #publish_message_on_topic_avoid_retain_messages(topic_to_publish_confirm)
+        #publish_message_on_topic_avoid_retain_messages(topic_to_publish)
+        #publish_message_on_topic_avoid_retain_messages(topic_to_publish_on_enfermaria)
 
     except Exception as e:
         logging.exception(e)
