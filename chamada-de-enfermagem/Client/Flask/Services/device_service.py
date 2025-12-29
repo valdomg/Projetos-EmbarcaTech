@@ -48,7 +48,7 @@ class DeviceService:
 
     def update(self, document_id:str, document_with_updates:dict):
         document_with_updates.pop('document_id')
-
+    
         if ObjectId.is_valid(document_id) is False: 
             return jsonify({'message':'ID de dispositivo incorreto'}), 404
 
@@ -69,4 +69,5 @@ class DeviceService:
         if self.device_db_model.update_device(document_id, document_with_updates) is False:
             return jsonify({'message': 'Device não alterado, tente novamente'}), 500
         
+        run_command_to_add_device_mosquitto(document_with_updates['device'])
         return jsonify({'Message': 'Dispositivo atualizado!'}), 200
