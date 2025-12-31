@@ -35,7 +35,7 @@ void clearLine(uint8_t column, uint8_t line, uint8_t count) {
 
 // Dados fixos do Display
 void fixed_data() {
-  lcd.clear(); // Limpa a tela
+  lcd.clear();          // Limpa a tela
   lcd.setCursor(1, 0);  // Posiciona o cursor na coluna 1, linha 0
   lcd.print(F("Chamada Enfermagem"));
 
@@ -52,8 +52,26 @@ void fixed_data() {
 
 // Mostra a mensagem de falha
 void showFailureMessage(const char* msgType) {
-  // Indica que está na tela de falha
-  currentScreen = SCREEN_FAILURE;
+  // Validações dos tipos de Falhas
+  if (msgType == MESSAGE_WIFI) {                 // Se for falha no wifi
+    if (currentScreen == SCREEN_FAILURE_WIFI) {  // Verifica se já não mostrou a tela de erro wifi, se tiver mostrado retorna
+      return;
+    }
+    // Caso não tenha mostrado a tela de erro wifi,
+    //  currentScreen recebe a SCREEN_FAILURE_WIFI e prossegue com o código de mostrar a falha wifi na tela
+    currentScreen = SCREEN_FAILURE_WIFI;
+  }
+  // Caso não seja falha wifi, é falha no MQTT
+  else {
+    // Verifica se já mostrou a tela de falha correspondente
+    //  SE tiver mostrado, retorna
+    if (currentScreen == SCREEN_FAILURE_MQTT) {
+      return;
+    }
+    // Se tava em outra tela,
+    //  currentScreen recebe a SCREEN_FAILURE_MQTT e prossegue com o código de mostrar a falha MQTT na tela
+    currentScreen = SCREEN_FAILURE_MQTT;
+  }
 
   lcd.clear();          // Limpa a área
   lcd.setCursor(6, 0);  // Posiciona o cursor na coluna 6, linha 0
@@ -75,7 +93,7 @@ void showFailureMessage(const char* msgType) {
 void showExclusionConfirm(const char* infirmary) {
   // Indica que está na tela de confirmação de exclusão
   currentScreen = SCREEN_EXCLUSION_CONFIRM;
-  lcd.clear(); // Limpa a tela toda
+  lcd.clear();  // Limpa a tela toda
   lcd.setCursor(1, 0);
   lcd.print(F("Finalizar Chamada"));
 
@@ -96,8 +114,8 @@ void showExclusionConfirm(const char* infirmary) {
 void showInfirmaryNumber(const char* infirmary, bool hasNursingCall, int total_items) {
   // Se não estiver na tela MAIN (esta tela)
   if (currentScreen != SCREEN_MAIN) {
-    fixed_data(); // Mostra os dados Fixos
-  } else { // se já tiver nessa tela, limpa só a região necessária
+    fixed_data();  // Mostra os dados Fixos
+  } else {         // se já tiver nessa tela, limpa só a região necessária
     // Limpa 8 espaços na coluna/linha escolhida - ENFERMARIA
     clearLine(12, 2, 8);
     // Limpa 3 espaços na coluna/linha escolhida - QUANT. CHAMADAS
@@ -132,7 +150,7 @@ void showInfirmaryNumber(const char* infirmary, bool hasNursingCall, int total_i
 void showIPAddress(const char* msg_IPAddress) {
   // Indica que está na tela de IP
   currentScreen = SCREEN_IPADDRESS;
-  lcd.clear(); // Limpa a tela toda
+  lcd.clear();          // Limpa a tela toda
   lcd.setCursor(2, 0);  // Posiciona o cursor na coluna 2, linha 0
   lcd.print(F("Wi-Fi Conectado"));
 
