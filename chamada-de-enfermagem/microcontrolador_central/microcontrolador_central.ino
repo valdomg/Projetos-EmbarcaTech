@@ -72,7 +72,7 @@ void handleDelete() {  // ===== Botão Delete
     // Chama a função de públicar o ID do dispositivo e o número da enfermaria (tranforma em float o infirmary)
 
     char buffer[256];
-    publicReponseDivice(idDevice, MQTT_PUBLICATION_TOPIC, createJsonPayload(buffer, sizeof(buffer), infirmary),true);
+    publicReponseDivice(idDevice, MQTT_PUBLICATION_TOPIC, createJsonPayload(buffer, sizeof(buffer), infirmary),false);
 
   }
 }
@@ -139,7 +139,7 @@ void loop() {
 
       if (listCalls.removeCurrent()) {  // Apaga o item selecionado
         log(LOG_INFO, "Chamada removida com sucesso!");
-        publicReponseDivice(idDevice,MQTT_PUBLICATION_TOPIC,"",true);
+        publicReponseDivice(idDevice,MQTT_PUB_CONFIRMATION_TOPIC,"",true);
       } else {
         log(LOG_ERROR, "Erro ao remover a chamada na lista!");
       }

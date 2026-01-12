@@ -136,7 +136,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
       publicReponseDivice(
         getPayloadID(payload, length),
         MQTT_PUB_CONFIRMATION_TOPIC,
-        creteJsonPayloadConfirmationMessage(buffer, sizeof(buffer))
+        creteJsonPayloadConfirmationMessage(buffer, sizeof(buffer)),
+        true
         );
 
       enableSoundAlert();
