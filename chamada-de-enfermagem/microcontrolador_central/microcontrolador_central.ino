@@ -14,7 +14,7 @@
 bool deletionConfirmation = false;
 
 // flag que indica se a mensagem de falha ddo wifi já foi exibida (detectar transição de falha para normal).
-bool wifiFailureDisplayed = false;  // Usada para evitar desenhar a tela de erro repetidamente a cada iteração do loop
+// bool wifiFailureDisplayed = false;  // Usada para evitar desenhar a tela de erro repetidamente a cada iteração do loop
 
 
 // ===== Funções de navegação =====
@@ -124,25 +124,11 @@ void setup() {
 void loop() {
 
   if (checkAndReconnectWifi()) {  // Retorna true se conseguir conectar/reconectar ao wifi
-    /* Se esta flag estiver true, significa que:
-        - O Wi-Fi estava desconectado anteriormente
-        - A mensagem de erro já foi exibida
-        - O Wi-Fi acabou de ser restabelecido*/
-    if (wifiFailureDisplayed) {
-      wifiFailureDisplayed = false;  // Sai do estado de falha
-    }
-
     // Garante que a conexão MQTT esteja ativa.
     // Só é chamada quando há Wi-Fi disponível.
     checkMQTTConnected();
-  } else {  // não há conexão
-    // Só entra se ainda não mostrou a mensagem de falha. Ou seja, evita mostrar repetidamente.
-    if (!wifiFailureDisplayed) {
-      showFailureMessage(MESSAGE_WIFI);  // Mensagem que indica que não há conexão Wi-Fi
-      /* Marca que já mostrou a mensagem de falha, então em iterações seguintes do loop não vai redesenhar a mensagem repetidamente.
-          Garante ainda que, quando o wifi voltar, o "if (wifiFailureDisplayed)" detectará a transição e restaurará a tela.*/
-      wifiFailureDisplayed = true;
-    }
+  } else {                             // não há conexão
+    showFailureMessage(MESSAGE_WIFI);  // Mensagem que indica que não há conexão Wi-Fi
   }
 
   // A função delay atrapalha o funcionamento dos botões
@@ -188,7 +174,7 @@ void loop() {
     listUpdated = false;  // reseta a flag
   }
 
-  // Verificações para poder sair das telas IP/Erro wifi/MQTT 
+  // Verificações para poder sair das telas IP/Erro wifi/MQTT
   if (checkButton(button_next)) handleNext();
   if (checkButton(button_prev)) handlePrev();
 

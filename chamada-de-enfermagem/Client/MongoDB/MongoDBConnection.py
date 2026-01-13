@@ -18,10 +18,10 @@ class MongoDBConnection:
     Classe para conexão com banco de dados MongoDB
     '''
     def __init__(self, uri:str, database_name:str):
-        self.uri = uri
-        self.database_name = database_name
-        self.client = None
-        self.db = None
+        self.__uri = uri
+        self.__database_name = database_name
+        self.__client = None
+        self.__db = None
 
     def __enter__(self):
         self.start_connection()
@@ -31,18 +31,23 @@ class MongoDBConnection:
         Função de iniciar a conexão com o banco de dados
         '''
         
-        if self.uri != None and self.database_name != None:
-            try:
-                self.client = MongoClient(self.uri, server_api=ServerApi('1'))
-                self.db = self.client[self.database_name]
-                self.client.admin.command('ping')
-                logging.info("Pinged your deployment. You successfully connected to MongoDB!")
+        if self.__uri != None and self.__database_name != None:
+
+            if self.__client is not None:
                 return True
-            except ConnectionFailure as e:
-                self.client = None
-                self.db = None
-                logging.exception(e)
-                return False
+            
+            else:
+                try:
+                    self.__client = MongoClient(self.__uri, server_api=ServerApi('1'))
+                    self.__db = self.__client[self.__database_name]
+                    self.__client.admin.command('ping')
+                    logging.info("Pinged your deployment. You successfully connected to MongoDB!")
+                    return True
+                except ConnectionFailure as e:
+                    self.__client = None
+                    self.__db = None
+                    logging.exception(e)
+                    return False
         else:
             logging.warning('Database não definida')
             return False
@@ -52,8 +57,8 @@ class MongoDBConnection:
         Lista os documentos na coleção
         '''
         try:
-            if self.client is not None:
-                collection = self.db[collection]
+            if self.__client is not None:
+                collection = self.__db[collection]
                 return list(collection.find())
             else:
                 logging.warning('Client not connected')
@@ -67,8 +72,8 @@ class MongoDBConnection:
         '''
         
         try:
-            if self.client is not None:
-                collection = self.db[collection]
+            if self.__client is not None:
+                collection = self.__db[collection]
 
                 return collection.count_documents({})
             
@@ -84,11 +89,11 @@ class MongoDBConnection:
         Retorna um dicionário com todas as ocorrências por dia de algo
         '''
         try:
-            if self.client is not None:
+            if self.__client is not None:
                 
                 doc = []
 
-                collection_to_search = self.db[collection]
+                collection_to_search = self.__db[collection]
 
                 for i in range(1, days+1):    
                     data_start = data.replace(day=i, month=month, hour=0, minute=0, microsecond= 0000)
@@ -121,8 +126,8 @@ class MongoDBConnection:
         Retorna um valor com a quantidade de documentos em algum período
         '''
         try:
-            if self.client is not None:
-                collection = self.db[collection]
+            if self.__client is not None:
+                collection = self.__db[collection]
                 return collection.count_documents({
                         label_data:{
                             '$gte': start_date,
@@ -141,8 +146,8 @@ class MongoDBConnection:
         '''
 
         try:
-            if self.client is not None:
-                collection_to_search = self.db[collection]
+            if self.__client is not None:
+                collection_to_search = self.__db[collection]
 
                 result = collection_to_search.find_one({label:value})
 
@@ -165,8 +170,8 @@ class MongoDBConnection:
         '''
 
         try:
-            if self.client is not None:
-                collection_to_search = self.db[collection]
+            if self.__client is not None:
+                collection_to_search = self.__db[collection]
 
                 result = collection_to_search.find_one({'_id':ObjectId(document_id)})
 
@@ -188,8 +193,8 @@ class MongoDBConnection:
         Retorna um documento de acordo com seu label
         '''
         try:
-            if self.client is not None:
-                collection_to_search = self.db[collection]
+            if self.__client is not None:
+                collection_to_search = self.__db[collection]
 
                 result = collection_to_search.find_one({label_to_search:value_to_match})
 
@@ -211,9 +216,9 @@ class MongoDBConnection:
         Retorna um documento de acordo com seu ID
         '''
         try:
-            if self.client is not None:
+            if self.__client is not None:
 
-                collection_to_search = self.db[collection]
+                collection_to_search = self.__db[collection]
 
                 result = collection_to_search.find_one({'_id':ObjectId(id)})
 
@@ -231,8 +236,8 @@ class MongoDBConnection:
         Retorna uma lista com documentos com uma query de data
         '''
         try:
-            if self.client is not None:
-                collection = self.db[collection]
+            if self.__client is not None:
+                collection = self.__db[collection]
                 return list (collection.find({
                         label_data:{
                             '$gte': start_date,
@@ -246,15 +251,15 @@ class MongoDBConnection:
             logging.error('Error in list documents...')
             logging.exception(e)
 
-    def insert_document_collection(self,collection:str, document: dict):
+    def insert_document_collection(self,collection:str, document: dict) -> bool:
         '''
         Insere um novo documento na coleção
         '''
         try:
-            if self.client is not None:
+            if self.__client is not None:
                 document_to_save = document 
 
-                collection = self.db[collection]
+                collection = self.__db[collection]
                 result = collection.insert_one(document_to_save)
 
                 return result
@@ -271,7 +276,7 @@ class MongoDBConnection:
         Funçao para atualizar um documento de acordo com seu ID
         '''
         try:
-            if self.client is None:
+            if self.__client is None:
                 logging.warning('Client not connected')
 
             document_to_update = self.return_document_by_id(collection, document_id)
@@ -284,7 +289,7 @@ class MongoDBConnection:
                 logging.info('Docs is the same, no update')
                 return False
                 
-            collection_update = self.db[collection]
+            collection_update = self.__db[collection]
 
             result = collection_update.update_one(
                 {'_id': ObjectId(document_id)},
@@ -307,13 +312,13 @@ class MongoDBConnection:
         Função para deletar um documento da database de acordo com um label e seu valor
         '''
         try:
-            if self.client is not None:
+            if self.__client is not None:
                 
                 if self.check_if_document_exists(collection, label_to_match, value_to_match) == False:
                     logging.info('No values in DB')
                     return False
                 
-                collection_delete = self.db[collection]
+                collection_delete = self.__db[collection]
                 result = collection_delete.delete_one({label_to_match: value_to_match})
 
                 if result is False:
@@ -336,13 +341,13 @@ class MongoDBConnection:
         Função para deletar um documento da database de acordo com seu id
         '''
         try:
-            if self.client is not None:
+            if self.__client is not None:
                 
                 if self.check_if_document_exists_by_id(collection, document_id) == False:
                     logging.info('No values in DB')
                     return False
                 
-                collection_delete = self.db[collection]
+                collection_delete = self.__db[collection]
                 result = collection_delete.delete_one({'_id': ObjectId(document_id)})
 
                 if result is False:
@@ -372,6 +377,8 @@ class MongoDBConnection:
         '''
         Função para fechar a conexão com o banco de dados
         '''
-        if self.client:
-            self.client.close()
+        if self.__client:
+            self.__client.close()
             logging.info("Conexão fechada.")
+
+

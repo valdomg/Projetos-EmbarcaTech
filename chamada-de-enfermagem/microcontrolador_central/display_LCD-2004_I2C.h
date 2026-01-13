@@ -11,7 +11,10 @@ constexpr const char* MESSAGE_MQTT = "MQTT";
 enum DisplayState {
     SCREEN_NONE,                // Nenhuma Tela
     SCREEN_MAIN,                // Tela: showInfirmaryNumber()
-    SCREEN_FAILURE,             // Tela: showFailureMessage()
+    // Tela: showFailureMessage()
+    SCREEN_FAILURE_WIFI,        // Caso especial - máquina de estado para falha wifi - mostrar apenas 1 vez se o erro persistir
+    SCREEN_FAILURE_MQTT,        // Caso especial - máquina de estado para falha mqtt - mostrar apenas 1 vez se o erro persistir
+    // 
     SCREEN_EXCLUSION_CONFIRM,   // Tela: showExclusionConfirm()
     SCREEN_IPADDRESS            // Tela: showIPAddress()
 };
