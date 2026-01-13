@@ -52,23 +52,5 @@ void loop() {
         buttonBlocked = false;
       }
     }
-
-    // Controle de timeout e tentativas de reenviar
-    if (!confirmMsg && millis() - timeLastRequest > TIMEOUT_ACK && buttonBlocked) {
-
-      if (retryCount < MAX_RETRY) {
-        retryCount++;
-        Serial.printf("Tentando novamente... (%d/%d)\n", retryCount, MAX_RETRY);
-
-        client.publish(TOPIC_PUBLISH, createJsonPayload(), true);
-
-        timeLastRequest = millis();
-
-      } else {
-        buttonBlocked = false;
-        confirmMsg = true;
-        retryCount = 0;
-      }
-    }
   }
 }

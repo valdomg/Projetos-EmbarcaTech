@@ -17,13 +17,16 @@ const char* MQTT_USER = "";
 const char* MQTT_PASS = "";
 const char* ID_CLIENT = "{id-dispositivo}";
 
-const char* TOPIC_PUBLISH = "dispositivos/posto_enfermaria";
+//topico enfermaria
+const char* TOPIC_PUBLISH = "dispositivos/posto_enfermaria/{id-dispositivo}";
 const char* TOPIC_SUBSCRIBE = "dispositivos/enfermaria/{id-dispositivo}";
 
+//topico msg confirmacao
 const char* PUBLISH_MSG_CONFIRM = "dispositivo/confirmacao/posto_enfermaria";
 const char* TOPIC_SUBSCRIBE_CONFIRM = "dispositivo/confirmacao/{id-dispositivo}";
 
 
+ 
 
 
 WiFiClient espClient;
@@ -65,6 +68,7 @@ const char* createJsonPayload() {
   StaticJsonDocument<200> doc;
   doc["id"] = ID_CLIENT;
   doc["estado"] = "emergencia";
+
   doc["mensagem"] = "solicitar atendimento";
   doc["room_number"] = 1;
   doc["local"] = "enfermaria";
@@ -111,6 +115,9 @@ void callback(char* topic, byte* payload, unsigned int length) {
         desligarLed();
         if(client.publish(PUBLISH_MSG_CONFIRM, createJsonConfirmPayload(), false)){
           Serial.println("Enviado confirmacao de finalizado!");
+        }
+        if(client.publish(TOPIC_PUBLISH, "", true)){
+          Serial.println("Finalizado!");
         }
         buttonBlocked = false;
         confirmMsg = true;
