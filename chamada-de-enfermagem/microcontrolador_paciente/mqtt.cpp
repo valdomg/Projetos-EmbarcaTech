@@ -7,10 +7,10 @@
 // Variáveis de controle
 static unsigned long lastAttempConnectMQTT = 0;           // Guarda o tempo da última tentativa de conexão com o broker.
 static const unsigned long reconnectIntervalMQTT = 3000;  // Intervalo (ms) entre tentativas de reconexão ao broker.
-extern bool buttonBlocked;   // Indica se o botão está bloqueado para novos acionamentos (true = bloqueado, false = liberado)
-extern bool confirmMsg; // Indica se o dispositivo recebeu confirmação via callback (status: "ok")
+extern bool buttonEnable;                                // Indica se o botão está bloqueado para novos acionamentos (true = bloqueado, false = liberado)
+extern bool confirmMsg;                                   // Indica se o dispositivo recebeu confirmação via callback (status: "ok")
 
-//MQTT Broker 
+//MQTT Broker
 const char* MQTT_BROKER = "XXXXXX";
 const int MQTT_PORT = 0;
 const char* MQTT_USER = "";
@@ -26,7 +26,7 @@ const char* PUBLISH_MSG_CONFIRM = "dispositivo/confirmacao/posto_enfermaria";
 const char* TOPIC_SUBSCRIBE_CONFIRM = "dispositivo/confirmacao/{id-dispositivo}";
 
 
- 
+
 
 
 WiFiClient espClient;
@@ -34,7 +34,7 @@ PubSubClient client(espClient);
 
 
 void setupMQTT() {
-  
+
   client.setServer(MQTT_BROKER, MQTT_PORT);
   client.setCallback(callback);
 }
@@ -112,15 +112,18 @@ void callback(char* topic, byte* payload, unsigned int length) {
       Serial.println("Comando: " + String(comando));
 
       if (String(comando) == "desligar") {
+
         desligarLed();
-        if(client.publish(PUBLISH_MSG_CONFIRM, createJsonConfirmPayload(), false)){
+        buttonEnable = false;
+
+        if (client.publish(PUBLISH_MSG_CONFIRM, createJsonConfirmPayload(), false)) {
           Serial.println("Enviado confirmacao de finalizado!");
         }
-        if(client.publish(TOPIC_PUBLISH, "", true)){
+        if (client.publish(TOPIC_PUBLISH, "", true)) {
           Serial.println("Finalizado!");
         }
-        buttonBlocked = false;
-        confirmMsg = true;
+
+
         Serial.println("Solicitação finalizada. Botão liberado!");
       }
     } else {
@@ -137,11 +140,13 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
       if (String(status) == "ok") {
         Serial.println("Solicitação recebida pelo enfermeiro");
+        
         ligarLed();
-        buttonBlocked = true;
-        confirmMsg = true;
+        buttonEnable = true;
+
       }
     } else {
+      
       Serial.println("Comando ausente ou nulo");
     }
   }
