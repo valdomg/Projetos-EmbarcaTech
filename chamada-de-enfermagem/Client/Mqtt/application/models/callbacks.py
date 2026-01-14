@@ -39,6 +39,7 @@ Colocar nova função para registar se
 '''
 def on_message(client, userdata, message, properties=None):
     '''
+    
     Callback para formatar as mensagens recebidas nos tópicos
 
         Os dispositivos nas salas assinam apenas o tópico em que estão,
@@ -61,15 +62,30 @@ def on_message(client, userdata, message, properties=None):
         formato para status: {
             'status': 'ok/error'
         }
+    
+    Tópicos = {
+        dispositivos/enfermaria/enfermaria<id>        - para o dispositivo central enviar uma mensagem
+            neste tópico os disposito de enfermaria se inscreve e espera receber
+            mensagens do dispositivo central
+
+        dispositivos/posto_enfermaria/enfermaria<id>  - para o dispositivo na enfermaria enviar uma mensagem
+            neste tópico o dispositivo central se inscreve e espera mensagens 
+            dos dispositivos de enfermaria
+
+        dispositivos/confirmacao/enfermaria<id>       - para o dispositivo central confirmar o recebimento da mensagem
+            neste tópico o disposito central confirma o recebimento das mensagens e envia 
+            uma mensagem nula para retirar possíveis mensagens retidas
+    }
     '''
         
-    try:
+    try:    
         payload = json.loads(message.payload.decode())
     except json.JSONDecodeError:
         logging.error(f'Falha ao decodificar mensagem..')
         return
     
     logging.info(f'Mensagem recebida!')
+    logging.info(f'Payload: {payload}')
 
     '''Quebra o tópico em partes'''
     partes = message.topic.split('/')
@@ -77,14 +93,12 @@ def on_message(client, userdata, message, properties=None):
     
     dispositivo_topic = None
 
-    if len(partes) == 2:
-        _, local_topic = partes
-
-    else:
-        _,local_topic, dispositivo_topic = partes
+    if len(partes) != 3:
+        return
+    
+    _, local_topic, dispositivo_topic = partes
 
     device = payload.get('id')
-    logging.info(f'Payload: {payload}')
 
     if dispositivo_topic != None:
         device = dispositivo_topic

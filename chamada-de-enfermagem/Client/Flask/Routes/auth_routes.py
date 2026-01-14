@@ -1,26 +1,16 @@
-from flask import Blueprint, request, jsonify, render_template, redirect, make_response, url_for
+from flask import Blueprint, request, render_template, redirect, make_response, url_for
 import jwt
 from datetime import datetime, timedelta, timezone
 from Flask.Services.user_service import UserService
 from Flask.Models.user_db_model import UserDBModel
-from Flask.Models.user_model import User
 from Flask.auth import SECRET_KEY
-from Flask.auth import token_required, admin_required
-from MongoDB.MongoDBConnection import MongoDBConnection
-from dotenv import load_dotenv
-import os
+from MongoDB.mongo_conn import mongo_conn
 import logging
 
 '''
 Arquivo para rotas do client
 '''
 
-load_dotenv()
-
-uri = os.getenv('MONGO_URI')
-database = os.getenv('MONGO_DATABASE')
-
-mongo_conn = MongoDBConnection(uri, database)
 user_db_model = UserDBModel(mongo_conn)
 user_service = UserService(user_db_model)
 
@@ -50,10 +40,8 @@ def login():
             username = request.form.get('username')
             password = request.form.get('password')
 
-            mongo_conn.start_connection()
             resp = user_service.login(username, password)
-            mongo_conn.close_connection()
-
+            
             if resp[2] != None:
 
                 user = resp[2]

@@ -69,11 +69,11 @@
       <main class="col">
         <div class="row box-container dados-rapidos">
           <div class="col borda-conteiner m-3">
-            <p>Enfermarias:</p>
+            <h3 class="m-3">Enfermarias:</h3>
             <h1 id="contagemDispositivos">5</h1>
           </div>
           <div class="col borda-conteiner m-3">
-            <p>Total de chamadas:</p>
+            <h3 class="m-3 ">Total de chamadas:</h3>
             <h1 id="contagemChamada">65</h1>
           </div>
         </div>
@@ -91,19 +91,42 @@
           </div>
 
           <div class="col borda-conteiner m-3">
-            <div class="row w-75 mx-auto">
-              <h3>Chamadas recentes:</h3>
+            <div class="row mx-auto m-3">
+              <h3 class="float-end">Chamadas do dia:</h3>
               <div id="chamadas-lista">
-                <!-- Lista para visualizacao -->
+
               
                 
               </div>
-              <div class="paginacao">
+              <!-- <div class="paginacao">
                 <a href="#" class="prev">«</a>
                 <a href="#" class="active">1</a>
                 <a href="#">2</a>
                 <a href="#" class="next">»</a>
-              </div>
+              </div> -->
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col borda-conteiner m-3">
+            <div class="row m-3">
+              <h3 class="float-end">Todas chamadas:</h3>
+                <div>
+                  <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Dispositivos</th>
+                        <th scope="col">Local</th>
+                        <th scope="col">Data</th>
+                      </tr>
+                    </thead>
+                    <tbody id="allChamadas">
+
+                    </tbody>
+                  </table>
+                </div>
             </div>
           </div>
         </div>
