@@ -154,11 +154,12 @@ void loop() {
 
     if (checkAndReconnectWifi()) {
       checkMQTTConnected();
+    } else {                             // não há conexão
+      showFailureMessage(MESSAGE_WIFI);  // Mensagem que indica que não há conexão Wi-Fi**
     }
-    
+
+
     stopServer(&server);
-    checkAndReconnectWifi();
-    checkMQTTConnected();
 
     if (hasOKMessage) {
       // log(LOG_INFO,listCalls.getIdCurrent());
@@ -166,12 +167,12 @@ void loop() {
 
       if (listCalls.removeCurrent()) {  // Apaga o item selecionado
         log(LOG_INFO, "Chamada removida com sucesso!");
-        publicReponseDivice(idDevice,MQTT_PUB_CONFIRMATION_TOPIC,"",true);
+        publicReponseDivice(idDevice, MQTT_PUB_CONFIRMATION_TOPIC, "", true);
       } else {
         log(LOG_ERROR, "Erro ao remover a chamada na lista!");
       }
-      
-      fixed_data();  // Atualiza o display com os dados fixos
+
+
       showInfirmaryNumber(
         listCalls.getInfirmaryCurrent(),
         listCalls.hasNursingCall(),
@@ -184,13 +185,13 @@ void loop() {
     }
 
 
-  // Atualiza se tiver novos dados, mas se nenhum botão estiver pressionado e se tiver na tela de navegação
-  if (listUpdated
-      && button_next.state == HIGH
-      && button_prev.state == HIGH
-      && button_delete.state == HIGH
-      && currentScreen == SCREEN_MAIN
-      && !deletionConfirmation) {
+    // Atualiza se tiver novos dados, mas se nenhum botão estiver pressionado e se tiver na tela de navegação
+    if (listUpdated
+        && button_next.state == HIGH
+        && button_prev.state == HIGH
+        && button_delete.state == HIGH
+        && currentScreen == SCREEN_MAIN
+        && !deletionConfirmation) {
 
       showInfirmaryNumber(
         listCalls.getInfirmaryCurrent(),
@@ -200,16 +201,16 @@ void loop() {
       listUpdated = false;  // reseta a flag
     }
 
-  // Verificações para poder sair das telas IP/Erro wifi/MQTT
-  if (checkButton(button_next)) handleNext();
-  if (checkButton(button_prev)) handlePrev();
+    // Verificações para poder sair das telas IP/Erro wifi/MQTT
+    if (checkButton(button_next)) handleNext();
+    if (checkButton(button_prev)) handlePrev();
 
-  // Habilita o botão de delete somente se houver dados na lista
-  // aciona led se houver algum chamado
-  if (listCalls.hasNursingCall()) {
-    // if (checkButton(button_next)) handleNext();
-    // if (checkButton(button_prev)) handlePrev();
-    if (checkButton(button_delete)) handleDelete();
+    // Habilita o botão de delete somente se houver dados na lista
+    // aciona led se houver algum chamado
+    if (listCalls.hasNursingCall()) {
+      // if (checkButton(button_next)) handleNext();
+      // if (checkButton(button_prev)) handlePrev();
+      if (checkButton(button_delete)) handleDelete();
 
       toggleLed();
     } else {

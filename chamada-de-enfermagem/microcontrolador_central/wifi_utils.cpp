@@ -65,7 +65,7 @@ bool connectToWiFi() {
 
   // Verifica se a conexão foi bem sucedida
   if (WiFi.status() == WL_CONNECTED) {
-    log(LOG_INFO, "Conectado ao Wi-Fi: %s", WIFI_SSID);
+    // log(LOG_INFO, "Conectado ao Wi-Fi: %s", WIFI_SSID);
     const char* network_ipAddress = IPparserToConstChar(WiFi.localIP());
     // log(LOG_INFO, "IP: %s", IPparserToConstChar(WiFi.localIP()));  // mostra o IP atribuído
     log(LOG_INFO, "IP: %s", network_ipAddress);  // mostra o IP atribuído
