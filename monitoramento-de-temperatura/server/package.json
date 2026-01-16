@@ -22,8 +22,10 @@
     "mongoose": "^8.16.5",
     "mqtt": "^5.13.3",
     "nodemailer": "^7.0.10",
+    "puppeteer": "^24.35.0",
     "swagger-autogen": "^2.23.7",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "cross-env": "^10.0.0"

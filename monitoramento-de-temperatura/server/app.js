@@ -7,6 +7,7 @@ import temperatureRoutes from './routes.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import swaggerUi from 'swagger-ui-express';
 import fs from "fs";
+import path from 'path';
 
 const swaggerDocument = JSON.parse(
   fs.readFileSync(new URL("./docs/swagger-output.json", import.meta.url))
@@ -18,6 +19,11 @@ app.use(cors());
 app.use(cors({
   origin: 'http://127.0.0.1:5500' //colocar seu ip e porta que esta rodando o frontend
 }));
+
+app.use(
+  '/reports',
+  express.static('public/reports')
+)
 
 
 app.use(express.json());

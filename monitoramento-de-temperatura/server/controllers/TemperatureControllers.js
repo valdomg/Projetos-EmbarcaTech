@@ -1,5 +1,6 @@
 import TemperatureService from '../services/TemperatureReading/TemperatureServices.js';
 import TemperatureModel from '../models/Temperature.js';
+import { ReportPdfService } from '../services/pdf/generatePdf.js';
 class TemperatureController {
   constructor() {
     this.temperatureService = new TemperatureService(TemperatureModel);
@@ -84,6 +85,18 @@ class TemperatureController {
     const { startDate, endDate } = req.query;
     const temperatures = await this.temperatureService.getReport(roomId, startDate, endDate);
     res.status(200).json(temperatures);
+  }
+
+  getPdfReport = async (req, res) => {
+    const { roomId } = req.params;
+    const { startDate, endDate } = req.query;
+    const readings = await this.temperatureService.getReport(roomId, startDate, endDate);
+    const pdf = await ReportPdfService.generate({ roomId, startDate, endDate, readings });
+    
+    res.status(200).json({
+      message: 'Relatório gerado com sucesso',
+      link: pdf.publicUrl
+    });
   }
 
   getTemperatureReadingsByInterval = async (req, res) => {
