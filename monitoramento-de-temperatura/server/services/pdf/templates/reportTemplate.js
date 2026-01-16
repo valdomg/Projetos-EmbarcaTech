@@ -1,5 +1,5 @@
 export default function reportTemplate({ roomId, startDate, endDate, readings }) {
-  const rows = readings.map(r => `
+  const rows = readings.readings.map(r => `
     <tr>
       <td>${r._id.day}/${r._id.month}/${r._id.year}</td>
       <td>${r._id.hour}:00</td>

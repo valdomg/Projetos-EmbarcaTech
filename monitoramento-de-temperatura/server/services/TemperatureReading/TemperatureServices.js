@@ -109,6 +109,11 @@ class TemperatureService {
   start.setHours(0, 0, 0, 0);
   end.setHours(23, 59, 59, 999);
 
+  const room = await this.roomService.getRoomById(roomId);
+  if (!room) {
+    throw ApiError.notFound("Sala não encontrada");
+  }
+
   const readings = await this.temperatureModel.aggregate([
     {
       $match: {
@@ -119,10 +124,10 @@ class TemperatureService {
     {
       $group: {
         _id: {
-          year: { $year: "$timestamp" },
-          month: { $month: "$timestamp" },
-          day: { $dayOfMonth: "$timestamp" },
-          hour: { $hour: "$timestamp" }
+          year: { $year: { date: "$timestamp", timezone: "America/Sao_Paulo" } },
+          month: { $month: { date: "$timestamp", timezone: "America/Sao_Paulo" } },
+          day: { $dayOfMonth: { date: "$timestamp", timezone: "America/Sao_Paulo" } },
+          hour: { $hour: { date: "$timestamp", timezone: "America/Sao_Paulo" } }
         },
         averageTemperature: { $avg: "$temperature" },
         averageHumidity: { $avg: "$humidity" },
@@ -135,7 +140,10 @@ class TemperatureService {
     { $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1, "_id.hour": 1 } }
   ]);
 
-  return readings ?? [];
+  return {
+    room,
+    readings
+  } ?? [];
 };
 
 

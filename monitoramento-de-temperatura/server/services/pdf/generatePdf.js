@@ -1,12 +1,12 @@
 import puppeteer from 'puppeteer';
 import reportTemplate from './templates/reportTemplate.js';
-import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 import path from 'path';
 
 export class ReportPdfService {
-  static async generate({ roomId, startDate, endDate, readings }) {
-    const html = reportTemplate({ roomId, startDate, endDate, readings });
+
+  static async generate({ startDate, endDate, readings }) {
+    const html = reportTemplate({ roomId: readings.room.name, startDate, endDate, readings });
 
     const reportsDir = path.join(process.cwd(), 'public', 'reports');
 
@@ -14,7 +14,7 @@ export class ReportPdfService {
       fs.mkdirSync(reportsDir, { recursive: true });
     }
 
-    const fileName = `report-${uuidv4()}.pdf`;
+    const fileName = `Relatorio-${readings.room.name.replace(/ /g, "-")}-${startDate}-${endDate}-${Date.now()}.pdf`;
     const outputPath = path.join(reportsDir, fileName);
  
     const browser = await puppeteer.launch();

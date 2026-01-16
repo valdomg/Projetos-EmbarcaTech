@@ -83,15 +83,15 @@ class TemperatureController {
 
     const { roomId } = req.params;
     const { startDate, endDate } = req.query;
-    const temperatures = await this.temperatureService.getReport(roomId, startDate, endDate);
-    res.status(200).json(temperatures);
+    const result = await this.temperatureService.getReport(roomId, startDate, endDate);
+    res.status(200).json(result);
   }
 
   getPdfReport = async (req, res) => {
     const { roomId } = req.params;
     const { startDate, endDate } = req.query;
-    const readings = await this.temperatureService.getReport(roomId, startDate, endDate);
-    const pdf = await ReportPdfService.generate({ roomId, startDate, endDate, readings });
+    const result = await this.temperatureService.getReport(roomId, startDate, endDate);
+    const pdf = await ReportPdfService.generate({ startDate, endDate, readings: result });
     
     res.status(200).json({
       message: 'Relatório gerado com sucesso',
