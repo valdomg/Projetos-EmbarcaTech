@@ -8,7 +8,6 @@
 static unsigned long lastAttempConnectMQTT = 0;           // Guarda o tempo da última tentativa de conexão com o broker.
 static const unsigned long reconnectIntervalMQTT = 3000;  // Intervalo (ms) entre tentativas de reconexão ao broker.
 extern bool buttonEnable;                                // Indica se o botão está bloqueado para novos acionamentos (true = bloqueado, false = liberado)
-extern bool confirmMsg;                                   // Indica se o dispositivo recebeu confirmação via callback (status: "ok")
 
 //MQTT Broker
 const char* MQTT_BROKER = "XXXXXX";

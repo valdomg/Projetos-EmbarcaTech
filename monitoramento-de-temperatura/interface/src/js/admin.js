@@ -1,5 +1,5 @@
 import { checkAcess } from './auth.js';
-import { roomsSearch, usersSearch, userRegister,userEdit, userDelete, roomDelete, roomRegister, roomEdit } from './api.js';
+import { roomsSearch, usersSearch, userRegister, userEdit, userDelete, roomDelete, roomRegister, roomEdit } from './api.js';
 import { carregarTemperaturas } from './main.js'
 import { gerarRelatorio } from './report.js'
 
@@ -408,11 +408,11 @@ document.addEventListener('click', function (e) {
     const id = e.target.getAttribute('data-id');
     excluirSala(id);
   } else if (e.target && e.target.classList.contains('editarSala')) {
-      const id = e.target.getAttribute('data-id');
-      editarSala(id);
-  } else if(e.target && e.target.classList.contains('editarUsuario')) {
-      const id = e.target.getAttribute('data-id');
-      editarUsuario(id);
+    const id = e.target.getAttribute('data-id');
+    editarSala(id);
+  } else if (e.target && e.target.classList.contains('editarUsuario')) {
+    const id = e.target.getAttribute('data-id');
+    editarUsuario(id);
   }
 });
 
@@ -504,7 +504,7 @@ async function editarUsuario(id) {
       const senha2 = document.getElementById('senha2Edit').value;
       //requisicao da API para editar sala
 
-      if (senha != senha2){
+      if (senha != senha2) {
         alerta.innerText = data.erro || data.message || "Erro desconhecido";
         return;
       }
@@ -536,51 +536,94 @@ async function editarUsuario(id) {
 
 
 //Função excluir usuário
-async function excluirUsuario(id) {
+async function excluirUsuario(id, colunaIndex = 0) {
   // Confirmar exclusão
-  const confirmacao = confirm("Tem certeza que deseja excluir?");
-  if (!confirmacao) return; // Se o usuário não confirmar, a função é encerrada
+  // Mostrar o modal
+  const modal = document.getElementById('modalDelete');
+  abrirModal('modalDelete', '#confirmNo');
 
-  try {
-    const data = await userDelete(id);
+  // Pegar a linha pelo id
+  const linha = document.querySelector(`tr[data-id='${id}']`);
+
+  // Pegar o texto da célula específica
+  const valor = linha.getElementsByTagName('td')[colunaIndex].innerText;
+
+  // Pegar o cabeçalho da tabela correspondente
+  const tabela = linha.closest('table');
+  const th = tabela.querySelectorAll('thead th')[colunaIndex].innerText;
+
+  const mensagem = `Tem certeza que deseja excluir permanentemente "${th}: ${valor}"?`;
+
+  document.getElementById('deleteMessage').innerText = mensagem;
+
+  const excluir = document.getElementById("confirmYes");
+  excluir.onclick = async (e) => {
+    e.preventDefault();
+
+    try {
+      const data = await userDelete(id);
 
 
-    if (data.ok) {
-      alert(`Item com ID ${id} excluído com sucesso!`);
-      removerLinhaTabela(id);
-      return;
+      if (data.ok) {
+        removerLinhaTabela(id);
+        modal.close();
+        return;
+
+      }
+      alert(data.erro || data.message || "Erro desconhecido ao excluir o item");
 
     }
-    alert(data.erro || data.message || "Erro desconhecido ao excluir o item");
-
-  }
-  catch (error) {
-    alert(`Erro: ${error.message}`);
+    catch (error) {
+      alert(`Erro: ${error.message}`);
+    }
   }
 }
 
 
 //Função excluir usuário
-async function excluirSala(id) {
+async function excluirSala(id, colunaIndex = 0) {
   // Confirmar exclusão
-  const confirmacao = confirm("Tem certeza que deseja excluir?");
-  if (!confirmacao) return; // Se o usuário não confirmar, a função é encerrada
+  // Mostrar o modal
+  const modal = document.getElementById('modalDelete');
+  abrirModal('modalDelete', '#confirmNo');
 
-  try {
-    const data = await roomDelete(id);
+  // Pegar a linha pelo id
+  const linha = document.querySelector(`tr[data-id='${id}']`);
+
+  // Pegar o texto da célula específica
+  const valor = linha.getElementsByTagName('td')[colunaIndex].innerText;
 
 
-    if (data.ok) {
-      alert(`Item com ID ${id} excluído com sucesso!`);
-      removerLinhaTabela(id);
-      return;
+  // Pegar o cabeçalho da tabela correspondente
+  const tabela = linha.closest('table');
+  const th = tabela.querySelectorAll('thead th')[colunaIndex].innerText;
+
+
+  // Mensagem final
+  const mensagem = `Tem certeza que deseja excluir permanentemente "${th}: ${valor}"?`;
+  document.getElementById('deleteMessage').innerText = mensagem;
+
+  const excluir = document.getElementById("confirmYes");
+  excluir.onclick = async (e) => {
+    e.preventDefault();
+
+    try {
+
+      const data = await roomDelete(id);
+
+
+      if (data.ok) {
+        removerLinhaTabela(id);
+        modal.close();
+        return;
+
+      }
+      alert(data.erro || data.message || "Erro desconhecido ao excluir o item");
 
     }
-    alert(data.erro || data.message || "Erro desconhecido ao excluir o item");
-
-  }
-  catch (error) {
-    alert(`Erro: ${error.message}`);
+    catch (error) {
+      alert(`Erro: ${error.message}`);
+    }
   }
 }
 
