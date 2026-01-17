@@ -8,6 +8,120 @@ document.addEventListener("DOMContentLoaded", () => {
   checkAcess("admin");
 });
 
+
+// função para renderizar tabela de dispositivos e ambientes
+async function renderSalas() {
+
+  const dados = await roomsSearch();
+
+  if (!dados.length) {
+    console.error("Nenhum dado encontrado.");
+    return;
+  }
+
+  const grid = document.getElementById("dashboard");
+  grid.innerHTML = "";
+
+  const table = document.createElement("table");
+
+  table.innerHTML = `
+                            <caption>Salas</caption>
+                            <thead>
+                                <tr>
+                                <th scope="col">Ambiente</th>
+                                <th scope="col">Microcontrolador</th>
+                                <th scope="col">ID</th>
+                                <th scope="col">Ações</th>
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                            `;
+
+  const tbody = table.querySelector("tbody");
+
+
+  dados.forEach(sala => {
+    const row = document.createElement("tr");
+    row.setAttribute("data-id", sala._id);
+    row.innerHTML = `
+                            <td>${sala.name.toUpperCase()}</td>
+                            <td>${sala.microcontrollerId}</td>
+                            <td>${sala._id}</td>
+                            <td>
+                            <button data-id="${sala._id}" class="btn-warning editarSala" >Editar</button>
+                            <button data-id="${sala._id}" class="btn excluirSala">Excluir</button>
+                            </td>
+                            `;
+    tbody.appendChild(row);
+  });
+
+  grid.appendChild(table);
+
+  const button = document.getElementById('btn-click');
+
+  button.classList.remove('hide');
+  button.classList.add('show');
+
+  button.classList.remove('userInsert');
+  button.classList.add('roomInsert')
+}
+
+
+// função para renderizar tabela de usuários
+async function renderUsuarios() {
+  const dados = await usersSearch();
+
+  if (!dados.length) {
+    console.error("Nenhum dado encontrado.");
+    return;
+  }
+  const grid = document.getElementById("dashboard");
+  grid.innerHTML = "";
+
+  const table = document.createElement("table");
+
+  table.innerHTML = `
+                            <caption>Usuários</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Usuário</th>
+                                    <th scope="col">Email</th>
+                                    <th scope="col">ID</th>
+                                    <th scope="col">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        `;
+
+  const tbody = table.querySelector("tbody");
+
+
+  dados.forEach(sala => {
+    const row = document.createElement("tr");
+    row.setAttribute("data-id", sala._id);
+    row.innerHTML = `
+          <td>${sala.name.toUpperCase()}</td>
+          <td>${sala.email}</td>
+          <td>${sala._id}</td>
+          <td>
+          <button data-id="${sala._id}" class="btn-warning editarUsuario" >Editar</button>
+          <button data-id="${sala._id}" class="btn excluirUsuario">Excluir</button>
+        </td>
+        `;
+    tbody.appendChild(row);
+  });
+  grid.appendChild(table);
+
+  // Alterar a classe do botão para mostrar o conteúdo
+  const button = document.getElementById('btn-click');
+
+  button.classList.remove('hide');
+  button.classList.add('show');
+
+  button.classList.remove('roomInsert');
+  button.classList.add('userInsert')
+}
+
 // carregarTemperaturas();
 const links = document.querySelectorAll('.menu-lateral a[data-section]');
 
@@ -29,133 +143,11 @@ links.forEach(link => {
     console.log(section);
 
     if (section === 'room') {
-      try {
-        const dados = await roomsSearch();
-
-        if (!dados.length) {
-          console.error("Nenhum dado encontrado.");
-          return;
-        }
-
-        const grid = document.getElementById("dashboard");
-        grid.innerHTML = "";
-
-        const table = document.createElement("table");
-
-        table.innerHTML = `
-                            <caption>Salas</caption>
-                            <thead>
-                                <tr>
-                                <th scope="col">Sala</th>
-                                <th scope="col">Microcontrolador</th>
-                                <th scope="col">ID</th>
-                                <th scope="col">Ações</th>
-                            </tr>
-                            </thead>
-                            <tbody></tbody>
-                            `;
-
-        const tbody = table.querySelector("tbody");
-
-
-        dados.forEach(sala => {
-          const row = document.createElement("tr");
-          row.setAttribute("data-id", sala._id);
-          row.innerHTML = `
-                            <td>${sala.name.toUpperCase()}</td>
-                            <td>${sala.microcontrollerId}</td>
-                            <td>${sala._id}</td>
-                            <td>
-                            <button data-id="${sala._id}" class="btn-warning editarSala" >Editar</button>
-                            <button data-id="${sala._id}" class="btn excluirSala">Excluir</button>
-                            </td>
-                            `;
-          tbody.appendChild(row);
-        });
-
-        grid.appendChild(table);
-
-        const button = document.getElementById('btn-click');
-
-        button.classList.remove('hide');
-        button.classList.add('show');
-
-        button.classList.remove('userInsert');
-        button.classList.add('roomInsert')
-      } catch (error) {
-        console.error("Erro ao carregar salas:", error);
-
-        if (error.message.includes("401") || error.message.includes("403")) {
-          alert("Acesso não autorizado. Faça login novamente.");
-          localStorage.removeItem("token");
-          window.location.href = "login.html";
-        }
-      }
-
+      await renderSalas();
 
     } else if (section === 'user') {
-      try {
-        const dados = await usersSearch();
+      await renderUsuarios();
 
-        if (!dados.length) {
-          console.error("Nenhum dado encontrado.");
-          return;
-        }
-        const grid = document.getElementById("dashboard");
-        grid.innerHTML = "";
-
-        const table = document.createElement("table");
-
-        table.innerHTML = `
-                            <caption>Usuários</caption>
-                            <thead>
-                                <tr>
-                                    <th scope="col">Nome</th>
-                                    <th scope="col">Email</th>
-                                    <th scope="col">ID</th>
-                                    <th scope="col">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        `;
-
-        const tbody = table.querySelector("tbody");
-
-
-        dados.forEach(sala => {
-          const row = document.createElement("tr");
-          row.setAttribute("data-id", sala._id);
-          row.innerHTML = `
-          <td>${sala.name.toUpperCase()}</td>
-          <td>${sala.email}</td>
-          <td>${sala._id}</td>
-          <td>
-          <button data-id="${sala._id}" class="btn-warning editarUsuario" >Editar</button>
-          <button data-id="${sala._id}" class="btn excluirUsuario">Excluir</button>
-        </td>
-        `;
-          tbody.appendChild(row);
-        });
-        grid.appendChild(table);
-
-        // Alterar a classe do botão para mostrar o conteúdo
-        const button = document.getElementById('btn-click');
-
-        button.classList.remove('hide');
-        button.classList.add('show');
-
-        button.classList.remove('roomInsert');
-        button.classList.add('userInsert')
-
-      } catch (error) {
-        console.error("Erro ao carregar salas:", error);
-
-        if (error.message.includes("401") || error.message.includes("403")) {
-          alert("Acesso não autorizado. Faça login novamente.");
-          localStorage.removeItem("token");
-          window.location.href = "login.html";
-        }
-      }
     } else if (section === 'reports') {
       try {
         const dados = await roomsSearch();
@@ -261,6 +253,7 @@ document.addEventListener('click', (e) => {
 
           //Limpa o formulário
           document.getElementById("userForm").reset();
+          await renderUsuarios();
         } else {
 
           // alerta de erro;
@@ -299,6 +292,7 @@ document.addEventListener('click', (e) => {
 
           //Limpa o formulário
           document.getElementById("roomForm").reset();
+          await renderSalas();
         } else {
 
           // alerta de erro;
@@ -458,6 +452,7 @@ async function editarSala(id) {
 
         //Limpa o formulário
         document.getElementById("roomFormEdit").reset();
+        await renderSalas();
       } else {
 
         // alerta de erro;
@@ -520,6 +515,7 @@ async function editarUsuario(id) {
 
         //Limpa o formulário
         document.getElementById("roomFormEdit").reset();
+        await renderUsuarios();
       } else {
 
         // alerta de erro;
