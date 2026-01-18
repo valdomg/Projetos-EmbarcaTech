@@ -70,11 +70,11 @@ export async function roomTempInterval(salaId, start, end) {
     });
 
   const dados = await response.json();
-  
+
   if (!response) {
     throw new Error(dados.erro || dados.message || "Erro ao buscar temperaturas");
   }
-  
+
   return dados;
 }
 
@@ -97,7 +97,7 @@ export async function roomsSearch() {
   return dados;
 }
 
-  //Cadastrar sala
+//Cadastrar sala
 export async function roomRegister(nome, microcontrolador) {
 
   const token = localStorage.getItem("token");
@@ -133,7 +133,7 @@ export async function roomRegister(nome, microcontrolador) {
 }
 
 
-  //Editar sala
+//Editar sala
 export async function roomEdit(id, nome, microcontrolador) {
 
   const token = localStorage.getItem("token");
@@ -172,31 +172,31 @@ export async function roomEdit(id, nome, microcontrolador) {
 
 //Deletar sala
 export async function roomDelete(roomId) {
-    const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token");
 
-    const response = await fetch(`http://localhost:3000/api/room/${roomId}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
-    });
+  const response = await fetch(`http://localhost:3000/api/room/${roomId}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+  });
 
 
-    if (response.status === 204) {
-      return {ok: true};
-    }
+  if (response.status === 204) {
+    return { ok: true };
+  }
 
-    let dados = {};
-    try{
-      dados = await response.json();
-    }catch(_){
+  let dados = {};
+  try {
+    dados = await response.json();
+  } catch (_) {
 
-    }
-    
-    return {
-      ok: response.ok,
-      ...dados,
+  }
+
+  return {
+    ok: response.ok,
+    ...dados,
   };
 }
 
@@ -224,48 +224,58 @@ export async function usersSearch() {
 
 //Login de usuario
 export async function userLogin(email, senha) {
-  
-    const body = {
-        email: email,
-        password: senha
-    };
 
-    try {
-        // Faz a requisição de login
-        const response = await fetch("http://localhost:3000/api/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(body),
-        });
+  const body = {
+    email: email,
+    password: senha
+  };
 
-        const data = await response.json();
-        console.log(data);
+  try {
+    // Faz a requisição de login
+    const response = await fetch("http://localhost:3000/api/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
 
-        if (response.ok) {
-            localStorage.setItem("token", data.token);
+    const data = await response.json();
+    console.log(data);
 
-            const decode = jwt_decode(data.token);
+    if (response.ok) {
+      localStorage.setItem("token", data.token);
 
-            if (decode.role == "admin"){
-              window.location.href = "admin.html";  
-            }else{
-              window.location.href = "index.html";
-            }
+      const decode = jwt_decode(data.token);
+
+      if (decode.role == "admin") {
+        window.location.href = "admin.html";
+      } else {
+        window.location.href = "index.html";
+      }
 
 
-        } else {
-            alert(data.message || data.erro || "Usuário ou senha inválida.");
-        }
-    } catch (error) {
-        console.error("Erro ao fazer login:", error);
-        alert("Erro ao tentar fazer login. Tente novamente.");
+    } else {
+      const alerta = document.getElementById("responseUser");
+      alerta.innerText = `${data.message || data.erro || "Usuário ou senha inválida."}`;
+      // setTimeout(() => { alerta.innerText = ""; }, 3000);
+
+    }
+  } catch (error) {
+    console.error("Erro ao fazer login:", error);
+
+    if (error instanceof TypeError && error.message === "Failed to fetch") {
+      const alerta = document.getElementById("responseUser");
+      alerta.innerText = "Erro de conexão com o servidor. Tente novamente.";
+    } else {
+      const alerta = document.getElementById("responseUser");
+      alerta.innerText = "Ocorreu um erro inesperado.";
     }
   }
+}
 
 
-  //Cadastrar usuarios no sistema
+//Cadastrar usuarios no sistema
 export async function userRegister(usuario, email, senha) {
 
   const token = localStorage.getItem("token");
@@ -302,7 +312,7 @@ export async function userRegister(usuario, email, senha) {
 }
 
 
-  //Editar dados do usuario
+//Editar dados do usuario
 export async function userEdit(id, usuario, email, senha) {
 
   const token = localStorage.getItem("token");
@@ -341,30 +351,30 @@ export async function userEdit(id, usuario, email, senha) {
 
 //Deletar usuário 
 export async function userDelete(userId) {
-    const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token");
 
-    const response = await fetch(`http://localhost:3000/api/user/${userId}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
-    });
+  const response = await fetch(`http://localhost:3000/api/user/${userId}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+  });
 
 
-    if (response.status === 204) {
-      return {ok: true};
-    }
+  if (response.status === 204) {
+    return { ok: true };
+  }
 
-    let dados = {};
-    try{
-      dados = await response.json();
-    }catch(_){
+  let dados = {};
+  try {
+    dados = await response.json();
+  } catch (_) {
 
-    }
-    
-    return {
-      ok: response.ok,
-      ...dados,
+  }
+
+  return {
+    ok: response.ok,
+    ...dados,
   };
 }

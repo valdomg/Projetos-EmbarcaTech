@@ -264,6 +264,7 @@ button {
 
 .menu-lateral a:hover {
     background-color: #e6e6e6;
+    color: rgb(195, 0, 10);
 }
 
 .menu-lateral .btn {
@@ -400,12 +401,14 @@ dialog h3 {
     opacity: 0;
 }
 
-/* .alert{
-    color: red;
+.alert{
+    width: 100%;
+    background-color: rgb(244, 214, 210);
+    color: rgb(118, 46, 35);
     text-align: center;
     font-weight: bold;
     margin-top: 5px;
-} */
+}
 
 .relatorio label,
 .relatorio input,
@@ -415,12 +418,33 @@ dialog h3 {
 
 .relatorio button {
     padding: 8px 12px;
-    background-color: #007bff;
+    background-color: #bb0202;
     color: #ffffff;
     border: none;
     border-radius: 5px;
     width: 200px;
     font-size: 18px;
+}
+
+
+.modalDelete{
+    display: flex;
+    align-items: start;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.deleteRow{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.deleteBtn{
+    display: flex;
+    justify-content: end;
+    gap: 0.5rem;
 }
 
 

@@ -1,5 +1,6 @@
 #include "wifi_utils.h"
 #include "mqtt.h"
+#include "server.h"
 
 #include "display_LCD-2004_I2C.h"
 #include "listNursingCall_utils.h"
@@ -8,6 +9,7 @@
 #include "config.h"
 #include "buzzer.h"
 #include "led.h"
+#include "config_storage.h"
 
 
 // flag que indica se o botão de deletar foi pressionado uma vez e está aguardando confirmação
@@ -16,6 +18,10 @@ bool deletionConfirmation = false;
 // flag que indica se a mensagem de falha ddo wifi já foi exibida (detectar transição de falha para normal).
 // bool wifiFailureDisplayed = false;  // Usada para evitar desenhar a tela de erro repetidamente a cada iteração do loop
 
+// flag que indica se a mensagem de falha ddo wifi já foi exibida (detectar transição de falha para normal).
+// bool wifiFailureDisplayed = false;  // Usada para evitar desenhar a tela de erro repetidamente a cada iteração do loop
+
+ESP8266WebServer server(80);
 
 // ===== Funções de navegação =====
 void handleNext() {  // ===== Botão Next (>)
@@ -84,6 +90,7 @@ void handleDelete() {  // ===== Botão Delete
     const char* infirmary = listCalls.getInfirmaryCurrent();
     const char* idDevice = listCalls.getIdCurrent();
     // Chama a função de públicar o ID do dispositivo e o número da enfermaria (tranforma em float o infirmary)
+
     char buffer[256];
 
     // flag qu indica se deu certo publicar ou não
@@ -97,9 +104,6 @@ void handleDelete() {  // ===== Botão Delete
   }
 }
 
-void deleteMessage() {
-}
-
 
 void setup() {
   // Serial.begin(115200);
@@ -107,37 +111,55 @@ void setup() {
   // inicializa o display
   lcd2004_init();
 
-  if (!connectToWiFi()) {
-    log(LOG_WARN, "Falha ao conectar com WiFI.");
-  }
-  setupMQTT();
 
   // Inicializa botões
   initButtons();
+
+  enableButtonInterruptChange();
 
   ledInit();
 
   // inicializa buzzer
   buzzerInit();
+
+  initConfigStorage();
+  cfg = loadConfig();
+
+  if (!connectToWiFi()) {
+    // Serial.println("WiFi não conectado.");
+    log(LOG_WARN, "Falha ao conectar com WiFI.");
+  }
+
+  setupMQTT();
+
+  showInfirmaryNumber(
+    listCalls.getInfirmaryCurrent(),
+    listCalls.hasNursingCall(),
+    listCalls.getTotal());  // Mostra os dados no display
 }
 
 void loop() {
 
-  if (checkAndReconnectWifi()) {  // Retorna true se conseguir conectar/reconectar ao wifi
-    // Garante que a conexão MQTT esteja ativa.
-    // Só é chamada quando há Wi-Fi disponível.
-    checkMQTTConnected();
-  } else {                             // não há conexão
-    showFailureMessage(MESSAGE_WIFI);  // Mensagem que indica que não há conexão Wi-Fi
-  }
 
-  // A função delay atrapalha o funcionamento dos botões
-  // delay(1000);
+  if (isConfigurationMode() || !cfg.valid) {
 
-  // client.disconnect();
-  // if (!client.connected()){
-  //   Serial.println("servidor mqtt desconectado");
-  // }
+    turnOnLed();
+    createAccessPoint();
+    startServer(&server);
+    server_handle_loop(&server);
+
+    // log(LOG_INFO, "modo configuraçao");
+
+  } else {
+
+    if (checkAndReconnectWifi()) {
+      checkMQTTConnected();
+    } else {                             // não há conexão
+      showFailureMessage(MESSAGE_WIFI);  // Mensagem que indica que não há conexão Wi-Fi**
+    }
+
+
+    stopServer(&server);
 
   if (hasOKMessage) {
     // log(LOG_INFO,listCalls.getIdCurrent());
@@ -151,46 +173,47 @@ void loop() {
       listCalls.hasNursingCall(),
       listCalls.getTotal());  // Mostra os dados no display
 
-    deletionConfirmation = false;
-    // Ao marcar o chamado como resolvido, reseta a flag, indicando se atingir o limite pode remover o current
-    listCalls.setDoNotRemoveCurrent(false);  // vira false - pode remover current
-    hasOKMessage = false;
-  }
+      // Ao marcar o chamado como resolvido, reseta a flag, indicando se atingir o limite pode remover o current
+      deletionConfirmation = false;
+      listCalls.setDoNotRemoveCurrent(false);  // vira false - pode remover current
+      hasOKMessage = false;
+    }
 
 
-  // Atualiza se tiver novos dados, mas se nenhum botão estiver pressionado e se tiver na tela de navegação
-  if (listUpdated
-      && button_next.state == HIGH
-      && button_prev.state == HIGH
-      && button_delete.state == HIGH
-      && currentScreen == SCREEN_MAIN
-      && !deletionConfirmation) {
+    // Atualiza se tiver novos dados, mas se nenhum botão estiver pressionado e se tiver na tela de navegação
+    if (listUpdated
+        && button_next.state == HIGH
+        && button_prev.state == HIGH
+        && button_delete.state == HIGH
+        && currentScreen == SCREEN_MAIN
+        && !deletionConfirmation) {
 
-    showInfirmaryNumber(
-      listCalls.getInfirmaryCurrent(),
-      listCalls.hasNursingCall(),
-      listCalls.getTotal());
+      showInfirmaryNumber(
+        listCalls.getInfirmaryCurrent(),
+        listCalls.hasNursingCall(),
+        listCalls.getTotal());
 
-    listUpdated = false;  // reseta a flag
-  }
+      listUpdated = false;  // reseta a flag
+    }
 
-  // Verificações para poder sair das telas IP/Erro wifi/MQTT
-  if (checkButton(button_next)) handleNext();
-  if (checkButton(button_prev)) handlePrev();
+    // Verificações para poder sair das telas IP/Erro wifi/MQTT
+    if (checkButton(button_next)) handleNext();
+    if (checkButton(button_prev)) handlePrev();
 
-  // Habilita o botão de delete somente se houver dados na lista
-  // aciona led se houver algum chamado
-  if (listCalls.hasNursingCall()) {
-    // if (checkButton(button_next)) handleNext();
-    // if (checkButton(button_prev)) handlePrev();
-    if (checkButton(button_delete)) handleDelete();
+    // Habilita o botão de delete somente se houver dados na lista
+    // aciona led se houver algum chamado
+    if (listCalls.hasNursingCall()) {
+      // if (checkButton(button_next)) handleNext();
+      // if (checkButton(button_prev)) handlePrev();
+      if (checkButton(button_delete)) handleDelete();
 
-    toggleLed();
-  } else {
-    turnOffLed();
-  }
+      toggleLed();
+    } else {
+      turnOffLed();
+    }
 
-  if (doesHaveNotificationBuzzer()) {
-    toggleBuzzer();
+    if (doesHaveNotificationBuzzer()) {
+      toggleBuzzer();
+    }
   }
 }
