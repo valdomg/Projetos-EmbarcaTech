@@ -141,7 +141,7 @@ void loop() {
 
   if (hasOKMessage) {
     // log(LOG_INFO,listCalls.getIdCurrent());
-    if (listCalls.removeCurrent()) {  // Apaga o item selecionado
+    if (listCalls.removalById(calledToBeErased)) {  // Apaga o item selecionado
       log(LOG_INFO, "Chamada removida com sucesso!");
     } else {
       log(LOG_ERROR, "Erro ao remover a chamada na lista!");

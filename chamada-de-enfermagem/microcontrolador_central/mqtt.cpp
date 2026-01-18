@@ -19,6 +19,11 @@ static unsigned long lastAttempConnectMQTT = 0;           // Guarda o tempo da �
 static const unsigned long reconnectIntervalMQTT = 3000;  // Intervalo (ms) entre tentativas de reconexão ao broker.
 
 bool hasOKMessage = false;
+
+const char* calledToBeErased;
+
+
+
 // -----------------------------------------------------------------------------
 // Funções auxiliares
 // -----------------------------------------------------------------------------
@@ -117,6 +122,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
   if (strcmp(topic, MQTT_SUB_CONFIRMATION_TOPIC) == 0) {
     // Serial.println("recebeu ok");
+    calledToBeErased = getPayloadID(payload, length);
     hasOKMessage = true;
   }
 
