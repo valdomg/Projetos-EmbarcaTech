@@ -55,6 +55,6 @@ void callback(char* topic, byte* payload, unsigned int length);
  * @param id    - Identificador do dispositivo ou sensor (sufixo do tópico).
  * @param value - Valor numérico (float) a ser enviado.
  */
-bool publicReponseDivice(const char* deviceId, const char* topic, const char* message);
+bool publicReponseDivice(const char* deviceId, const char* topic, const char* message, bool retained = false);
 
 #endif // MQTT_HELPER_H

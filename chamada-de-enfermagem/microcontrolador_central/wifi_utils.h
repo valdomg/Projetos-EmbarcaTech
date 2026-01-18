@@ -37,6 +37,17 @@ bool connectToWiFi();
  */
 bool checkAndReconnectWifi();
 
+
+
+/**
+ * @brief Cria um ponto de acesso (Access Point) para configuração local.
+ * 
+ * - Configura o módulo Wi-Fi no modo AP.
+ * - Cria uma rede com SSID e senha pré-definidos.
+ * - Exibe o endereço IP do ponto de acesso via porta serial.
+ */
+void createAccessPoint();
+
 /**
  * @brief Retorna o status da conexão Wi-Fi.
  * 
