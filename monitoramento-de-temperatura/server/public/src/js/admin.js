@@ -636,7 +636,7 @@ function removerLinhaTabela(id) {
 }
 
 
-//Evento para logout
-document.getElementById('logoutBtn').addEventListener('click', () => {
-  alert('Logout realizado!');
-});
+// //Evento para logout
+// document.getElementById('logoutBtn').addEventListener('click', () => {
+//   alert('Logout realizado!');
+// });
