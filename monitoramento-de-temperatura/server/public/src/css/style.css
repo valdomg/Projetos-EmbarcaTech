@@ -186,7 +186,7 @@ button {
 .room-grid {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    margin: 100px 100px 10px 100px;
+    margin: 80px 100px 10px 100px;
     align-items: center;
     justify-content: center;
     gap: 20px;
