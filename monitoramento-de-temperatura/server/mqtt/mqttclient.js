@@ -1,11 +1,13 @@
 import mqtt from "mqtt";
 import TemperatureModel from '../models/Temperature.js';
 import TemperatureService from '../services/TemperatureReading/TemperatureServices.js';
+import EmailService from "../services/email/sendEmail.js";
 
 const connectUrl = process.env.MQTT_BROKER_URL;
 const clientId = `mqtt_${Math.random().toString(16).slice(3)}`;
 
 const temperatureService = new TemperatureService(TemperatureModel);
+const emailService = new EmailService();
 
 const mqttClient = mqtt.connect(connectUrl, {
   clientId,
@@ -34,6 +36,13 @@ mqttClient.on('message', (topic, message) => {
     const temperatureData = JSON.parse(message.toString());
     temperatureService.createTemperatureReading(temperatureData);
   }
+
+  if(topic === 'sensors/alerts') {
+    const alertData = JSON.parse(message.toString());
+    const { microcontrollerId, temperature, humidity } = alertData;
+    emailService.sendAlertEmail(microcontrollerId, temperature, humidity);
+  }
+
 });
 
 

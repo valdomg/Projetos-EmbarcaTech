@@ -1,5 +1,6 @@
 import TemperatureService from '../services/TemperatureReading/TemperatureServices.js';
 import TemperatureModel from '../models/Temperature.js';
+import { ReportPdfService } from '../services/pdf/generatePdf.js';
 class TemperatureController {
   constructor() {
     this.temperatureService = new TemperatureService(TemperatureModel);
@@ -68,6 +69,34 @@ class TemperatureController {
     const { startDate, endDate } = req.query;
     const temperatures = await this.temperatureService.getRoomTemperatureReadingsByInterval(roomId, startDate, endDate);
     res.status(200).json(temperatures);
+  }
+
+  getReport = async (req, res) => {
+          /*
+          #swagger.tags = ['Temperature']
+          #swagger.summary = 'Obtém as leituras de temperatura e humidade por hora de um ambiente específico por intervalo'
+          #swagger.description = 'Esse endpoint retorna media, minima e maxima de temperatura e humidade por hora para um ambiente específico com base no ID do ambiente e no intervalo de datas fornecidos.'
+          #swagger.security = [{
+            "bearerAuth": []
+          }] 
+          */
+
+    const { roomId } = req.params;
+    const { startDate, endDate } = req.query;
+    const result = await this.temperatureService.getReport(roomId, startDate, endDate);
+    res.status(200).json(result);
+  }
+
+  getPdfReport = async (req, res) => {
+    const { roomId } = req.params;
+    const { startDate, endDate } = req.query;
+    const result = await this.temperatureService.getReport(roomId, startDate, endDate);
+    const pdf = await ReportPdfService.generate(result);
+    
+    res.status(200).json({
+      message: 'Relatório gerado com sucesso',
+      link: pdf.publicUrl
+    });
   }
 
   getTemperatureReadingsByInterval = async (req, res) => {
