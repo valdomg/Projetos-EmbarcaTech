@@ -154,7 +154,7 @@ button {
     gap: 20px;
     flex-direction: row;
     justify-content: space-evenly;
-    margin: 100px;
+    margin: 50px 100px;
     flex-flow: wrap;
 
 }
@@ -295,7 +295,7 @@ hr {
 }
 
 .menu-principal .room-card{
-    background-color: rgba(221, 217, 217, 0.6);
+    background-color: rgba(245, 242, 242, 0.313);
     border: 1px solid rgba(197, 197, 197, 0.6);
     border-radius: 3px;
     color: #747373;
