@@ -1,8 +1,17 @@
+const pad2 = (n) => String(n).padStart(2, "0");
+
+const formatBRDateFromString = (dateStr) => {
+  const [year, month, day] = dateStr.split("-");
+  return `${day}/${month}/${year}`;
+};
+
+const formatHour = (hour) => `${pad2(hour)}:00`;
+
 export default function reportTemplate({ roomId, startDate, endDate, readings }) {
   const rows = readings.readings.map(r => `
     <tr>
-      <td>${r._id.day}/${r._id.month}/${r._id.year}</td>
-      <td>${r._id.hour}:00</td>
+      <td>${pad2(r._id.day)}/${pad2(r._id.month)}/${r._id.year}</td>
+      <td>${formatHour(r._id.hour)}</td>
       <td>${r.averageTemperature.toFixed(2)} °C</td>
       <td>${r.minTemperature.toFixed(2)} °C</td>
       <td>${r.maxTemperature.toFixed(2)} °C</td>
@@ -25,8 +34,8 @@ export default function reportTemplate({ roomId, startDate, endDate, readings })
       <body>
         <h1>Relatório de Temperatura</h1>
 
-        <p><strong>Sala:</strong> ${roomId}</p>
-        <p><strong>Período:</strong> ${startDate} até ${endDate}</p>
+        <p><strong>Setor:</strong> ${roomId}</p>
+        <p><strong>Período:</strong> ${formatBRDateFromString(startDate)} até ${formatBRDateFromString(endDate)}</p>
 
         <table>
           <thead>

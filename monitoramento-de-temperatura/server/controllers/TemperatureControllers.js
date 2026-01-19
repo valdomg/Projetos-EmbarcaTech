@@ -91,7 +91,7 @@ class TemperatureController {
     const { roomId } = req.params;
     const { startDate, endDate } = req.query;
     const result = await this.temperatureService.getReport(roomId, startDate, endDate);
-    const pdf = await ReportPdfService.generate({ startDate, endDate, readings: result });
+    const pdf = await ReportPdfService.generate(result);
     
     res.status(200).json({
       message: 'Relatório gerado com sucesso',

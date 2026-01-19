@@ -5,8 +5,8 @@ import path from 'path';
 
 export class ReportPdfService {
 
-  static async generate({ startDate, endDate, readings }) {
-    const html = reportTemplate({ roomId: readings.room.name, startDate, endDate, readings });
+  static async generate(readings) {
+    const html = reportTemplate({ roomId: readings.room.name, startDate: readings.startDate, endDate: readings.endDate, readings });
 
     const reportsDir = path.join(process.cwd(), 'public', 'reports');
 
@@ -14,7 +14,7 @@ export class ReportPdfService {
       fs.mkdirSync(reportsDir, { recursive: true });
     }
 
-    const fileName = `Relatorio-${readings.room.name.replace(/ /g, "-")}-${startDate}-${endDate}-${Date.now()}.pdf`;
+    const fileName = `Relatorio-${readings.room.name.replace(/ /g, "-")}-${readings.startDate}-${readings.endDate}-${Date.now()}.pdf`;
     const outputPath = path.join(reportsDir, fileName);
  
     const browser = await puppeteer.launch();

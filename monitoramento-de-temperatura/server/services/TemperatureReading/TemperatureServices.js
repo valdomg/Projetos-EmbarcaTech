@@ -2,6 +2,7 @@ import RoomServices from "../Room/RoomServices.js";
 import RoomModel from '../../models/Room.js';
 import ApiError from "../../utils/errors.js";
 import mongoose from "mongoose";
+import {createBrazilRange} from "../../utils/dateRange.js";
 
 class TemperatureService {
   constructor(temperatureModel) {
@@ -46,8 +47,7 @@ class TemperatureService {
   getTemperatureReadingsByInterval = async (startDate, endDate) => {
     await this.validateInterval(startDate, endDate);
 
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+    const { start, end } = createBrazilRange(startDate, endDate);
 
     return await this.temperatureModel.find({
       timestamp: {
@@ -77,10 +77,7 @@ class TemperatureService {
     }
 
     await this.validateInterval(startDate, endDate);
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    start.setHours(0, 0, 0, 0);
-    end.setHours(23, 59, 59, 999);
+    const { start, end } = createBrazilRange(startDate, endDate);
 
     const readings = await this.temperatureModel.find({
       room: roomId,
@@ -104,10 +101,7 @@ class TemperatureService {
 
   await this.validateInterval(startDate, endDate);
 
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  start.setHours(0, 0, 0, 0);
-  end.setHours(23, 59, 59, 999);
+  const { start, end } = createBrazilRange(startDate, endDate);
 
   const room = await this.roomService.getRoomById(roomId);
   if (!room) {
@@ -142,6 +136,8 @@ class TemperatureService {
 
   return {
     room,
+    startDate,
+    endDate,
     readings
   } ?? [];
 };
