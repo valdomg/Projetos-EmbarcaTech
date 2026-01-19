@@ -36,7 +36,7 @@ class UserController {
 
         const { role } = req.user;
         if (role !== 'admin') {
-            return res.status(403).json({ message: 'Acesso negado. Apenas administradores podem criar ambientes.' });
+            return res.status(403).json({ message: 'Acesso negado. Apenas administradores podem criar usuários.' });
         }
 
 
@@ -179,7 +179,7 @@ class UserController {
 
         const { role } = req.user;
         if (role !== 'admin') {
-            return res.status(403).json({ message: 'Acesso negado. Apenas administradores podem criar ambientes.' });
+            return res.status(403).json({ message: 'Acesso negado. Apenas administradores podem deletar usuários.' });
         }
         const { userId } = req.params;
         await this.userService.deleteUser(userId);

@@ -124,8 +124,8 @@ describe('TemperatureService', () => {
 
   describe('getTemperatureReadingsByInterval', () => {
     it('should return readings between two dates', async () => {
-      const startDate = '2025-07-29T14:00:00Z';
-      const endDate = '2025-07-30T14:00:00Z';
+      const startDate = '2025-07-29';
+      const endDate = '2025-07-30';
       const mockResult = ['reading in interval'];
 
       mockModel.find.mockReturnValueOnce({
@@ -137,16 +137,16 @@ describe('TemperatureService', () => {
 
       expect(mockModel.find).toHaveBeenCalledWith({
         timestamp: {
-          $gte: new Date(startDate),
-          $lte: new Date(endDate)
+          $gte: new Date(`${startDate}T00:00:00-03:00`),
+          $lte: new Date(`${endDate}T23:59:59.999-03:00`)
         }
       });
       expect(result).toBe(mockResult);
     });
 
     it("should return an error if the interval is invalid", async () => {
-      const startDate = '2025-07-30T14:00:00Z';
-      const endDate = '2025-07-29T14:00:00Z';
+      const startDate = '2025-07-30';
+      const endDate = '2025-07-29';
 
       await expect(service.getTemperatureReadingsByInterval(startDate, endDate)).rejects.toThrow("Intervalo de datas inválido");
     });
@@ -161,7 +161,7 @@ describe('TemperatureService', () => {
       });
       const startDate = '2025-07-29T00:00:00Z';
       const endDate = '2025-07-30T00:00:00Z';
-      await expect(service.getRoomTemperatureReadingsByInterval('Sala', startDate, endDate)).rejects.toThrow("Nenhuma leitura encontrada para a sala no intervalo especificado");
+      await expect(service.getRoomTemperatureReadingsByInterval('Sala', startDate, endDate)).resolves.toEqual([]);
     });
 
     it('should throw error if interval is invalid', async () => {
@@ -218,8 +218,8 @@ describe('TemperatureService', () => {
 
   describe('getRoomTemperatureReadingsByInterval', () => {
     it('should return readings for a room between two dates', async () => {
-      const startDate = '2025-07-29T00:00:00Z';
-      const endDate = '2025-07-30T00:00:00Z';
+      const startDate = '2025-07-29';
+      const endDate = '2025-07-30';
       const mockResult = ['room + interval reading'];
 
       mockModel.find.mockReturnValueOnce({
@@ -227,12 +227,13 @@ describe('TemperatureService', () => {
       });
 
       const result = await service.getRoomTemperatureReadingsByInterval('Sala', startDate, endDate);
-
+      const expectedStart = new Date(`${startDate}T00:00:00-03:00`);
+      const expectedEnd = new Date(`${endDate}T23:59:59.999-03:00`);
       expect(mockModel.find).toHaveBeenCalledWith({
         room: 'Sala',
         timestamp: {
-          $gte: new Date(startDate),
-          $lte: new Date(endDate)
+          $gte: expectedStart,
+          $lte: expectedEnd
         }
       });
       expect(result).toBe(mockResult);

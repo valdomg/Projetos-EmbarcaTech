@@ -1,5 +1,8 @@
 import RoomServices from "../Room/RoomServices.js";
 import RoomModel from '../../models/Room.js';
+import ApiError from "../../utils/errors.js";
+import mongoose from "mongoose";
+import {createBrazilRange} from "../../utils/dateRange.js";
 
 class TemperatureService {
   constructor(temperatureModel) {
@@ -44,23 +47,25 @@ class TemperatureService {
   getTemperatureReadingsByInterval = async (startDate, endDate) => {
     await this.validateInterval(startDate, endDate);
 
+    const { start, end } = createBrazilRange(startDate, endDate);
+
     return await this.temperatureModel.find({
       timestamp: {
-        $gte: new Date(startDate),
-        $lte: new Date(endDate)
+        $gte: start,
+        $lte: end
       }
     }).populate('room');
   }
 
   getRoomTemperatureReadings = async (roomId) => {
     if (!roomId) {
-      throw new Error("ID da sala é obrigatório");
+      throw ApiError.badRequest("ID da sala é obrigatório");
     }
 
     const readings = await this.temperatureModel.find({ room: roomId }).populate('room');
 
     if (!readings || readings.length === 0) {
-      throw new Error("Nenhuma leitura encontrada para a sala");
+      return [];
     }
 
     return readings;
@@ -68,35 +73,85 @@ class TemperatureService {
 
   getRoomTemperatureReadingsByInterval = async (roomId, startDate, endDate) => {
     if (!roomId) {
-      throw new Error("ID da sala é obrigatório");
+      throw ApiError.badRequest("ID da sala é obrigatório");
     }
 
     await this.validateInterval(startDate, endDate);
+    const { start, end } = createBrazilRange(startDate, endDate);
 
     const readings = await this.temperatureModel.find({
       room: roomId,
       timestamp: {
-        $gte: new Date(startDate),
-        $lte: new Date(endDate)
+        $gte: start,
+        $lte: end
       }
     }).populate('room');
 
     if (!readings || readings.length === 0) {
-      throw new Error("Nenhuma leitura encontrada para a sala no intervalo especificado");
+      return [];
     }
 
     return readings;
   }
 
+  getReport = async (roomId, startDate, endDate) => {
+  if (!roomId) {
+    throw ApiError.badRequest("ID da sala é obrigatório");
+  }
+
+  await this.validateInterval(startDate, endDate);
+
+  const { start, end } = createBrazilRange(startDate, endDate);
+
+  const room = await this.roomService.getRoomById(roomId);
+  if (!room) {
+    throw ApiError.notFound("Sala não encontrada");
+  }
+
+  const readings = await this.temperatureModel.aggregate([
+    {
+      $match: {
+        room: new mongoose.Types.ObjectId(roomId),
+        timestamp: { $gte: start, $lte: end }
+      }
+    },
+    {
+      $group: {
+        _id: {
+          year: { $year: { date: "$timestamp", timezone: "America/Sao_Paulo" } },
+          month: { $month: { date: "$timestamp", timezone: "America/Sao_Paulo" } },
+          day: { $dayOfMonth: { date: "$timestamp", timezone: "America/Sao_Paulo" } },
+          hour: { $hour: { date: "$timestamp", timezone: "America/Sao_Paulo" } }
+        },
+        averageTemperature: { $avg: "$temperature" },
+        averageHumidity: { $avg: "$humidity" },
+        maxTemperature: { $max: "$temperature" },
+        minTemperature: { $min: "$temperature" },
+        maxHumidity: { $max: "$humidity" },
+        minHumidity: { $min: "$humidity" }
+      }
+    },
+    { $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1, "_id.hour": 1 } }
+  ]);
+
+  return {
+    room,
+    startDate,
+    endDate,
+    readings
+  } ?? [];
+};
+
+
   getTemperatureReadingById = async (id) => {
     if (!id) {
-      throw new Error("ID inválido");
+      throw ApiError.badRequest("ID inválido");
     }
 
     const result = await this.temperatureModel.findById(id).populate('room');
 
     if (!result) {
-      throw new Error("Leitura não encontrada");
+      throw ApiError.notFound("Leitura não encontrada");
     }
 
     return result;
@@ -104,33 +159,33 @@ class TemperatureService {
 
   deleteTemperatureReading = async (id) => {
     if (!id) {
-      throw new Error("ID inválido");
+      throw ApiError.badRequest("ID inválido");
     }
     const result = await this.temperatureModel.findByIdAndDelete(id);
     if (!result) {
-      throw new Error("Leitura não encontrada");
+      throw ApiError.notFound("Leitura não encontrada");
     }
     return result;
   }
 
   validateInterval = async (startDate, endDate) => {
     if (!startDate || !endDate) {
-      throw new Error("Ambos os campos de data são obrigatórios");
+      throw ApiError.badRequest("Ambos os campos de data são obrigatórios");
     }
 
     const start = new Date(startDate);
     const end = new Date(endDate);
 
     if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-      throw new Error("Datas inválidas");
+      throw ApiError.badRequest("Datas inválidas");
     }
 
     if (start > end) {
-      throw new Error("Intervalo de datas inválido");
+      throw ApiError.badRequest("Intervalo de datas inválido");
     }
 
     if (end > new Date()) {
-      throw new Error("Data final não pode ser no futuro");
+      throw ApiError.badRequest("Data final não pode ser no futuro");
     }
     return true;
   }
