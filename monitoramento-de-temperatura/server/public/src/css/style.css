@@ -106,7 +106,7 @@ button {
     color: #ffffff;
     font-size: 16px;
     width: auto;
-    padding: 5px;
+    padding: 8px;
     justify-content: center;
     align-items: center;
     text-align: center;
@@ -127,6 +127,7 @@ button {
     align-items: center;
     text-align: center;
     box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+    outline: none;
 }
 
 .btn-primary:hover {
@@ -405,6 +406,15 @@ dialog h3 {
     width: 100%;
     background-color: rgb(244, 214, 210);
     color: rgb(118, 46, 35);
+    text-align: center;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+.alert-sucess{
+    width: 100%;
+    background-color: rgb(210, 244, 216);
+    color: rgb(9, 184, 0);
     text-align: center;
     font-weight: bold;
     margin-top: 5px;

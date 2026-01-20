@@ -235,7 +235,7 @@ document.addEventListener('click', (e) => {
         alerta.innerText = "As senhas devem ser iguais!";
 
         // Limpa o texto de alerta depois de 3 segundos
-        setTimeout(() => { alerta.innerText = ""; }, 3000);
+        setTimeout(() => { alerta.innerText = ""; }, 7000);
         return;
       }
 
@@ -249,7 +249,7 @@ document.addEventListener('click', (e) => {
           alerta.innerText = `Usuário ${data.name} cadastrado com sucesso!`;
 
           // Limpa o texto de alerta depois de 3 segundos
-          setTimeout(() => { alerta.innerText = ""; }, 3000);
+          setTimeout(() => { alerta.innerText = ""; }, 7000);
 
           //Limpa o formulário
           document.getElementById("userForm").reset();
@@ -260,7 +260,7 @@ document.addEventListener('click', (e) => {
           const alerta = document.getElementById("responseUser");
           alerta.innerText = data.erro || data.message || "Erro desconhecido no cadastro";
           // Limpa o texto depois de 3 segundos
-          setTimeout(() => { alerta.innerText = ""; }, 3000);
+          setTimeout(() => { alerta.innerText = ""; }, 7000);
         }
       } catch (error) {
         alert(`${error.message}`);
@@ -288,7 +288,7 @@ document.addEventListener('click', (e) => {
           alerta.innerText = `Ambiente ${data.name} cadastrado com sucesso!`;
 
           // Limpa o texto de alerta depois de 3 segundos
-          setTimeout(() => { alerta.innerText = ""; }, 3000);
+          setTimeout(() => { alerta.innerText = ""; }, 7000);
 
           //Limpa o formulário
           document.getElementById("roomForm").reset();
@@ -299,7 +299,7 @@ document.addEventListener('click', (e) => {
           const alerta = document.getElementById("responseRoom");
           alerta.innerText = data.erro || data.message || "Erro desconhecido no cadastro";
           // Limpa o texto depois de 3 segundos
-          setTimeout(() => { alerta.innerText = ""; }, 3000);
+          setTimeout(() => { alerta.innerText = ""; }, 7000);
         }
       } catch (error) {
         alert(`${error.message}`);
@@ -448,7 +448,7 @@ async function editarSala(id) {
         alerta.innerText = `Ambiente ${data.name} editado com sucesso!`;
 
         // Limpa o texto de alerta depois de 3 segundos
-        setTimeout(() => { alerta.innerText = ""; }, 3000);
+        setTimeout(() => { alerta.innerText = ""; },7000);
 
         //Limpa o formulário
         document.getElementById("roomFormEdit").reset();
@@ -459,7 +459,7 @@ async function editarSala(id) {
         const alerta = document.getElementById("responseRoomEdit");
         alerta.innerText = data.erro || data.message || "Erro desconhecido na edição";
         // Limpa o texto depois de 3 segundos
-        setTimeout(() => { alerta.innerText = ""; }, 3000);
+        setTimeout(() => { alerta.innerText = ""; }, 7000);
       }
     } catch (error) {
       alert(`${error.message}`);
@@ -511,7 +511,7 @@ async function editarUsuario(id) {
         alerta.innerText = `Usuário ${data.name} editado com sucesso!`;
 
         // Limpa o texto de alerta depois de 3 segundos
-        setTimeout(() => { alerta.innerText = ""; }, 3000);
+        setTimeout(() => { alerta.innerText = ""; }, 7000);
 
         //Limpa o formulário
         document.getElementById("roomFormEdit").reset();
@@ -522,7 +522,7 @@ async function editarUsuario(id) {
         const alerta = document.getElementById("responseRoomEdit");
         alerta.innerText = data.erro || data.message || "Erro desconhecido na edição";
         // Limpa o texto depois de 3 segundos
-        setTimeout(() => { alerta.innerText = ""; }, 3000);
+        setTimeout(() => { alerta.innerText = ""; }, 7000);
       }
     } catch (error) {
       alert(`${error.message}`);
