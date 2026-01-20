@@ -55,6 +55,24 @@ nav h1 {
     padding: 15px;
 }
 
+a#menu {
+    border: none;
+    color: #ffffff;
+    display: none;
+    text-align: center;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 21px;
+}
+
+#menu i {
+    border: none;
+}
+
+#menu i:hover {
+    border: 1px solid #ffffff;
+}
+
 
 
 /*  BREAKPOINTS */
@@ -84,17 +102,17 @@ nav h1 {
     }
 
     nav h1 {
-        font-size: 12px;
+        font-size: 20px;
         text-align: center;
     }
 
     .navbar h1 {
-        font-size: 12px;
+        font-size: 20px;
         text-align: center;
     }
 
     .icons {
-        font-size: 12px;
+        font-size: 20px;
         gap: 10px;
     }
 
@@ -103,7 +121,21 @@ nav h1 {
     }
 
     h4 {
-        font-size: 12px;
+        font-size: 18px;
+    }
+
+    a#menu {
+        border: none;
+        color: #ffffff;
+        display: block;
+        text-align: center;
+        padding: 10px;
+        cursor: pointer;
+        font-size: 21px;
+    }
+
+    #menu-img {
+        display: none;
     }
 }
 
@@ -111,12 +143,12 @@ nav h1 {
 @media (min-width: 768px) {
 
     nav h1 {
-        font-size: 18px;
+        font-size: 22px;
         text-align: center;
     }
 
     .navbar h1 {
-        font-size: 18px;
+        font-size: 22px;
         text-align: center;
     }
 
@@ -131,7 +163,7 @@ nav h1 {
     }
 
     .icons {
-        font-size: 12px;
+        font-size: 20px;
     }
 
     .fa {
@@ -139,12 +171,13 @@ nav h1 {
     }
 
     h4 {
-        font-size: 15px;
+        font-size: 18px;
     }
+
 }
 
 
-@media (min-width: 992px) {
+@media (min-width: 902px) {
     nav h1 {
         font-size: 34px;
     }
@@ -173,6 +206,14 @@ nav h1 {
 
     h4 {
         font-size: 18px;
+    }
+    
+    a#menu {
+        display: none;
+    }
+
+    #menu-img {
+        display: block;
     }
 
 }

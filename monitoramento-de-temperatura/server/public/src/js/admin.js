@@ -143,9 +143,13 @@ links.forEach(link => {
     console.log(section);
 
     if (section === 'room') {
+      const itens = document.getElementById('itens');
+      itens.classList.remove('aberto');
       await renderSalas();
 
     } else if (section === 'user') {
+      const itens = document.getElementById('itens');
+      itens.classList.remove('aberto');
       await renderUsuarios();
 
     } else if (section === 'reports') {
@@ -154,10 +158,15 @@ links.forEach(link => {
         console.log(dados);
 
         if (!dados.length) {
+          const itens = document.getElementById('itens');
+          itens.classList.remove('aberto');
           console.error(`Nenhum dado encontrado para o período`);
           window.alert("Sem dados para o período");
           return;
         }
+
+        const itens = document.getElementById('itens');
+        itens.classList.remove('aberto');
 
         const grid = document.getElementById("dashboard");
         grid.innerHTML = "";
@@ -394,6 +403,13 @@ function abrirModal(modalId, closeBtnSelector) {
 
 // Evento para excluir e editar usuário ou sala
 document.addEventListener('click', function (e) {
+
+  const menuBtn = e.target.closest('.menu-hamburger');
+
+  if (menuBtn) {
+    clickMenu();
+    return;
+  }
   if (e.target && e.target.classList.contains('excluirUsuario')) {
     const id = e.target.getAttribute('data-id');
     excluirUsuario(id);
@@ -407,7 +423,7 @@ document.addEventListener('click', function (e) {
   } else if (e.target && e.target.classList.contains('editarUsuario')) {
     const id = e.target.getAttribute('data-id');
     editarUsuario(id);
-  }
+  } 
 });
 
 
@@ -640,3 +656,8 @@ function removerLinhaTabela(id) {
 // document.getElementById('logoutBtn').addEventListener('click', () => {
 //   alert('Logout realizado!');
 // });
+
+function clickMenu() {
+  const itens = document.getElementById('itens');
+  itens.classList.toggle('aberto');
+}

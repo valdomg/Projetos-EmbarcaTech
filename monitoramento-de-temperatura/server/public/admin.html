@@ -12,7 +12,10 @@
 <body class="default hide">
 
     <nav class="navbar">
-        <a href="admin.html"><img src="src/img/logo2.png"></a>
+        <a id="menu" class="menu-hamburger">
+            <i class="fa fa-bars"></i>
+        </a>
+        <a id="menu-img" href="admin.html"><img src="src/img/logo2.png"></a>
         <h1>Painel do Administrador</h1>
         <div class="icons">
             <!-- <a href="relatorio.html" title="Relatório"><i class="fa fa-file-excel-o"></i></a> 
@@ -22,7 +25,8 @@
 
     <div class="dashboard-admin">
 
-        <div class="menu-lateral">
+        <div class="menu-lateral" id="itens">
+
             <a data-section="dashboard" class="username active">
                 <i class="fa fa-dashboard"></i> Dashboard
             </a>
@@ -44,7 +48,7 @@
             </a>
         </div>
 
-        <div class="menu-principal">
+        <div class="menu-principal" id="menu-principal">
             <div id="roomsGrid" class="show room-grid"></div>
             <div id="dashboard" class="hide admin-content"></div>
             <button type="button" id="btn-click" class="hide btn-primary">Cadastrar Novo</button>
