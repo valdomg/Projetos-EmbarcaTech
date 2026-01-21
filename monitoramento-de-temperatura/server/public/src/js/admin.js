@@ -271,6 +271,7 @@ document.addEventListener('click', (e) => {
         console.log(data);
 
         if (data && data.id) {
+          alertMsg('responseUser', 'sucesso');
           const alerta = document.getElementById("responseUser");
           alerta.innerText = `Usuário ${data.name} cadastrado com sucesso!`;
 
@@ -283,13 +284,14 @@ document.addEventListener('click', (e) => {
         } else {
 
           // alerta de erro;
+          alertMsg('responseUser', 'erro');
           const alerta = document.getElementById("responseUser");
           alerta.innerText = data.erro || data.message || "Erro desconhecido no cadastro";
           // Limpa o texto depois de 3 segundos
           setTimeout(() => { alerta.innerText = ""; }, 7000);
         }
       } catch (error) {
-        
+        alertMsg('responseUser', 'erro');
                   // alerta de erro;
           const alerta = document.getElementById("responseUser");
           alerta.innerText = error.message;
@@ -316,6 +318,7 @@ document.addEventListener('click', (e) => {
 
         if (data && data._id) {
           const alerta = document.getElementById("responseRoom");
+          alertMsg('responseRoom', 'sucesso');
           alerta.innerText = `Ambiente ${data.name} cadastrado com sucesso!`;
 
           // Limpa o texto de alerta depois de 3 segundos
@@ -328,6 +331,7 @@ document.addEventListener('click', (e) => {
 
           // alerta de erro;
           const alerta = document.getElementById("responseRoom");
+          alertMsg('responseRoom', 'alert');
           alerta.innerText = data.erro || data.message || "Erro desconhecido no cadastro";
           // Limpa o texto depois de 3 segundos
           setTimeout(() => { alerta.innerText = ""; }, 7000);
@@ -335,6 +339,7 @@ document.addEventListener('click', (e) => {
       } catch (error) {
                           // alerta de erro;
           const alerta = document.getElementById("responseRoom");
+          alertMsg('responseRoom', 'erro');
           alerta.innerText = error.message;
           // Limpa o texto depois de 3 segundos
           setTimeout(() => { alerta.innerText = ""; }, 7000);
@@ -487,6 +492,7 @@ async function editarSala(id) {
 
       if (data && data._id) {
         const alerta = document.getElementById("responseRoomEdit");
+        alertMsg('responseRoom', 'sucesso');
         alerta.innerText = `Ambiente ${data.name} editado com sucesso!`;
 
         // Limpa o texto de alerta depois de 3 segundos
@@ -499,6 +505,7 @@ async function editarSala(id) {
 
         // alerta de erro;
         const alerta = document.getElementById("responseRoomEdit");
+        alertMsg('responseRoom', 'erro');
         alerta.innerText = data.erro || data.message || "Erro desconhecido na edição";
         // Limpa o texto depois de 3 segundos
         setTimeout(() => { alerta.innerText = ""; }, 7000);
@@ -506,6 +513,7 @@ async function editarSala(id) {
     } catch (error) {
                                 // alerta de erro;
           const alerta = document.getElementById("responseRoom");
+          alertMsg('responseRoom', 'erro');
           alerta.innerText = error.message;
           // Limpa o texto depois de 3 segundos
           setTimeout(() => { alerta.innerText = ""; }, 7000);
@@ -554,6 +562,7 @@ async function editarUsuario(id) {
 
       if (data && data._id) {
         const alerta = document.getElementById("responseUserEdit");
+        alertMsg('responseRoom', 'sucesso');
         alerta.innerText = `Usuário ${data.name} editado com sucesso!`;
 
         // Limpa o texto de alerta depois de 3 segundos
@@ -566,6 +575,7 @@ async function editarUsuario(id) {
 
         // alerta de erro;
         const alerta = document.getElementById("responseRoomEdit");
+        alertMsg('responseRoom', 'erro');
         alerta.innerText = data.erro || data.message || "Erro desconhecido na edição";
         // Limpa o texto depois de 3 segundos
         setTimeout(() => { alerta.innerText = ""; }, 7000);
@@ -573,6 +583,7 @@ async function editarUsuario(id) {
     } catch (error) {
                                 // alerta de erro;
           const alerta = document.getElementById("responseRoom");
+          alertMsg('responseRoom', 'erro');
           alerta.innerText = error.message;
           // Limpa o texto depois de 3 segundos
           setTimeout(() => { alerta.innerText = ""; }, 7000);
@@ -694,4 +705,19 @@ function removerLinhaTabela(id) {
 function clickMenu() {
   const itens = document.getElementById('itens');
   itens.classList.toggle('aberto');
+}
+
+
+function alertMsg(elementId, tipo = 'erro'){
+  const el = document.getElementById(elementId);
+  if(tipo == 'erro'){
+  
+    el.classList.remove('alert-sucess');
+    el.classList.add('alert');
+
+  }else{
+
+    el.classList.remove('alert');
+    el.classList.add('alert-sucess');
+  }
 }
