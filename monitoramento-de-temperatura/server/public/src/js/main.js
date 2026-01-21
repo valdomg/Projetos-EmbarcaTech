@@ -14,15 +14,21 @@ export async function carregarTemperaturas() {
     const dados = await buscarTemperaturas();
 
     if (!dados.length) {
-      console.error("Nenhum dado encontrado.");
+      const grid = document.getElementById("dashboard");
+
+      if (grid) {
+        grid.innerHTML = "<p>Nenhuma sala com dados disponíveis</p>";
+      }
+
       return;
     }
 
     // Agrupa por sala e pega a última leitura
     const ultimasPorSala = {};
     dados.forEach(dado => {
-      const sala = dado.room; 
-      if (!sala){
+      const sala = dado.room;
+      if (!sala) {
+
         return;
       }
       if (!ultimasPorSala[sala._id] || new Date(dado.timestamp) > new Date(ultimasPorSala[sala._id].timestamp)) {
@@ -41,7 +47,7 @@ export async function carregarTemperaturas() {
     const grid = document.getElementById("roomsGrid");
 
     // condição caso o grid tenha sido removido do html
-    if(!grid){
+    if (!grid) {
       console.log('Não encontrou o elemento RoomGrid');
       return;
     }

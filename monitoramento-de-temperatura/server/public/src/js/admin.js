@@ -14,13 +14,21 @@ async function renderSalas() {
 
   const dados = await roomsSearch();
 
-  if (!dados.length) {
-    console.error("Nenhum dado encontrado.");
-    return;
-  }
-
   const grid = document.getElementById("dashboard");
   grid.innerHTML = "";
+
+  if (!dados.length) {
+    console.error("Nenhum dado encontrado.");
+    grid.innerHTML = "<p>Nenhuma sala cadastrada.</p>";
+
+    const button = document.getElementById('btn-click');
+    button.classList.remove('hide');
+    button.classList.add('show');
+    button.classList.remove('userInsert');
+    button.classList.add('roomInsert');
+
+    return;
+  }
 
   const table = document.createElement("table");
 
@@ -71,12 +79,21 @@ async function renderSalas() {
 async function renderUsuarios() {
   const dados = await usersSearch();
 
-  if (!dados.length) {
-    console.error("Nenhum dado encontrado.");
-    return;
-  }
   const grid = document.getElementById("dashboard");
   grid.innerHTML = "";
+
+  if (!dados.length) {
+    console.error("Nenhum dado encontrado.");
+    grid.innerHTML = "<p>Nenhum usuário cadastrado.</p>";
+
+    const button = document.getElementById('btn-click');
+    button.classList.remove('hide');
+    button.classList.add('show');
+    button.classList.remove('roomInsert');
+    button.classList.add('userInsert');
+
+    return;
+  }
 
   const table = document.createElement("table");
 
@@ -272,7 +289,12 @@ document.addEventListener('click', (e) => {
           setTimeout(() => { alerta.innerText = ""; }, 7000);
         }
       } catch (error) {
-        alert(`${error.message}`);
+        
+                  // alerta de erro;
+          const alerta = document.getElementById("responseUser");
+          alerta.innerText = error.message;
+          // Limpa o texto depois de 3 segundos
+          setTimeout(() => { alerta.innerText = ""; }, 7000);
       }
     };
 
@@ -311,7 +333,11 @@ document.addEventListener('click', (e) => {
           setTimeout(() => { alerta.innerText = ""; }, 7000);
         }
       } catch (error) {
-        alert(`${error.message}`);
+                          // alerta de erro;
+          const alerta = document.getElementById("responseRoom");
+          alerta.innerText = error.message;
+          // Limpa o texto depois de 3 segundos
+          setTimeout(() => { alerta.innerText = ""; }, 7000);
       }
     };
   } else if (e.target.classList.contains('emitirRelatorio')) {
@@ -423,7 +449,7 @@ document.addEventListener('click', function (e) {
   } else if (e.target && e.target.classList.contains('editarUsuario')) {
     const id = e.target.getAttribute('data-id');
     editarUsuario(id);
-  } 
+  }
 });
 
 
@@ -464,7 +490,7 @@ async function editarSala(id) {
         alerta.innerText = `Ambiente ${data.name} editado com sucesso!`;
 
         // Limpa o texto de alerta depois de 3 segundos
-        setTimeout(() => { alerta.innerText = ""; },7000);
+        setTimeout(() => { alerta.innerText = ""; }, 7000);
 
         //Limpa o formulário
         document.getElementById("roomFormEdit").reset();
@@ -478,7 +504,11 @@ async function editarSala(id) {
         setTimeout(() => { alerta.innerText = ""; }, 7000);
       }
     } catch (error) {
-      alert(`${error.message}`);
+                                // alerta de erro;
+          const alerta = document.getElementById("responseRoom");
+          alerta.innerText = error.message;
+          // Limpa o texto depois de 3 segundos
+          setTimeout(() => { alerta.innerText = ""; }, 7000);
     }
   };
 }
@@ -541,7 +571,11 @@ async function editarUsuario(id) {
         setTimeout(() => { alerta.innerText = ""; }, 7000);
       }
     } catch (error) {
-      alert(`${error.message}`);
+                                // alerta de erro;
+          const alerta = document.getElementById("responseRoom");
+          alerta.innerText = error.message;
+          // Limpa o texto depois de 3 segundos
+          setTimeout(() => { alerta.innerText = ""; }, 7000);
     }
   };
 }
