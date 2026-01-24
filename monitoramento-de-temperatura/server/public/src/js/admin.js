@@ -492,7 +492,7 @@ async function editarSala(id) {
 
       if (data && data._id) {
         const alerta = document.getElementById("responseRoomEdit");
-        alertMsg('responseRoom', 'sucesso');
+        alertMsg('responseRoomEdit', 'sucesso');
         alerta.innerText = `Ambiente ${data.name} editado com sucesso!`;
 
         // Limpa o texto de alerta depois de 3 segundos
@@ -505,7 +505,7 @@ async function editarSala(id) {
 
         // alerta de erro;
         const alerta = document.getElementById("responseRoomEdit");
-        alertMsg('responseRoom', 'erro');
+        alertMsg('responseRoomEdit', 'erro');
         alerta.innerText = data.erro || data.message || "Erro desconhecido na edição";
         // Limpa o texto depois de 3 segundos
         setTimeout(() => { alerta.innerText = ""; }, 7000);
@@ -513,7 +513,7 @@ async function editarSala(id) {
     } catch (error) {
                                 // alerta de erro;
           const alerta = document.getElementById("responseRoom");
-          alertMsg('responseRoom', 'erro');
+          alertMsg('responseRoomEdit', 'erro');
           alerta.innerText = error.message;
           // Limpa o texto depois de 3 segundos
           setTimeout(() => { alerta.innerText = ""; }, 7000);
@@ -554,7 +554,9 @@ async function editarUsuario(id) {
       //requisicao da API para editar sala
 
       if (senha != senha2) {
-        alerta.innerText = data.erro || data.message || "Erro desconhecido";
+        const alerta = document.getElementById("responseUserEdit");
+        alertMsg('responseUserEdit', 'erro');
+        alerta.innerText = "As senhas devem ser iguais!";
         return;
       }
       const data = await userEdit(id, nome, email, senha);
@@ -562,28 +564,28 @@ async function editarUsuario(id) {
 
       if (data && data._id) {
         const alerta = document.getElementById("responseUserEdit");
-        alertMsg('responseRoom', 'sucesso');
+        alertMsg('responseUserEdit', 'sucesso');
         alerta.innerText = `Usuário ${data.name} editado com sucesso!`;
 
         // Limpa o texto de alerta depois de 3 segundos
         setTimeout(() => { alerta.innerText = ""; }, 7000);
 
         //Limpa o formulário
-        document.getElementById("roomFormEdit").reset();
+        document.getElementById("userFormEdit").reset();
         await renderUsuarios();
       } else {
 
         // alerta de erro;
-        const alerta = document.getElementById("responseRoomEdit");
-        alertMsg('responseRoom', 'erro');
+        const alerta = document.getElementById("responseUserEdit");
+        alertMsg('responseUserEdit', 'erro');
         alerta.innerText = data.erro || data.message || "Erro desconhecido na edição";
         // Limpa o texto depois de 3 segundos
         setTimeout(() => { alerta.innerText = ""; }, 7000);
       }
     } catch (error) {
                                 // alerta de erro;
-          const alerta = document.getElementById("responseRoom");
-          alertMsg('responseRoom', 'erro');
+          const alerta = document.getElementById("responseUserEdit");
+          alertMsg('responseUserEdit', 'erro');
           alerta.innerText = error.message;
           // Limpa o texto depois de 3 segundos
           setTimeout(() => { alerta.innerText = ""; }, 7000);
