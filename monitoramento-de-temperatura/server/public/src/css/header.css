@@ -77,6 +77,12 @@ a#menu {
 
 /*  BREAKPOINTS */
 @media (min-width: 344px) {
+
+    nav h1{
+        font-size: 15px;
+        padding: 10px;
+    }
+
     nav {
         flex-direction: row;
         justify-content: space-between;
@@ -141,10 +147,10 @@ a#menu {
 
 
 @media (min-width: 768px) {
-
     nav h1 {
-        font-size: 22px;
+        font-size: 20px;
         text-align: center;
+        padding: 10px;
     }
 
     .navbar h1 {
@@ -179,7 +185,7 @@ a#menu {
 
 @media (min-width: 902px) {
     nav h1 {
-        font-size: 34px;
+        font-size: 33px;
     }
 
     .navbar h1 {
