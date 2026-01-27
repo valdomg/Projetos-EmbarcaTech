@@ -11,7 +11,7 @@ export async function buscarTemperaturas() {
       }
     });
 
-  if (!response) {
+  if (!response.ok) {
     throw new Error(`Erro na requisição: ${response.status}`);
   }
   const dados = await response.json();
@@ -30,7 +30,7 @@ export async function TempIntervalo(start, end) {
       }
     });
 
-  if (!response) {
+  if (!response.ok) {
     throw new Error("Erro ao buscar temperaturas");
   }
   const dados = await response.json();
@@ -50,7 +50,7 @@ export async function buscarTemperaturaSala(salaId) {
       }
     });
 
-  if (!response) {
+  if (!response.ok) {
     throw new Error("Erro ao buscar temperaturas");
   }
   const dados = await response.json();
@@ -71,7 +71,7 @@ export async function roomTempInterval(salaId, start, end) {
 
   const dados = await response.json();
 
-  if (!response) {
+  if (!response.ok) {
     throw new Error(dados.erro || dados.message || "Erro ao buscar temperaturas");
   }
 
@@ -89,7 +89,7 @@ export async function roomsSearch() {
       }
     });
 
-  if (!response) {
+  if (!response.ok) {
     throw new Error("Erro ao buscar salas");
   }
   const dados = await response.json();
@@ -214,7 +214,7 @@ export async function usersSearch() {
       }
     });
 
-  if (!response) {
+  if (!response.ok) {
     throw new Error("Erro ao buscar usuários");
   }
   const dados = await response.json();
