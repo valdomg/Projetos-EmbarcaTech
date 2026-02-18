@@ -15,4 +15,6 @@ extern void lcd1602_showData(float temp, float humi, bool alertTemp, bool alertH
 
 extern void handleBacklightLCD(bool isAlertState, bool commandTurnOnLCD);
 
+void showIPAddress(const char* msg_IPAddress);
+
 #endif // Final da diretiva de proteção contra múltiplas inclusões
