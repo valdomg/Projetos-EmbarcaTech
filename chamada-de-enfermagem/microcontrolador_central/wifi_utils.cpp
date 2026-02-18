@@ -4,7 +4,7 @@
 #include "log.h"
 #include "config_storage.h"
 
-#include "display_LCD-2004_I2C.h" // Para mostrar o IP da rede
+#include "display_LCD-2004_I2C.h"  // Para mostrar o IP da rede
 
 
 // ------------------------------------------------------------
@@ -57,21 +57,18 @@ bool connectToWiFi() {
 
   // Aguarda até a conexão ou até o timeout
   while (WiFi.status() != WL_CONNECTED && millis() < timeout) {
-    delay(500);  // aguarda meio segundo entre tentativas
-    Serial.print(".");     // imprime ponto para indicar progresso
+    delay(500);         // aguarda meio segundo entre tentativas
+    Serial.print(".");  // imprime ponto para indicar progresso
   }
 
   Serial.println();
 
   // Verifica se a conexão foi bem sucedida
   if (WiFi.status() == WL_CONNECTED) {
-    // log(LOG_INFO, "Conectado ao Wi-Fi: %s", WIFI_SSID);
-    const char* network_ipAddress = IPparserToConstChar(WiFi.localIP());
-    // log(LOG_INFO, "IP: %s", IPparserToConstChar(WiFi.localIP()));  // mostra o IP atribuído
-    log(LOG_INFO, "IP: %s", network_ipAddress);  // mostra o IP atribuído
+
 
     // Mostrar no display o IP da rede
-    showIPAddress(network_ipAddress);
+    showIPAddress(IPparserToConstChar(WiFi.localIP()));
     return true;
   }
 
@@ -133,10 +130,9 @@ void createAccessPoint() {
     WiFi.mode(WIFI_AP);
     WiFi.softAP(SSID_ACCESS_POINT, PASSWORD_ACCESS_POINT);
     IPAddress ip = WiFi.softAPIP();
-    
-    snprintf(ipBuffer, sizeof(ipBuffer), "%u.%u.%u.%u",
-             ip[0], ip[1], ip[2], ip[3]);
-    log(LOG_INFO, "Endereço IP: %s", ipBuffer);
+
+    showIPAddress(IPparserToConstChar(ip));
+    log(LOG_INFO, "Endereço IP: %s", IPparserToConstChar(ip));
   }
 }
 
