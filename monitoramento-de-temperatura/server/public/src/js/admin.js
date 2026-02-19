@@ -1,5 +1,5 @@
 import { checkAcess } from './auth.js';
-import { roomsSearch, usersSearch, userRegister,userEdit, userDelete, roomDelete, roomRegister, roomEdit } from './api.js';
+import { roomsSearch, usersSearch, userRegister, userEdit, userDelete, roomDelete, roomRegister, roomEdit } from './api.js';
 import { carregarTemperaturas } from './main.js'
 import { gerarRelatorio } from './report.js'
 
@@ -7,6 +7,137 @@ import { gerarRelatorio } from './report.js'
 document.addEventListener("DOMContentLoaded", () => {
   checkAcess("admin");
 });
+
+
+// função para renderizar tabela de dispositivos e ambientes
+async function renderSalas() {
+
+  const dados = await roomsSearch();
+
+  const grid = document.getElementById("dashboard");
+  grid.innerHTML = "";
+
+  if (!dados.length) {
+    console.error("Nenhum dado encontrado.");
+    grid.innerHTML = "<p>Nenhuma sala cadastrada.</p>";
+
+    const button = document.getElementById('btn-click');
+    button.classList.remove('hide');
+    button.classList.add('show');
+    button.classList.remove('userInsert');
+    button.classList.add('roomInsert');
+
+    return;
+  }
+
+  const table = document.createElement("table");
+
+  table.innerHTML = `
+                            <caption>Salas</caption>
+                            <thead>
+                                <tr>
+                                <th scope="col">Ambiente</th>
+                                <th scope="col">Microcontrolador</th>
+                                <th scope="col">ID</th>
+                                <th scope="col">Ações</th>
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                            `;
+
+  const tbody = table.querySelector("tbody");
+
+
+  dados.forEach(sala => {
+    const row = document.createElement("tr");
+    row.setAttribute("data-id", sala._id);
+    row.innerHTML = `
+                            <td>${sala.name.toUpperCase()}</td>
+                            <td>${sala.microcontrollerId}</td>
+                            <td>${sala._id}</td>
+                            <td>
+                            <button data-id="${sala._id}" class="btn-warning editarSala" >Editar</button>
+                            <button data-id="${sala._id}" class="btn excluirSala">Excluir</button>
+                            </td>
+                            `;
+    tbody.appendChild(row);
+  });
+
+  grid.appendChild(table);
+
+  const button = document.getElementById('btn-click');
+
+  button.classList.remove('hide');
+  button.classList.add('show');
+
+  button.classList.remove('userInsert');
+  button.classList.add('roomInsert')
+}
+
+
+// função para renderizar tabela de usuários
+async function renderUsuarios() {
+  const dados = await usersSearch();
+
+  const grid = document.getElementById("dashboard");
+  grid.innerHTML = "";
+
+  if (!dados.length) {
+    console.error("Nenhum dado encontrado.");
+    grid.innerHTML = "<p>Nenhum usuário cadastrado.</p>";
+
+    const button = document.getElementById('btn-click');
+    button.classList.remove('hide');
+    button.classList.add('show');
+    button.classList.remove('roomInsert');
+    button.classList.add('userInsert');
+
+    return;
+  }
+
+  const table = document.createElement("table");
+
+  table.innerHTML = `
+                            <caption>Usuários</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Usuário</th>
+                                    <th scope="col">Email</th>
+                                    <th scope="col">ID</th>
+                                    <th scope="col">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        `;
+
+  const tbody = table.querySelector("tbody");
+
+
+  dados.forEach(sala => {
+    const row = document.createElement("tr");
+    row.setAttribute("data-id", sala._id);
+    row.innerHTML = `
+          <td>${sala.name.toUpperCase()}</td>
+          <td>${sala.email}</td>
+          <td>${sala._id}</td>
+          <td>
+          <button data-id="${sala._id}" class="btn-warning editarUsuario" >Editar</button>
+          <button data-id="${sala._id}" class="btn excluirUsuario">Excluir</button>
+        </td>
+        `;
+    tbody.appendChild(row);
+  });
+  grid.appendChild(table);
+
+  // Alterar a classe do botão para mostrar o conteúdo
+  const button = document.getElementById('btn-click');
+
+  button.classList.remove('hide');
+  button.classList.add('show');
+
+  button.classList.remove('roomInsert');
+  button.classList.add('userInsert')
+}
 
 // carregarTemperaturas();
 const links = document.querySelectorAll('.menu-lateral a[data-section]');
@@ -29,143 +160,30 @@ links.forEach(link => {
     console.log(section);
 
     if (section === 'room') {
-      try {
-        const dados = await roomsSearch();
-
-        if (!dados.length) {
-          console.error("Nenhum dado encontrado.");
-          return;
-        }
-
-        const grid = document.getElementById("dashboard");
-        grid.innerHTML = "";
-
-        const table = document.createElement("table");
-
-        table.innerHTML = `
-                            <caption>Salas</caption>
-                            <thead>
-                                <tr>
-                                <th scope="col">Sala</th>
-                                <th scope="col">Microcontrolador</th>
-                                <th scope="col">ID</th>
-                                <th scope="col">Ações</th>
-                            </tr>
-                            </thead>
-                            <tbody></tbody>
-                            `;
-
-        const tbody = table.querySelector("tbody");
-
-
-        dados.forEach(sala => {
-          const row = document.createElement("tr");
-          row.setAttribute("data-id", sala._id);
-          row.innerHTML = `
-                            <td>${sala.name.toUpperCase()}</td>
-                            <td>${sala.microcontrollerId}</td>
-                            <td>${sala._id}</td>
-                            <td>
-                            <button data-id="${sala._id}" class="btn-warning editarSala" >Editar</button>
-                            <button data-id="${sala._id}" class="btn excluirSala">Excluir</button>
-                            </td>
-                            `;
-          tbody.appendChild(row);
-        });
-
-        grid.appendChild(table);
-
-        const button = document.getElementById('btn-click');
-
-        button.classList.remove('hide');
-        button.classList.add('show');
-
-        button.classList.remove('userInsert');
-        button.classList.add('roomInsert')
-      } catch (error) {
-        console.error("Erro ao carregar salas:", error);
-
-        if (error.message.includes("401") || error.message.includes("403")) {
-          alert("Acesso não autorizado. Faça login novamente.");
-          localStorage.removeItem("token");
-          window.location.href = "login.html";
-        }
-      }
-
+      const itens = document.getElementById('itens');
+      itens.classList.remove('aberto');
+      await renderSalas();
 
     } else if (section === 'user') {
-      try {
-        const dados = await usersSearch();
+      const itens = document.getElementById('itens');
+      itens.classList.remove('aberto');
+      await renderUsuarios();
 
-        if (!dados.length) {
-          console.error("Nenhum dado encontrado.");
-          return;
-        }
-        const grid = document.getElementById("dashboard");
-        grid.innerHTML = "";
-
-        const table = document.createElement("table");
-
-        table.innerHTML = `
-                            <caption>Usuários</caption>
-                            <thead>
-                                <tr>
-                                    <th scope="col">Nome</th>
-                                    <th scope="col">Email</th>
-                                    <th scope="col">ID</th>
-                                    <th scope="col">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        `;
-
-        const tbody = table.querySelector("tbody");
-
-
-        dados.forEach(sala => {
-          const row = document.createElement("tr");
-          row.setAttribute("data-id", sala._id);
-          row.innerHTML = `
-          <td>${sala.name.toUpperCase()}</td>
-          <td>${sala.email}</td>
-          <td>${sala._id}</td>
-          <td>
-          <button data-id="${sala._id}" class="btn-warning editarUsuario" >Editar</button>
-          <button data-id="${sala._id}" class="btn excluirUsuario">Excluir</button>
-        </td>
-        `;
-          tbody.appendChild(row);
-        });
-        grid.appendChild(table);
-
-        // Alterar a classe do botão para mostrar o conteúdo
-        const button = document.getElementById('btn-click');
-
-        button.classList.remove('hide');
-        button.classList.add('show');
-
-        button.classList.remove('roomInsert');
-        button.classList.add('userInsert')
-
-      } catch (error) {
-        console.error("Erro ao carregar salas:", error);
-
-        if (error.message.includes("401") || error.message.includes("403")) {
-          alert("Acesso não autorizado. Faça login novamente.");
-          localStorage.removeItem("token");
-          window.location.href = "login.html";
-        }
-      }
     } else if (section === 'reports') {
       try {
         const dados = await roomsSearch();
         console.log(dados);
 
         if (!dados.length) {
+          const itens = document.getElementById('itens');
+          itens.classList.remove('aberto');
           console.error(`Nenhum dado encontrado para o período`);
           window.alert("Sem dados para o período");
           return;
         }
+
+        const itens = document.getElementById('itens');
+        itens.classList.remove('aberto');
 
         const grid = document.getElementById("dashboard");
         grid.innerHTML = "";
@@ -174,6 +192,7 @@ links.forEach(link => {
         relatorio.classList.add("relatorio");
         relatorio.innerHTML = `
                 <h3>Emitir Relatório</h3>
+                <p id="alertRelatorio" class="alert"></p>
                 <div>
                     <label>Escolha o local</label>
                     <select name="room" id="room-select">
@@ -185,8 +204,9 @@ links.forEach(link => {
                     <input id="start" class="date" type="date">
                     <label>à </label>
                     <input id="end" class="date" type="date">
-                    <button  type="button" class="btn emitirRelatorio">Baixar</button>
+                    <button type="button" class="btn emitirRelatorio">Baixar</button>
                 </div>
+                
                 `;
 
         grid.appendChild(relatorio);
@@ -241,7 +261,7 @@ document.addEventListener('click', (e) => {
         alerta.innerText = "As senhas devem ser iguais!";
 
         // Limpa o texto de alerta depois de 3 segundos
-        setTimeout(() => { alerta.innerText = ""; }, 3000);
+        setTimeout(() => { alerta.innerText = ""; }, 7000);
         return;
       }
 
@@ -251,24 +271,32 @@ document.addEventListener('click', (e) => {
         console.log(data);
 
         if (data && data.id) {
+          alertMsg('responseUser', 'sucesso');
           const alerta = document.getElementById("responseUser");
           alerta.innerText = `Usuário ${data.name} cadastrado com sucesso!`;
 
           // Limpa o texto de alerta depois de 3 segundos
-          setTimeout(() => { alerta.innerText = ""; }, 3000);
+          setTimeout(() => { alerta.innerText = ""; }, 7000);
 
           //Limpa o formulário
           document.getElementById("userForm").reset();
+          await renderUsuarios();
         } else {
 
           // alerta de erro;
+          alertMsg('responseUser', 'erro');
           const alerta = document.getElementById("responseUser");
           alerta.innerText = data.erro || data.message || "Erro desconhecido no cadastro";
           // Limpa o texto depois de 3 segundos
-          setTimeout(() => { alerta.innerText = ""; }, 3000);
+          setTimeout(() => { alerta.innerText = ""; }, 7000);
         }
       } catch (error) {
-        alert(`${error.message}`);
+        alertMsg('responseUser', 'erro');
+                  // alerta de erro;
+          const alerta = document.getElementById("responseUser");
+          alerta.innerText = error.message;
+          // Limpa o texto depois de 3 segundos
+          setTimeout(() => { alerta.innerText = ""; }, 7000);
       }
     };
 
@@ -290,23 +318,31 @@ document.addEventListener('click', (e) => {
 
         if (data && data._id) {
           const alerta = document.getElementById("responseRoom");
+          alertMsg('responseRoom', 'sucesso');
           alerta.innerText = `Ambiente ${data.name} cadastrado com sucesso!`;
 
           // Limpa o texto de alerta depois de 3 segundos
-          setTimeout(() => { alerta.innerText = ""; }, 3000);
+          setTimeout(() => { alerta.innerText = ""; }, 7000);
 
           //Limpa o formulário
           document.getElementById("roomForm").reset();
+          await renderSalas();
         } else {
 
           // alerta de erro;
           const alerta = document.getElementById("responseRoom");
+          alertMsg('responseRoom', 'alert');
           alerta.innerText = data.erro || data.message || "Erro desconhecido no cadastro";
           // Limpa o texto depois de 3 segundos
-          setTimeout(() => { alerta.innerText = ""; }, 3000);
+          setTimeout(() => { alerta.innerText = ""; }, 7000);
         }
       } catch (error) {
-        alert(`${error.message}`);
+                          // alerta de erro;
+          const alerta = document.getElementById("responseRoom");
+          alertMsg('responseRoom', 'erro');
+          alerta.innerText = error.message;
+          // Limpa o texto depois de 3 segundos
+          setTimeout(() => { alerta.innerText = ""; }, 7000);
       }
     };
   } else if (e.target.classList.contains('emitirRelatorio')) {
@@ -398,6 +434,13 @@ function abrirModal(modalId, closeBtnSelector) {
 
 // Evento para excluir e editar usuário ou sala
 document.addEventListener('click', function (e) {
+
+  const menuBtn = e.target.closest('.menu-hamburger');
+
+  if (menuBtn) {
+    clickMenu();
+    return;
+  }
   if (e.target && e.target.classList.contains('excluirUsuario')) {
     const id = e.target.getAttribute('data-id');
     excluirUsuario(id);
@@ -406,11 +449,11 @@ document.addEventListener('click', function (e) {
     const id = e.target.getAttribute('data-id');
     excluirSala(id);
   } else if (e.target && e.target.classList.contains('editarSala')) {
-      const id = e.target.getAttribute('data-id');
-      editarSala(id);
-  } else if(e.target && e.target.classList.contains('editarUsuario')) {
-      const id = e.target.getAttribute('data-id');
-      editarUsuario(id);
+    const id = e.target.getAttribute('data-id');
+    editarSala(id);
+  } else if (e.target && e.target.classList.contains('editarUsuario')) {
+    const id = e.target.getAttribute('data-id');
+    editarUsuario(id);
   }
 });
 
@@ -449,23 +492,31 @@ async function editarSala(id) {
 
       if (data && data._id) {
         const alerta = document.getElementById("responseRoomEdit");
+        alertMsg('responseRoomEdit', 'sucesso');
         alerta.innerText = `Ambiente ${data.name} editado com sucesso!`;
 
         // Limpa o texto de alerta depois de 3 segundos
-        setTimeout(() => { alerta.innerText = ""; }, 3000);
+        setTimeout(() => { alerta.innerText = ""; }, 7000);
 
         //Limpa o formulário
         document.getElementById("roomFormEdit").reset();
+        await renderSalas();
       } else {
 
         // alerta de erro;
         const alerta = document.getElementById("responseRoomEdit");
+        alertMsg('responseRoomEdit', 'erro');
         alerta.innerText = data.erro || data.message || "Erro desconhecido na edição";
         // Limpa o texto depois de 3 segundos
-        setTimeout(() => { alerta.innerText = ""; }, 3000);
+        setTimeout(() => { alerta.innerText = ""; }, 7000);
       }
     } catch (error) {
-      alert(`${error.message}`);
+                                // alerta de erro;
+          const alerta = document.getElementById("responseRoom");
+          alertMsg('responseRoomEdit', 'erro');
+          alerta.innerText = error.message;
+          // Limpa o texto depois de 3 segundos
+          setTimeout(() => { alerta.innerText = ""; }, 7000);
     }
   };
 }
@@ -497,13 +548,15 @@ async function editarUsuario(id) {
 
     try {
       const nome = document.getElementById("nameEdit").value;
-      const micro = document.getElementById("emailEdit").value;
+      const email = document.getElementById("emailEdit").value;
       const senha = document.getElementById('senhaEdit').value;
       const senha2 = document.getElementById('senha2Edit').value;
       //requisicao da API para editar sala
 
-      if (senha != senha2){
-        alerta.innerText = data.erro || data.message || "Erro desconhecido";
+      if (senha != senha2) {
+        const alerta = document.getElementById("responseUserEdit");
+        alertMsg('responseUserEdit', 'erro');
+        alerta.innerText = "As senhas devem ser iguais!";
         return;
       }
       const data = await userEdit(id, nome, email, senha);
@@ -511,74 +564,125 @@ async function editarUsuario(id) {
 
       if (data && data._id) {
         const alerta = document.getElementById("responseUserEdit");
+        alertMsg('responseUserEdit', 'sucesso');
         alerta.innerText = `Usuário ${data.name} editado com sucesso!`;
 
         // Limpa o texto de alerta depois de 3 segundos
-        setTimeout(() => { alerta.innerText = ""; }, 3000);
+        setTimeout(() => { alerta.innerText = ""; }, 7000);
 
         //Limpa o formulário
-        document.getElementById("roomFormEdit").reset();
+        document.getElementById("userFormEdit").reset();
+        await renderUsuarios();
       } else {
 
         // alerta de erro;
-        const alerta = document.getElementById("responseRoomEdit");
+        const alerta = document.getElementById("responseUserEdit");
+        alertMsg('responseUserEdit', 'erro');
         alerta.innerText = data.erro || data.message || "Erro desconhecido na edição";
         // Limpa o texto depois de 3 segundos
-        setTimeout(() => { alerta.innerText = ""; }, 3000);
+        setTimeout(() => { alerta.innerText = ""; }, 7000);
       }
     } catch (error) {
-      alert(`${error.message}`);
+                                // alerta de erro;
+          const alerta = document.getElementById("responseUserEdit");
+          alertMsg('responseUserEdit', 'erro');
+          alerta.innerText = error.message;
+          // Limpa o texto depois de 3 segundos
+          setTimeout(() => { alerta.innerText = ""; }, 7000);
     }
   };
 }
 
 
 //Função excluir usuário
-async function excluirUsuario(id) {
+async function excluirUsuario(id, colunaIndex = 0) {
   // Confirmar exclusão
-  const confirmacao = confirm("Tem certeza que deseja excluir?");
-  if (!confirmacao) return; // Se o usuário não confirmar, a função é encerrada
+  // Mostrar o modal
+  const modal = document.getElementById('modalDelete');
+  abrirModal('modalDelete', '#confirmNo');
 
-  try {
-    const data = await userDelete(id);
+  // Pegar a linha pelo id
+  const linha = document.querySelector(`tr[data-id='${id}']`);
+
+  // Pegar o texto da célula específica
+  const valor = linha.getElementsByTagName('td')[colunaIndex].innerText;
+
+  // Pegar o cabeçalho da tabela correspondente
+  const tabela = linha.closest('table');
+  const th = tabela.querySelectorAll('thead th')[colunaIndex].innerText;
+
+  const mensagem = `Tem certeza que deseja excluir permanentemente "${th}: ${valor}"?`;
+
+  document.getElementById('deleteMessage').innerText = mensagem;
+
+  const excluir = document.getElementById("confirmYes");
+  excluir.onclick = async (e) => {
+    e.preventDefault();
+
+    try {
+      const data = await userDelete(id);
 
 
-    if (data.ok) {
-      alert(`Item com ID ${id} excluído com sucesso!`);
-      removerLinhaTabela(id);
-      return;
+      if (data.ok) {
+        removerLinhaTabela(id);
+        modal.close();
+        return;
+
+      }
+      alert(data.erro || data.message || "Erro desconhecido ao excluir o item");
 
     }
-    alert(data.erro || data.message || "Erro desconhecido ao excluir o item");
-
-  }
-  catch (error) {
-    alert(`Erro: ${error.message}`);
+    catch (error) {
+      alert(`Erro: ${error.message}`);
+    }
   }
 }
 
 
 //Função excluir usuário
-async function excluirSala(id) {
+async function excluirSala(id, colunaIndex = 0) {
   // Confirmar exclusão
-  const confirmacao = confirm("Tem certeza que deseja excluir?");
-  if (!confirmacao) return; // Se o usuário não confirmar, a função é encerrada
+  // Mostrar o modal
+  const modal = document.getElementById('modalDelete');
+  abrirModal('modalDelete', '#confirmNo');
 
-  try {
-    const data = await roomDelete(id);
+  // Pegar a linha pelo id
+  const linha = document.querySelector(`tr[data-id='${id}']`);
+
+  // Pegar o texto da célula específica
+  const valor = linha.getElementsByTagName('td')[colunaIndex].innerText;
 
 
-    if (data.ok) {
-      alert(`Item com ID ${id} excluído com sucesso!`);
-      removerLinhaTabela(id);
-      return;
+  // Pegar o cabeçalho da tabela correspondente
+  const tabela = linha.closest('table');
+  const th = tabela.querySelectorAll('thead th')[colunaIndex].innerText;
+
+
+  // Mensagem final
+  const mensagem = `Tem certeza que deseja excluir permanentemente "${th}: ${valor}"?`;
+  document.getElementById('deleteMessage').innerText = mensagem;
+
+  const excluir = document.getElementById("confirmYes");
+  excluir.onclick = async (e) => {
+    e.preventDefault();
+
+    try {
+
+      const data = await roomDelete(id);
+
+
+      if (data.ok) {
+        removerLinhaTabela(id);
+        modal.close();
+        return;
+
+      }
+      alert(data.erro || data.message || "Erro desconhecido ao excluir o item");
 
     }
-    alert(data.erro || data.message || "Erro desconhecido ao excluir o item");
-
-  }
-  catch (error) {
-    alert(`Erro: ${error.message}`);
+    catch (error) {
+      alert(`Erro: ${error.message}`);
+    }
   }
 }
 
@@ -595,7 +699,27 @@ function removerLinhaTabela(id) {
 }
 
 
-//Evento para logout
-document.getElementById('logoutBtn').addEventListener('click', () => {
-  alert('Logout realizado!');
-});
+// //Evento para logout
+// document.getElementById('logoutBtn').addEventListener('click', () => {
+//   alert('Logout realizado!');
+// });
+
+function clickMenu() {
+  const itens = document.getElementById('itens');
+  itens.classList.toggle('aberto');
+}
+
+
+function alertMsg(elementId, tipo = 'erro'){
+  const el = document.getElementById(elementId);
+  if(tipo == 'erro'){
+  
+    el.classList.remove('alert-sucess');
+    el.classList.add('alert');
+
+  }else{
+
+    el.classList.remove('alert');
+    el.classList.add('alert-sucess');
+  }
+}

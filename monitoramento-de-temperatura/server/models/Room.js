@@ -20,6 +20,16 @@ const roomSchema = new mongoose.Schema({
     required: true,
     default: 30
   },
+  minHumidity: {
+    type: Number,
+    required: true,
+    default: 30
+  },
+  maxHumidity: {
+    type: Number,
+    required: true,
+    default: 60
+  }
 });
 
 const Room = mongoose.model("Room", roomSchema);

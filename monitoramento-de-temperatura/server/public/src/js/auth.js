@@ -27,8 +27,10 @@ export function checkAcess(permissao = null) {
   const token = localStorage.getItem("token");
 
   if (!token) {
-    alert("Sessão expirada, faça login novamente.");
+    // alert("Sessão expirada, faça login novamente.");
     window.location.href = "login.html";
+    const alerta = document.getElementById("responseUser");
+    alerta.innerText = "Sessão expirada, faça login novamente.";
     return false;
   }
 
@@ -45,19 +47,26 @@ export function checkAcess(permissao = null) {
     }
 
     if (decoded.exp && decoded.exp < now) {
-      alert("Sessão expirada, faça login novamente.");
+      // alert("Sessão expirada, faça login novamente.");
       localStorage.removeItem("token");
       window.location.href = "login.html";
+      // console.error("Erro ao fazer login:", error);
+      const alerta = document.getElementById("responseUser");
+      alerta.innerText = "Sessão expirada, faça login novamente.";
       return false;
     }
 
+    document.body.classList.remove("hide");
+    document.body.classList.add("show");
     return true; // acesso liberado
 
   } catch (e) {
     console.error("Erro ao decodificar token:", e);
-    alert(`Erro: ${e}`);
+    const alerta = document.getElementById("responseUser");
+    // alert(`Erro: ${e}`);
     localStorage.removeItem("token");
     window.location.href = "login.html";
+    alerta.innerText = `${e}`;
     return false;
   }
 }
