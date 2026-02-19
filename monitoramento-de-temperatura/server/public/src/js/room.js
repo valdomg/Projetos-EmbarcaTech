@@ -112,14 +112,17 @@ async function atualizarGraficos() {
 
 function calcularIntervalo() {
   const agora = new Date();
+  
   const start = new Date(agora);
-  start.setHours(agora.getHours() - 24); // Subtrai 24 horas para obter o "start" de 24 horas atrás
+  start.setDate(start.getDate() - 1);
 
-  // Formatar as datas no formato ISO 8601 para passar na URL
-  const startISO = start.toISOString();
-  const endISO = agora.toISOString(); // A data de "agora" será o "end"
+  const startDate = start.toISOString().split("T")[0];
+  const endDate = agora.toISOString().split("T")[0];
 
-  return { start: startISO, end: endISO };
+  return {
+    start: startDate, // YYYY-MM-DD
+    end: endDate      // YYYY-MM-DD
+  };
 }
 
 

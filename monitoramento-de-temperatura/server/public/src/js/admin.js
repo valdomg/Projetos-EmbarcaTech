@@ -14,13 +14,21 @@ async function renderSalas() {
 
   const dados = await roomsSearch();
 
-  if (!dados.length) {
-    console.error("Nenhum dado encontrado.");
-    return;
-  }
-
   const grid = document.getElementById("dashboard");
   grid.innerHTML = "";
+
+  if (!dados.length) {
+    console.error("Nenhum dado encontrado.");
+    grid.innerHTML = "<p>Nenhuma sala cadastrada.</p>";
+
+    const button = document.getElementById('btn-click');
+    button.classList.remove('hide');
+    button.classList.add('show');
+    button.classList.remove('userInsert');
+    button.classList.add('roomInsert');
+
+    return;
+  }
 
   const table = document.createElement("table");
 
@@ -71,12 +79,21 @@ async function renderSalas() {
 async function renderUsuarios() {
   const dados = await usersSearch();
 
-  if (!dados.length) {
-    console.error("Nenhum dado encontrado.");
-    return;
-  }
   const grid = document.getElementById("dashboard");
   grid.innerHTML = "";
+
+  if (!dados.length) {
+    console.error("Nenhum dado encontrado.");
+    grid.innerHTML = "<p>Nenhum usuário cadastrado.</p>";
+
+    const button = document.getElementById('btn-click');
+    button.classList.remove('hide');
+    button.classList.add('show');
+    button.classList.remove('roomInsert');
+    button.classList.add('userInsert');
+
+    return;
+  }
 
   const table = document.createElement("table");
 
@@ -143,9 +160,13 @@ links.forEach(link => {
     console.log(section);
 
     if (section === 'room') {
+      const itens = document.getElementById('itens');
+      itens.classList.remove('aberto');
       await renderSalas();
 
     } else if (section === 'user') {
+      const itens = document.getElementById('itens');
+      itens.classList.remove('aberto');
       await renderUsuarios();
 
     } else if (section === 'reports') {
@@ -154,10 +175,15 @@ links.forEach(link => {
         console.log(dados);
 
         if (!dados.length) {
+          const itens = document.getElementById('itens');
+          itens.classList.remove('aberto');
           console.error(`Nenhum dado encontrado para o período`);
           window.alert("Sem dados para o período");
           return;
         }
+
+        const itens = document.getElementById('itens');
+        itens.classList.remove('aberto');
 
         const grid = document.getElementById("dashboard");
         grid.innerHTML = "";
@@ -235,7 +261,7 @@ document.addEventListener('click', (e) => {
         alerta.innerText = "As senhas devem ser iguais!";
 
         // Limpa o texto de alerta depois de 3 segundos
-        setTimeout(() => { alerta.innerText = ""; }, 3000);
+        setTimeout(() => { alerta.innerText = ""; }, 7000);
         return;
       }
 
@@ -245,11 +271,12 @@ document.addEventListener('click', (e) => {
         console.log(data);
 
         if (data && data.id) {
+          alertMsg('responseUser', 'sucesso');
           const alerta = document.getElementById("responseUser");
           alerta.innerText = `Usuário ${data.name} cadastrado com sucesso!`;
 
           // Limpa o texto de alerta depois de 3 segundos
-          setTimeout(() => { alerta.innerText = ""; }, 3000);
+          setTimeout(() => { alerta.innerText = ""; }, 7000);
 
           //Limpa o formulário
           document.getElementById("userForm").reset();
@@ -257,13 +284,19 @@ document.addEventListener('click', (e) => {
         } else {
 
           // alerta de erro;
+          alertMsg('responseUser', 'erro');
           const alerta = document.getElementById("responseUser");
           alerta.innerText = data.erro || data.message || "Erro desconhecido no cadastro";
           // Limpa o texto depois de 3 segundos
-          setTimeout(() => { alerta.innerText = ""; }, 3000);
+          setTimeout(() => { alerta.innerText = ""; }, 7000);
         }
       } catch (error) {
-        alert(`${error.message}`);
+        alertMsg('responseUser', 'erro');
+                  // alerta de erro;
+          const alerta = document.getElementById("responseUser");
+          alerta.innerText = error.message;
+          // Limpa o texto depois de 3 segundos
+          setTimeout(() => { alerta.innerText = ""; }, 7000);
       }
     };
 
@@ -285,10 +318,11 @@ document.addEventListener('click', (e) => {
 
         if (data && data._id) {
           const alerta = document.getElementById("responseRoom");
+          alertMsg('responseRoom', 'sucesso');
           alerta.innerText = `Ambiente ${data.name} cadastrado com sucesso!`;
 
           // Limpa o texto de alerta depois de 3 segundos
-          setTimeout(() => { alerta.innerText = ""; }, 3000);
+          setTimeout(() => { alerta.innerText = ""; }, 7000);
 
           //Limpa o formulário
           document.getElementById("roomForm").reset();
@@ -297,12 +331,18 @@ document.addEventListener('click', (e) => {
 
           // alerta de erro;
           const alerta = document.getElementById("responseRoom");
+          alertMsg('responseRoom', 'alert');
           alerta.innerText = data.erro || data.message || "Erro desconhecido no cadastro";
           // Limpa o texto depois de 3 segundos
-          setTimeout(() => { alerta.innerText = ""; }, 3000);
+          setTimeout(() => { alerta.innerText = ""; }, 7000);
         }
       } catch (error) {
-        alert(`${error.message}`);
+                          // alerta de erro;
+          const alerta = document.getElementById("responseRoom");
+          alertMsg('responseRoom', 'erro');
+          alerta.innerText = error.message;
+          // Limpa o texto depois de 3 segundos
+          setTimeout(() => { alerta.innerText = ""; }, 7000);
       }
     };
   } else if (e.target.classList.contains('emitirRelatorio')) {
@@ -394,6 +434,13 @@ function abrirModal(modalId, closeBtnSelector) {
 
 // Evento para excluir e editar usuário ou sala
 document.addEventListener('click', function (e) {
+
+  const menuBtn = e.target.closest('.menu-hamburger');
+
+  if (menuBtn) {
+    clickMenu();
+    return;
+  }
   if (e.target && e.target.classList.contains('excluirUsuario')) {
     const id = e.target.getAttribute('data-id');
     excluirUsuario(id);
@@ -445,10 +492,11 @@ async function editarSala(id) {
 
       if (data && data._id) {
         const alerta = document.getElementById("responseRoomEdit");
+        alertMsg('responseRoomEdit', 'sucesso');
         alerta.innerText = `Ambiente ${data.name} editado com sucesso!`;
 
         // Limpa o texto de alerta depois de 3 segundos
-        setTimeout(() => { alerta.innerText = ""; }, 3000);
+        setTimeout(() => { alerta.innerText = ""; }, 7000);
 
         //Limpa o formulário
         document.getElementById("roomFormEdit").reset();
@@ -457,12 +505,18 @@ async function editarSala(id) {
 
         // alerta de erro;
         const alerta = document.getElementById("responseRoomEdit");
+        alertMsg('responseRoomEdit', 'erro');
         alerta.innerText = data.erro || data.message || "Erro desconhecido na edição";
         // Limpa o texto depois de 3 segundos
-        setTimeout(() => { alerta.innerText = ""; }, 3000);
+        setTimeout(() => { alerta.innerText = ""; }, 7000);
       }
     } catch (error) {
-      alert(`${error.message}`);
+                                // alerta de erro;
+          const alerta = document.getElementById("responseRoom");
+          alertMsg('responseRoomEdit', 'erro');
+          alerta.innerText = error.message;
+          // Limpa o texto depois de 3 segundos
+          setTimeout(() => { alerta.innerText = ""; }, 7000);
     }
   };
 }
@@ -500,7 +554,9 @@ async function editarUsuario(id) {
       //requisicao da API para editar sala
 
       if (senha != senha2) {
-        alerta.innerText = data.erro || data.message || "Erro desconhecido";
+        const alerta = document.getElementById("responseUserEdit");
+        alertMsg('responseUserEdit', 'erro');
+        alerta.innerText = "As senhas devem ser iguais!";
         return;
       }
       const data = await userEdit(id, nome, email, senha);
@@ -508,24 +564,31 @@ async function editarUsuario(id) {
 
       if (data && data._id) {
         const alerta = document.getElementById("responseUserEdit");
+        alertMsg('responseUserEdit', 'sucesso');
         alerta.innerText = `Usuário ${data.name} editado com sucesso!`;
 
         // Limpa o texto de alerta depois de 3 segundos
-        setTimeout(() => { alerta.innerText = ""; }, 3000);
+        setTimeout(() => { alerta.innerText = ""; }, 7000);
 
         //Limpa o formulário
-        document.getElementById("roomFormEdit").reset();
+        document.getElementById("userFormEdit").reset();
         await renderUsuarios();
       } else {
 
         // alerta de erro;
-        const alerta = document.getElementById("responseRoomEdit");
+        const alerta = document.getElementById("responseUserEdit");
+        alertMsg('responseUserEdit', 'erro');
         alerta.innerText = data.erro || data.message || "Erro desconhecido na edição";
         // Limpa o texto depois de 3 segundos
-        setTimeout(() => { alerta.innerText = ""; }, 3000);
+        setTimeout(() => { alerta.innerText = ""; }, 7000);
       }
     } catch (error) {
-      alert(`${error.message}`);
+                                // alerta de erro;
+          const alerta = document.getElementById("responseUserEdit");
+          alertMsg('responseUserEdit', 'erro');
+          alerta.innerText = error.message;
+          // Limpa o texto depois de 3 segundos
+          setTimeout(() => { alerta.innerText = ""; }, 7000);
     }
   };
 }
@@ -640,3 +703,23 @@ function removerLinhaTabela(id) {
 // document.getElementById('logoutBtn').addEventListener('click', () => {
 //   alert('Logout realizado!');
 // });
+
+function clickMenu() {
+  const itens = document.getElementById('itens');
+  itens.classList.toggle('aberto');
+}
+
+
+function alertMsg(elementId, tipo = 'erro'){
+  const el = document.getElementById(elementId);
+  if(tipo == 'erro'){
+  
+    el.classList.remove('alert-sucess');
+    el.classList.add('alert');
+
+  }else{
+
+    el.classList.remove('alert');
+    el.classList.add('alert-sucess');
+  }
+}
