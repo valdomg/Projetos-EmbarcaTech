@@ -1,13 +1,28 @@
 /**
  * @file button.cpp
- * @brief Implementação das rotinas de controle e interrupção de botões físicos.
+ * @brief Implementação do módulo de controle de botões físicos.
  *
- * Este módulo lida com o gerenciamento de dois botões:
- * - Um botão de **mute** (curto clique)
- * - Um botão de **long press** (pressionamento longo)
+ * @details
+ * Este módulo é responsável pelo gerenciamento de dois botões físicos
+ * utilizados no sistema:
  *
- * Inclui tratamento de debounce, alternância lógica (toggle), 
- * e detecção de pressões longas baseadas em tempo.
+ * - Botão de mute (pressionamento curto)
+ * - Botão de long press (pressionamento longo)
+ *
+ * Funcionalidades implementadas:
+ *
+ * - Detecção de pressionamento curto
+ * - Detecção de pressionamento longo
+ * - Alternância de estado lógico (toggle)
+ * - Tratamento de debounce por software
+ * - Uso de interrupções externas (ISR)
+ *
+ * O módulo utiliza variáveis do tipo volatile para garantir integridade
+ * no acesso concorrente entre o código principal e as rotinas de interrupção.
+ *
+ * @note Este módulo depende das definições de pinos em config.h
+ *
+ * @date 2026
  */
 
 #include "c_types.h"
@@ -15,36 +30,67 @@
 #include "log.h"
 #include "config.h"
 
-// -----------------------------------------------------------------------------
-// Variáveis globais
-// -----------------------------------------------------------------------------
-
-/// Marca o tempo em que o botão começou a ser pressionado (usado para long press)
+/**
+ * @brief Armazena o instante em que o botão foi pressionado.
+ *
+ * @details
+ * Utilizado para calcular o tempo de duração do pressionamento
+ * e determinar se foi um short press ou long press.
+ *
+ * @note Variável modificada dentro de ISR.
+ */
 volatile unsigned long buttonPressStartTime = 0;
 
-/// Indica se ocorreu uma pressão longa no botão (pressionado > 15s)
+/**
+ * @brief Flag que indica ocorrência de long press.
+ *
+ * @details
+ * É ativada quando o botão permanece pressionado por tempo
+ * superior ao limite definido.
+ *
+ * @note Acessada no loop principal.
+ */
 volatile bool flagLongPress = false;
 
-volatile bool flagShortPress = false;
-
-/// Indica se o botão está atualmente pressionado
-volatile bool isButtonPressed = false;
 
 /**
- * @brief Flag que indica se o botão "mute" foi pressionado.
- * 
- * É `volatile` porque pode ser modificada dentro de uma ISR (rotina de interrupção),
- * garantindo leitura correta mesmo em contextos concorrentes.
+ * @brief Flag que indica ocorrência de short press.
+ *
+ * @note Definida dentro da ISR e consumida no loop principal.
+ */
+volatile bool flagShortPress = false;
+
+
+/**
+ * @brief Indica se o botão está atualmente pressionado.
+ *
+ * @details
+ * Utilizado para controlar a transição de estados
+ * impedindo a atualizacao do buttonPressStartTime
+ * para estado atual e obtendo o momento em que o botao foi 
+ * precionado.
+ */
+volatile bool isButtonPressed = false;
+
+
+/**
+ * @brief Flag de pressionamento do botão mute.
+ *
+ * @details
+ * Utilizada para sinalizar que ocorreu um clique válido,
+ * após tratamento de debounce.
  */
 volatile bool flagMutePressed = false;
 
 
 bool isLCDturnOn = false;
 
+
 /**
- * @brief Estado lógico atual do botão de mute.
- * 
- * Alterna (toggle) entre `true` e `false` a cada clique válido.
+ * @brief Indica se o sistema está em modo mute.
+ *
+ * @details
+ * Alterna seu valor a cada clique válido no botão mute.
  */
 bool isMuted = false;
 
@@ -54,14 +100,16 @@ bool isMuted = false;
 // -----------------------------------------------------------------------------
 
 /**
- * @brief ISR do botão de mute.
+ * @brief Rotina de interrupção do botão de mute.
  *
- * Chamado automaticamente a cada borda de subida (RISING) no pino do botão.
- * Implementa um **debounce por software** para evitar múltiplas detecções
- * de um mesmo clique físico.
+ * @details
+ * Executada automaticamente quando ocorre uma borda de subida
+ * no pino configurado.
  *
- * Se o intervalo desde a última interrupção for maior que 500 ms, a flag
- * `flagMutePressed` é ativada.
+ * Implementa debounce por software para evitar múltiplas
+ * detecções causadas por ruído mecânico.
+ *
+ * @note Esta função é executada em contexto de interrupção.
  */
 void IRAM_ATTR muteButtonISR() {
   static unsigned long lastInterruptTime = 0;  ///< Marca o instante da última interrupção
@@ -75,25 +123,32 @@ void IRAM_ATTR muteButtonISR() {
 }
 
 /**
- * @brief ISR para detecção de pressão longa.
+ * @brief Rotina de interrupção para detecção de long press.
  *
- * Detecta quanto tempo o botão permanece pressionado.
- * Se for pressionado por mais de 15 segundos, ativa a flag `flagLongPress`.
+ * @details
+ * Monitora o tempo em que o botão permanece pressionado.
+ *
+ * Comportamento:
+ *
+ * - Se pressionado por mais de 15 segundos → long press
+ * - Se pressionado entre 100 ms e 15 segundos → short press
+ *
+ * @note Executada em contexto de interrupção.
  */
 void IRAM_ATTR longPressButtonISR() {
   bool readButton = digitalRead(PIN_BUTTON_LONG);
 
-  if (readButton == LOW && !isButtonPressed) {
-    // Início da pressão
+  if (readButton == LOW && !isButtonPressed) { //captura o tempo inicial onde o botao foi precionado evento de decida
+    // Início da pressão                       //impede que quando o botao matem-se pressionado o registro de tempo atualize novamente
     buttonPressStartTime = millis();
     isButtonPressed = true;
 
-  } else if (readButton == HIGH && isButtonPressed) {
+  } else if (readButton == HIGH && isButtonPressed) { // checa se o botao foi solto
     // Soltou o botão
     unsigned long now = millis();
-    if (now - buttonPressStartTime >= 15 * 1000) {
+    if (now - buttonPressStartTime >= 15 * 1000) { //verifica se o botao passou 15 segundos pressionados
       flagLongPress = !flagLongPress;
-    } else if (now - buttonPressStartTime < 15 * 1000 && now - buttonPressStartTime >= 100) {
+    } else if (now - buttonPressStartTime < 15 * 1000 && now - buttonPressStartTime >= 100) { //verifica se foi um short press
       flagShortPress = true;
       
     }
@@ -109,48 +164,64 @@ void IRAM_ATTR longPressButtonISR() {
 /**
  * @brief Inicializa o pino do botão.
  *
- * Configura o pino como entrada com **pull-up interno**,
- * preparando-o para ser utilizado com interrupções.
+ * @param pin Número do pino digital conectado ao botão.
  *
- * @param pin Pino digital conectado ao botão.
+ * @details
+ * Configura o pino como entrada com resistor pull-up interno.
+ *
+ * @note Deve ser chamada durante o setup do sistema.
  */
 void buttonInit(uint8_t pin) {
   pinMode(pin, INPUT_PULLUP);
 }
 
 /**
- * @brief Habilita a interrupção por borda de subida (RISING).
+ * @brief Habilita interrupção por borda de subida.
  *
- * Ativa a ISR `muteButtonISR()` para capturar cliques rápidos.
+ * @param pin Pino do botão.
  *
- * @param pin Pino do botão configurado.
+ * @details
+ * Associa o pino à ISR responsável pelo tratamento de
+ * pressionamento do botão mute.
  */
 void enableButtonInterruptRising(uint8_t pin) {
   attachInterrupt(digitalPinToInterrupt(pin), muteButtonISR, RISING);
 }
 
 /**
- * @brief Desabilita a interrupção do botão de mute.
+ * @brief Desabilita interrupção por borda de subida.
  *
- * Impede que novas interrupções de clique sejam processadas.
+ * @param pin Pino do botão.
+ *
+ * @details
+ * Associa o pino à ISR responsável pelo tratamento de
+ * pressionamento do botão mute.
  */
 void disableButtonInterruptRising(uint8_t pin) {
   detachInterrupt(digitalPinToInterrupt(pin));
 }
 
 /**
- * @brief Habilita a interrupção por mudança de estado (CHANGE).
+ * @brief Habilita interrupção por mudança de estado.
  *
- * Ativa a ISR `longPressButtonISR()` para monitorar o tempo de pressão do botão.
+ * @param pin Pino do botão.
  *
- * @param pin Pino do botão de long press.
+ * @details
+ * Utilizada para detectar início e fim do pressionamento,
+ * permitindo calcular sua duração.
  */
 void enableButtonInterruptChange(uint8_t pin) {
   attachInterrupt(digitalPinToInterrupt(pin), longPressButtonISR, CHANGE);
 }
 
 /**
- * @brief Desabilita a interrupção de long press.
+ * @brief Desabilita interrupção por mudança de estado.
+ *
+ * @param pin Pino do botão.
+ *
+ * @details
+ * Utilizada para detectar início e fim do pressionamento,
+ * permitindo calcular sua duração.
  */
 void disableButtonInterruptChange(uint8_t pin) {
   detachInterrupt(digitalPinToInterrupt(pin));
@@ -173,13 +244,15 @@ bool checkButtonPressed(volatile bool *buttonPressed) {
   return false;
 }
 
+
 /**
- * @brief Retorna o estado lógico do botão de mute.
+ * @brief Retorna o estado atual do modo mute.
  *
- * Alterna o valor de `isMuted` a cada clique detectado.
+ * @return true Sistema está mutado.
+ * @return false Sistema não está mutado.
  *
- * @return `true` se o sistema está mutado.
- * @return `false` caso contrário.
+ * @details
+ * Alterna o estado interno quando um novo pressionamento é detectado.
  */
 bool wasMuted() {
   if (checkButtonPressed(&flagMutePressed)) {
@@ -189,16 +262,24 @@ bool wasMuted() {
 }
 
 /**
- * @brief Retorna o estado da flag de pressão longa.
+ * @brief Verifica ocorrência de long press.
  *
- * @return `true` se ocorreu uma pressão longa (> 15s).
- * @return `false` caso contrário.
+ * @return true Se ocorreu long press.
+ * @return false Caso contrário.
  */
 bool wasButtonLongPressed() {
   return flagLongPress;
 }
 
 
+/**
+ * @brief Verifica ocorrência de short press.
+ *
+ * @return true Se ocorreu short press.
+ * @return false Caso contrário.
+ *
+ * @note A flag é automaticamente resetada após leitura.
+ */
 bool wasButtonShortPress(){
   if (flagShortPress == true){
     flagShortPress = false;
@@ -208,9 +289,12 @@ bool wasButtonShortPress(){
 }
 
 /**
- * @brief Reseta o estado lógico do botão de mute.
+ * @brief Reseta o estado do botão mute.
  *
- * Útil em rotinas de inicialização ou reinicialização do sistema.
+ * @details
+ * Define o sistema como não mutado.
+ *
+ * @note Usado em reinicializações ou mudança de modo.
  */
 void resetButtonState() {
   isMuted = false;
