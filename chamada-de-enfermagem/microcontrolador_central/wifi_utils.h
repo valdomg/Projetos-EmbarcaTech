@@ -55,4 +55,7 @@ void createAccessPoint();
  */
 bool wifiIsConnected();
 
+
+const char* getIPwifi();
+
 #endif
