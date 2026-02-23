@@ -163,7 +163,8 @@ void loop() {
 
   if (hasOKMessage) {
     // log(LOG_INFO,listCalls.getIdCurrent());
-    if (listCalls.removalById(calledToBeErased)) {  // Apaga o item selecionado
+    if (listCalls.removalById(calledToBeErased)) {  // Apaga o item 
+      publicReponseDivice(calledToBeErased,MQTT_PUB_CONFIRMATION_TOPIC,"",true);
       log(LOG_INFO, "Chamada removida com sucesso!");
     } else {
       log(LOG_ERROR, "Erro ao remover a chamada na lista!");
