@@ -1,3 +1,54 @@
+/**
+ * @file sensor.cpp
+ * @brief Implementação do módulo de leitura do sensor ambiental AHT10.
+ *
+ * Este módulo é responsável por inicializar e realizar a leitura dos dados
+ * de temperatura e umidade relativa do ar utilizando o sensor AHT10 através
+ * da interface de comunicação I²C.
+ *
+ * Funcionalidades principais:
+ *
+ * - Inicialização do barramento I²C;
+ * - Inicialização do sensor AHT10;
+ * - Leitura periódica dos dados ambientais;
+ * - Validação dos dados lidos;
+ * - Fornecimento dos dados através da estrutura EnvironmentData.
+ *
+ * Os dados coletados são utilizados por outros módulos do sistema, como:
+ *
+ * - Exibição no display LCD;
+ * - Envio para o broker MQTT;
+ * - Verificação de condições de alerta;
+ * - Armazenamento local.
+ *
+ * Comunicação:
+ *
+ * - Interface: I²C
+ * - Pinos utilizados:
+ *      SDA → definido em config.h
+ *      SCL → definido em config.h
+ *
+ * Biblioteca utilizada:
+ *
+ * - Adafruit AHTX0
+ *
+ * Estrutura de dados retornada:
+ *
+ * @code
+ * struct EnvironmentData {
+ *     float temperature;
+ *     float humidity;
+ *     bool valid;
+ * };
+ * @endcode
+ *
+ * @note Este módulo depende da inicialização correta do barramento I²C.
+ *
+ * @warning Caso o sensor não seja inicializado corretamente, os dados retornados serão inválidos.
+ *
+ * @see sensor.h
+ */
+
 #include <Wire.h>
 #include "sensor.h"
 #include "log.h"

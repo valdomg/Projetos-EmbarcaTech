@@ -1,6 +1,3 @@
-#ifndef WIFI_HELPER_H
-#define WIFI_HELPER_H
-
 /**
  * @file wifi_helper.h
  * @brief Declarações das funções auxiliares para gerenciamento de conexão Wi-Fi.
@@ -10,6 +7,10 @@
  * - Monitorar o status e reconectar automaticamente em caso de desconexão.
  * - Criar um ponto de acesso (Access Point) para configuração local, se necessário.
  */
+
+#ifndef WIFI_HELPER_H
+#define WIFI_HELPER_H
+
 
 /**
  * @brief Conecta o dispositivo à rede Wi-Fi configurada.

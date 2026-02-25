@@ -1,8 +1,3 @@
-#ifndef SENSOR_H
-#define SENSOR_H
-
-#include <Adafruit_AHTX0.h>
-
 /**
  * @file sensor.h
  * @brief Declarações relacionadas ao uso do sensor AHT10 (temperatura e umidade).
@@ -10,6 +5,12 @@
  * Este módulo encapsula a inicialização e a leitura de dados do sensor AHT10,
  * retornando os valores em uma estrutura própria.
  */
+
+#ifndef SENSOR_H
+#define SENSOR_H
+
+#include <Adafruit_AHTX0.h>
+
 
 /**
  * @struct EnvironmentData

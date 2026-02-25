@@ -1,3 +1,22 @@
+/**
+ * @file mqtt.cpp
+ * @brief Implementação do módulo de comunicação MQTT.
+ *
+ * Este módulo é responsável por gerenciar toda a comunicação entre o dispositivo
+ * e o broker MQTT, incluindo:
+ *
+ * - Configuração da conexão com o broker;
+ * - Gerenciamento de reconexão automática;
+ * - Envio de dados de sensores em formato JSON;
+ * - Reenvio de dados armazenados localmente em caso de falha;
+ * - Publicação de alertas;
+ * - Recuperação do cliente em caso de falhas críticas.
+ *
+ * A comunicação é baseada na biblioteca PubSubClient.
+ *
+ * O módulo foi projetado para operar de forma não bloqueante utilizando millis().
+ */
+
 #include "config.h"
 #include "mqtt.h"
 #include "log.h"
@@ -6,241 +25,341 @@
 #include "storage.h"
 #include "config_storage.h"
 
-/**
- * @file mqtt.cpp
- * @brief Implementação das funções relacionadas à comunicação MQTT.
- *
- * Este módulo gerencia:
- * - A configuração e a conexão com o broker MQTT via TLS/SSL;
- * - O envio de dados de sensores em formato JSON;
- * - O reenvio de dados armazenados localmente (em caso de falhas);
- * - O envio de mensagens de alerta.
- */
 
 
 // -----------------------------------------------------------------------------
 // Objetos MQTT
 // -----------------------------------------------------------------------------
 
-/// Cliente seguro para comunicação criptografada via TLS/SSL.
+/**
+ * @brief Cliente de rede utilizado pelo MQTT.
+ *
+ * Responsável pela comunicação TCP/IP com o broker.
+ *
+ * @note Pode ser substituído por WiFiClientSecure caso TLS seja utilizado.
+ */
 WiFiClient espClient;
 
-/// Cliente MQTT da biblioteca PubSubClient, utilizando o cliente seguro.
+
+/**
+ * @brief Cliente MQTT responsável pela comunicação com o broker.
+ *
+ * Utiliza o cliente de rede espClient como camada de transporte.
+ */
 PubSubClient client(espClient);
 
 
 // -----------------------------------------------------------------------------
-// Variáveis de controle de reconexão e envio
+// Variáveis de controle de reconexão
 // -----------------------------------------------------------------------------
 
-static unsigned long lastAttempConnectMQTT = 0;           ///< Tempo da última tentativa de conexão ao broker MQTT.
-static const unsigned long reconnectIntervalMQTT = 3000;  ///< Intervalo mínimo entre tentativas de reconexão (ms).
+/**
+ * @brief Armazena o tempo da última tentativa de conexão MQTT.
+ *
+ * Utilizado para evitar tentativas excessivas de reconexão.
+ */
+static unsigned long lastAttempConnectMQTT = 0;
 
-static unsigned long lastConnectionDataSent = 0;       ///< Tempo da última tentativa de envio de mensagem armazenada.
-static const unsigned long resendIntervalMQTT = 3000;  ///< Intervalo mínimo entre reenvios de mensagens (ms).
 
+/**
+ * @brief Intervalo mínimo entre tentativas de reconexão MQTT.
+ *
+ * Valor definido em milissegundos.
+ */
+static const unsigned long reconnectIntervalMQTT = 3000;
+
+
+/**
+ * @brief Armazena o tempo do último envio de dados armazenados.
+ */
+static unsigned long lastConnectionDataSent = 0;
+
+
+/**
+ * @brief Intervalo mínimo entre reenvio de mensagens armazenadas.
+ */
+static const unsigned long resendIntervalMQTT = 3000;
+
+
+/**
+ * @brief Indica se um alerta já foi enviado.
+ *
+ * Evita envio repetido da mesma mensagem de alerta.
+ */
 bool wasSendAlert = false;
 
+
 // -----------------------------------------------------------------------------
-// Funções de inicialização e conexão
+// Inicialização
 // -----------------------------------------------------------------------------
 
 /**
- * @brief Configura o cliente MQTT e inicializa a conexão segura.
+ * @brief Inicializa o cliente MQTT.
  *
- * Define o servidor MQTT (endereço e porta) e desativa a verificação de certificado
- * para permitir comunicação segura mesmo sem validação completa do SSL/TLS.
- * 
- * Esta função deve ser chamada apenas uma vez, normalmente durante a inicialização
- * do sistema (por exemplo, no `setup()`).
+ * Configura:
+ *
+ * - Endereço do broker;
+ * - Porta de comunicação;
+ *
+ * Esta função deve ser chamada durante o setup do sistema.
+ *
+ * @example
+ * @code
+ * setupMQTT();
+ * @endcode
  */
-void setupMQTT() {
-  // espClient.setInsecure();  // Desativa a verificação do certificado TLS
-  client.setServer(cfg.mqttServer.c_str(), cfg.mqttPort);
-  log(LOG_DEBUG, "MQTT inicializado");
+void setupMQTT()
+{
+    client.setServer(cfg.mqttServer.c_str(), cfg.mqttPort);
+
+    log(LOG_DEBUG, "MQTT inicializado");
 }
 
 
 /**
- * @brief Reconfigura o cliente MQTT e o cliente TLS (WiFiClientSecure).
+ * @brief Reinicializa o cliente MQTT e o cliente de rede.
  *
- * Essa função é chamada quando o cliente MQTT falha repetidamente ao tentar
- * reconectar ao broker. Em situações assim, o cliente TLS pode ficar em um
- * estado inválido, bloqueando novas conexões. O procedimento abaixo recria
- * ambos os clientes para restaurar a comunicação.
+ * Utilizado quando ocorrem múltiplas falhas de conexão.
  *
- * Operações executadas:
- * - Reinstancia o objeto `WiFiClientSecure` (limpa conexões antigas);
- * - Desativa a verificação de certificado TLS (`setInsecure`);
- * - Redefine o servidor MQTT e a porta segura;
- * - Reassocia o cliente TLS ao cliente MQTT.
+ * Esta função recria:
  *
- * Essa rotina evita a necessidade de reiniciar o microcontrolador.
+ * - Cliente de rede
+ * - Cliente MQTT
+ *
+ * Permitindo restaurar a comunicação sem reiniciar o dispositivo.
  */
-void resetMQTTClient() {
-  log(LOG_WARN, "Reinicializando cliente MQTT e TLS...");
+void resetMQTTClient()
+{
+    log(LOG_WARN, "Reinicializando cliente MQTT e TLS...");
 
-  espClient = WiFiClient();  // recria o cliente seguro
-  // espClient.setInsecure();         // desativa verificação de certificado
-  client.setServer(cfg.mqttServer.c_str(), cfg.mqttPort);
-  client.setClient(espClient);
+    espClient = WiFiClient();
 
-  log(LOG_DEBUG, "Cliente MQTT reconfigurado");
+    client.setServer(cfg.mqttServer.c_str(), cfg.mqttPort);
+
+    client.setClient(espClient);
+
+    log(LOG_DEBUG, "Cliente MQTT reconfigurado");
 }
+
+
+// -----------------------------------------------------------------------------
+// Gerenciamento de conexão
+// -----------------------------------------------------------------------------
 
 /**
  * @brief Verifica e mantém a conexão com o broker MQTT.
  *
- * - Executa `client.loop()` para processar pacotes MQTT pendentes.
- * - Se desconectado, tenta reconectar dentro do intervalo configurado.
+ * Esta função:
  *
- * @return true  Se o cliente está conectado (ou reconectado com sucesso).
- * @return false Se ainda não foi possível restabelecer a conexão.
- */
-bool checkMQTTConnected() {
-
-  if (client.connected()) {
-    client.loop();  // Mantém o link ativo e processa mensagens
-    return true;    // Já está conectado
-  }
-
-  unsigned long now = millis();  // Obtém tempo atual
-
-  // Verifica se já passou o intervalo mínimo entre tentativas
-  if (now - lastAttempConnectMQTT >= reconnectIntervalMQTT) {
-    lastAttempConnectMQTT = now;  // Atualiza timestamp da última tentativa
-
-    log(LOG_DEBUG, "Tentando conectar ao MQTT...");
-
-    // Tenta autenticar no broker com credenciais do arquivo de configuração
-    if (client.connect(cfg.mqttDeviceId.c_str(), cfg.mqttUser.c_str(), cfg.mqttPass.c_str())) {
-      log(LOG_INFO, "Conectado ao broker MQTT");
-      return true;
-    } else {
-      log(LOG_ERROR, "Erro ao conectar com broker (rc=%d)", client.state());
-
-
-      static uint8_t connection_drop_count = 0;
-
-      connection_drop_count++;
-
-      if (connection_drop_count >= 3) {
-        resetMQTTClient();
-        connection_drop_count = 0;
-      }
-
-      return false;
-    }
-  }
-
-  return false;  // Intervalo ainda não atingido
-}
-
-
-// -----------------------------------------------------------------------------
-// Funções de publicação
-// -----------------------------------------------------------------------------
-
-/**
- * @brief Publica dados de sensores (temperatura e umidade) em um tópico MQTT.
+ * - Mantém a conexão ativa;
+ * - Tenta reconectar automaticamente;
+ * - Evita tentativas excessivas.
  *
- * O payload é gerado em formato JSON contendo:
- * - `Microcontrollerid` — Identificador do dispositivo (ESP);
- * - `temperature` — Valor de temperatura;
- * - `humidity` — Valor de umidade.
+ * Também executa:
  *
- * Exemplo de JSON publicado:
- * ```json
+ * client.loop()
+ *
+ * necessário para manter a comunicação MQTT.
+ *
+ * @return true Cliente conectado
+ * @return false Cliente desconectado
+ *
+ * @note Deve ser chamada continuamente dentro do loop()
+ *
+ * @example
+ *
+ * @code
+ * if(checkMQTTConnected())
  * {
- *   "Microcontrollerid": "esp32-horta01",
- *   "temperature": 26.4,
- *   "humidity": 58.3
+ *     publishSensorData(temp, hum);
  * }
- * ```
- *
- * @param temperature Valor da temperatura em °C.
- * @param humidity    Valor da umidade relativa (%).
- * @return true  Se os dados foram enviados com sucesso.
- * @return false Se ocorreu falha na publicação.
+ * @endcode
  */
-bool publishSensorData(float temperature, float humidity) {
-  StaticJsonDocument<128> doc;
-  doc["microcontrollerId"] = cfg.mqttDeviceId.c_str();
-  doc["temperature"] = temperature;
-  doc["humidity"] = humidity;
+bool checkMQTTConnected()
+{
+    if (client.connected())
+    {
+        client.loop();
 
-  char buffer[128];
-  serializeJson(doc, buffer);
+        return true;
+    }
 
-  if (!client.publish(cfg.mqttTopicData.c_str(), buffer)) {
-    log(LOG_WARN, "Falha ao enviar dados ao broker MQTT");
+    unsigned long now = millis();
+
+    if (now - lastAttempConnectMQTT >= reconnectIntervalMQTT)
+    {
+        lastAttempConnectMQTT = now;
+
+        log(LOG_DEBUG, "Tentando conectar ao MQTT...");
+
+        if (client.connect(
+                cfg.mqttDeviceId.c_str(),
+                cfg.mqttUser.c_str(),
+                cfg.mqttPass.c_str()))
+        {
+            log(LOG_INFO, "Conectado ao broker MQTT");
+
+            return true;
+        }
+        else
+        {
+            log(LOG_ERROR, "Erro ao conectar com broker (rc=%d)", client.state());
+
+            static uint8_t connection_drop_count = 0;
+
+            connection_drop_count++;
+
+            if (connection_drop_count >= 3)
+            {
+                resetMQTTClient();
+
+                connection_drop_count = 0;
+            }
+
+            return false;
+        }
+    }
+
     return false;
-  }
-
-  return true;
 }
 
 
-/**
- * @brief Reenvia dados armazenados localmente (em caso de falha anterior).
- *
- * - Verifica se há dados salvos no sistema de armazenamento (LittleFS);
- * - Envia um registro por vez, respeitando o intervalo mínimo entre reenvios;
- * - Caso o envio seja bem-sucedido, remove o registro do armazenamento.
- */
-void resendMqttData() {
-  if (!hasDataStorage()) return;  // Nenhum dado armazenado
-
-  unsigned long now = millis();
-
-  // Respeita o intervalo mínimo entre reenvios
-  if (now - lastConnectionDataSent >= resendIntervalMQTT) {
-    lastConnectionDataSent = now;
-
-    ObjectStorage obj = getObjectStorage();  // Obtém o primeiro objeto salvo
-    if (obj.valid) {
-      if (publishSensorData(obj.temperature, obj.humidity)) {
-        deleteOneMessage();  // Remove a mensagem já reenviada
-      }
-    }
-  }
-}
-
+// -----------------------------------------------------------------------------
+// Publicação de dados
+// -----------------------------------------------------------------------------
 
 /**
- * @brief Publica uma mensagem de alerta no broker MQTT.
+ * @brief Publica dados de sensores no broker MQTT.
  *
- * O payload é gerado em formato JSON contendo:
- * - `Microcontrollerid` — Identificador do dispositivo;
- * - `alert` — Texto descritivo do alerta.
+ * Os dados são enviados no formato JSON.
  *
- * Exemplo de JSON:
- * ```json
+ * Estrutura:
+ *
+ * @code
  * {
- *   "Microcontrollerid": "esp32-horta01",
- *   "alert": "Nível de umidade abaixo do mínimo"
+ *   "microcontrollerId": "...",
+ *   "temperature": 25.0,
+ *   "humidity": 60.0
  * }
- * ```
+ * @endcode
  *
- * @param alert Mensagem de alerta a ser enviada.
+ * @param temperature Temperatura em graus Celsius
+ * @param humidity Umidade relativa do ar
+ *
+ * @return true Sucesso
+ * @return false Falha
  */
-void publishAlert(float temperature, float humidity) {
-
-  if (!wasSendAlert) {
+bool publishSensorData(float temperature, float humidity)
+{
     StaticJsonDocument<128> doc;
+
     doc["microcontrollerId"] = cfg.mqttDeviceId.c_str();
+
     doc["temperature"] = temperature;
+
     doc["humidity"] = humidity;
 
     char buffer[128];
+
     serializeJson(doc, buffer);
-    client.publish(cfg.mqttTopicAlert.c_str(), buffer);
-    wasSendAlert = true;
-    log(LOG_INFO, "alerta publicado no mqtt");
-  }
+
+    if (!client.publish(cfg.mqttTopicData.c_str(), buffer))
+    {
+        log(LOG_WARN, "Falha ao enviar dados ao broker MQTT");
+
+        return false;
+    }
+
+    return true;
 }
 
 
-void resetStateSendAlert() {
-  wasSendAlert = false;
+// -----------------------------------------------------------------------------
+// Reenvio de dados armazenados
+// -----------------------------------------------------------------------------
+
+/**
+ * @brief Reenvia dados armazenados localmente.
+ *
+ * Utilizado quando houve falha de comunicação anterior.
+ *
+ * Fluxo:
+ *
+ * - Verifica armazenamento;
+ * - Envia mensagem;
+ * - Remove mensagem enviada.
+ *
+ * @note Utiliza LittleFS como armazenamento.
+ */
+void resendMqttData()
+{
+    if (!hasDataStorage())
+        return;
+
+    unsigned long now = millis();
+
+    if (now - lastConnectionDataSent >= resendIntervalMQTT)
+    {
+        lastConnectionDataSent = now;
+
+        ObjectStorage obj = getObjectStorage();
+
+        if (obj.valid)
+        {
+            if (publishSensorData(obj.temperature, obj.humidity))
+            {
+                deleteOneMessage();
+            }
+        }
+    }
+}
+
+
+// -----------------------------------------------------------------------------
+// Publicação de alertas
+// -----------------------------------------------------------------------------
+
+/**
+ * @brief Publica mensagem de alerta no broker MQTT.
+ *
+ * Utilizado quando o sistema detecta condições críticas.
+ *
+ * O envio ocorre apenas uma vez até ser resetado.
+ *
+ * @param temperature Temperatura atual
+ * @param humidity Umidade atual
+ */
+void publishAlert(float temperature, float humidity)
+{
+    if (!wasSendAlert)
+    {
+        StaticJsonDocument<128> doc;
+
+        doc["microcontrollerId"] = cfg.mqttDeviceId.c_str();
+
+        doc["temperature"] = temperature;
+
+        doc["humidity"] = humidity;
+
+        char buffer[128];
+
+        serializeJson(doc, buffer);
+
+        client.publish(cfg.mqttTopicAlert.c_str(), buffer);
+
+        wasSendAlert = true;
+
+        log(LOG_INFO, "alerta publicado no mqtt");
+    }
+}
+
+
+/**
+ * @brief Reseta o estado de envio de alerta.
+ *
+ * Permite que novos alertas sejam enviados.
+ */
+void resetStateSendAlert()
+{
+    wasSendAlert = false;
 }

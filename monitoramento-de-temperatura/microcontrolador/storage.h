@@ -1,3 +1,74 @@
+/**
+ * @file storage.h
+ * @brief Interface pública do módulo de armazenamento persistente utilizando LittleFS.
+ *
+ * Este módulo define as estruturas de dados e as funções responsáveis pelo
+ * gerenciamento do armazenamento local de dados ambientais (temperatura e umidade)
+ * no sistema de arquivos LittleFS do microcontrolador.
+ *
+ * O objetivo principal é fornecer um mecanismo de persistência confiável,
+ * permitindo que os dados sejam armazenados localmente quando não for possível
+ * enviá-los ao servidor remoto (por exemplo, em caso de falha na comunicação MQTT),
+ * e posteriormente recuperados e retransmitidos.
+ *
+ * Funcionalidades fornecidas:
+ *
+ * - Inicialização do sistema de arquivos;
+ * - Armazenamento persistente de dados em formato JSON;
+ * - Recuperação de registros armazenados;
+ * - Remoção sequencial de registros;
+ * - Verificação de existência de dados pendentes;
+ * - Impressão dos dados armazenados para depuração.
+ *
+ * Estrutura de armazenamento:
+ *
+ * - Os dados são armazenados em formato JSON;
+ * - Cada linha do arquivo representa um registro independente;
+ * - Cada registro contém:
+ *
+ * @code
+ * {
+ *   "t": 25.40,
+ *   "h": 60.20
+ * }
+ * @endcode
+ *
+ * Fluxo típico de utilização:
+ *
+ * @code
+ * initStorage();
+ *
+ * saveStorage(25.3, 60.2);
+ *
+ * ObjectStorage obj = getObjectStorage();
+ *
+ * if (obj.valid) {
+ *     // processar dados
+ *     deleteOneMessage();
+ * }
+ * @endcode
+ *
+ * Aplicações típicas:
+ *
+ * - Buffer local para sistemas IoT;
+ * - Armazenamento temporário em caso de falha de rede;
+ * - Sistemas com envio assíncrono de dados;
+ * - Sistemas tolerantes a falhas.
+ *
+ * Dependências:
+ *
+ * - LittleFS
+ * - ArduinoJson
+ * - ESP8266 / ESP32 Arduino Core
+ *
+ * Arquivo relacionado:
+ *
+ * @see storage.cpp
+ *
+ * @warning A função initStorage() deve ser chamada antes de qualquer operação.
+ *
+ * @note Este módulo implementa uma fila persistente FIFO simples.
+ */
 #ifndef STORAGE_H
 #define STORAGE_H
 

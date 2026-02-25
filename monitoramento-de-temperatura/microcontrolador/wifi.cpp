@@ -1,3 +1,36 @@
+/**
+ * @file wifi.cpp
+ * @brief Implementação do gerenciamento de conectividade Wi-Fi do dispositivo.
+ *
+ * Este arquivo contém as funções responsáveis por controlar a conexão
+ * Wi-Fi do sistema embarcado, incluindo:
+ *
+ * - Conexão à rede Wi-Fi configurada previamente.
+ * - Reconexão automática em caso de perda de conexão.
+ * - Criação de um Access Point (AP) para configuração local do dispositivo.
+ * - Armazenamento e disponibilização do endereço IP atual.
+ *
+ * O módulo utiliza as credenciais armazenadas na estrutura global de
+ * configuração (`cfg`), que são persistidas em memória através do
+ * subsistema de armazenamento.
+ *
+ * Também implementa mecanismos de controle de tempo para evitar
+ * tentativas excessivas de reconexão, melhorando a estabilidade
+ * e reduzindo o consumo de energia.
+ *
+ * Este arquivo depende dos seguintes módulos:
+ *
+ * - wifi.h              Interface pública do módulo Wi-Fi
+ * - config.h           Definições de configuração do sistema
+ * - config_storage.h   Persistência das configurações
+ * - log.h              Sistema de logging
+ *
+ * @note Este módulo foi desenvolvido para a plataforma ESP8266 utilizando
+ *       a biblioteca ESP8266WiFi.
+ *
+ * @date 2026
+ */
+
 #include <ESP8266WiFi.h>
 #include "wifi.h"
 #include "log.h"
@@ -5,13 +38,44 @@
 #include "config_storage.h"
 
 // -----------------------------------------------------------------------------
-// Buffer e controle de tempo
+// Buffer e controle de tempo de conexão WiFi
 // -----------------------------------------------------------------------------
 
-char ipBuffer[16];  ///< Armazena o endereço IP do dispositivo em formato de string (ex: "192.168.1.10")
+/**
+ * @brief Buffer que armazena o endereço IP do dispositivo.
+ *
+ * Este buffer contém o endereço IP no formato string IPv4,
+ * por exemplo: "192.168.1.10".
+ *
+ * O tamanho de 16 bytes é suficiente para armazenar o maior
+ * endereço IPv4 possível (15 caracteres) mais o caractere
+ * nulo de terminação '\0'.
+ */
+char ipBuffer[16];
 
-static unsigned long lastConnectionAttemp = 0; ///< Marca o tempo da última tentativa de conexão
-static const unsigned long reconnectInterval = 1000 * 75; ///< Intervalo de reconexão (1 minuto e 15 segundos)
+/**
+ * @brief Armazena o instante da última tentativa de conexão WiFi.
+ *
+ * Esta variável é utilizada para controlar o intervalo entre
+ * tentativas de reconexão, evitando múltiplas tentativas em
+ * sequência que podem causar instabilidade ou sobrecarga.
+ *
+ * O valor é baseado na função millis().
+ */
+static unsigned long lastConnectionAttemp = 0;
+
+/**
+ * @brief Intervalo entre tentativas de reconexão WiFi.
+ *
+ * Define o tempo mínimo, em milissegundos, que o sistema deve
+ * aguardar antes de tentar reconectar ao WiFi novamente.
+ *
+ * Valor atual: 75 segundos.
+ *
+ * O uso de intervalo evita tentativas excessivas de conexão,
+ * economiza energia e melhora a estabilidade do sistema.
+ */
+static const unsigned long reconnectInterval = 1000 * 75;
 
 // -----------------------------------------------------------------------------
 // Funções

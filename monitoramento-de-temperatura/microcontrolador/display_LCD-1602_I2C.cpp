@@ -1,40 +1,131 @@
-#include <Wire.h>                  // Inclui a biblioteca padrão para comunicação I2C
-#include <LiquidCrystal_I2C.h>     // Biblioteca que controla o display LCD 1602 via módulo I2C
-#include <math.h>                  // Biblioteca de funções matemáticas. Usada para "fabs(...)" valor absoluto de float/double.
-#include "display_LCD-1602_I2C.h"  // Inclusão do arquivo de cabeçalho do módulo que contém as declarações de funções
+/**
+ * @file display_LCD-1602_I2C.cpp
+ * @brief Implementação do controle do display LCD 1602 via I2C.
+ *
+ * Inclui a biblioteca padrão para comunicação I2C,
+ * a biblioteca de controle do display LCD 1602,
+ * e funções matemáticas utilizadas para cálculo de valor absoluto.
+ *
+ * Este módulo implementa funções para:
+ *
+ * - Inicializar o display
+ * - Limpar linhas
+ * - Exibir temperatura e umidade
+ * - Controlar o backlight
+ */
+
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+#include <math.h>
+
+#include "display_LCD-1602_I2C.h"
 #include "log.h"
 
 
-const uint8_t I2C_ADDR = 0x27;  // Endereço padrão do módulo I2C do LCD
-// Define quantidade de linhas e colunas do LCD (16 colunas e 2 linhas)
+/**
+ * @brief Endereço padrão do módulo I2C do LCD.
+ */
+const uint8_t I2C_ADDR = 0x27;
+
+
+/**
+ * @brief Quantidade de colunas do LCD.
+ */
 const uint8_t LCD_COLUMNS = 16;
+
+
+/**
+ * @brief Quantidade de linhas do LCD.
+ */
 const uint8_t LCD_LINES = 2;
 
-// Mensagem padrão exibida no display quando a temperatura ultrapassa o limite
+
+
+/**
+ * @brief Mensagem exibida quando temperatura ultrapassa o limite.
+ */
 #define TEMPERATURE_ALERT_MESSAGE F("ALERT_T: ")
-// Mensagem padrão usada para exibir a temperatura quando está dentro do limite
+
+
+/**
+ * @brief Mensagem exibida quando temperatura está dentro do limite.
+ */
 #define TEMPERATURE_MESSAGE F("T: ")
-// Mensagem padrão exibida no display quando a umidade ultrapassa o limite
+
+
+/**
+ * @brief Mensagem exibida quando umidade ultrapassa o limite.
+ */
 #define HUMIDITY_ALERT_MESSAGE F("ALERT_U: ")
-// Mensagem padrão usada para exibir a umidade quando está dentro do limite
+
+
+/**
+ * @brief Mensagem exibida quando umidade está dentro do limite.
+ */
 #define HUMIDITY_MESSAGE F("U: ")
 
-// Variáveis auxiliares para guardar último valor de temperatura e umidade
+
+
+/**
+ * @brief Último valor de temperatura exibido.
+ */
 float lastTemperature = -1000.0;
+
+
+/**
+ * @brief Último valor de umidade exibido.
+ */
 float lastHumidity = -1000.0;
 
-// Limiares mínimos de atualização para evitar reescrever o display sem necessidade
+
+
+/**
+ * @brief Limiar mínimo para atualização da temperatura.
+ *
+ * Evita reescrever o display sem necessidade.
+ */
 const float TEMP_UPDATE_THRESHOLD = 0.01;
+
+
+/**
+ * @brief Limiar mínimo para atualização da umidade.
+ */
 const float HUMI_UPDATE_THRESHOLD = 0.01;
 
+
+
+/**
+ * @brief Indica se o backlight está ligado.
+ */
 bool isBacklightTurnOn = true;
+
+
+/**
+ * @brief Guarda o tempo da última ativação do backlight.
+ */
 unsigned long lastTimeBackligthTurnOn = 0;
 
-// Instancia do LCD
+
+
+/**
+ * @brief Instância do LCD.
+ */
 LiquidCrystal_I2C lcd(I2C_ADDR, LCD_COLUMNS, LCD_LINES);
 
 
-// Função que inicializa o Display
+
+// ------------------------------------------------------------
+// Funções
+// ------------------------------------------------------------
+
+
+/**
+ * @brief Inicializa o display.
+ *
+ * Inicializa comunicação I2C,
+ * ativa o backlight
+ * e exibe mensagem inicial.
+ */
 void lcd1602_init() {
   Wire.begin();         // para garantir que I2C foi inicializada
   lcd.init();           // Inicializa o display e a comunicação I2C
@@ -47,9 +138,11 @@ void lcd1602_init() {
 }
 
 
-/*Função de Limpeza de Linha
-    Parâmetro:
-      - line: linha do display a ser limpa (uint8_t) */
+/**
+ * @brief Limpa uma linha do display.
+ *
+ * @param line Linha do display a ser limpa (uint8_t).
+ */
 void clearLine(uint8_t line) {
   if (line >= LCD_LINES) return;  // valida linha
   // Posiciona o cursor no início da linha indicada
@@ -61,13 +154,20 @@ void clearLine(uint8_t line) {
 }
 
 
-/* Função genérica para exibir o valor de temperatura ou umidade
-   Parâmetros:
-     - line: linha escolhida do display (0 = primeira, 1 = segunda)
-     - normalMsg/alertMsg: ponteiros do tipo __FlashStringHelper (strings guardadas na Flash via F()).
-     - value: valor de temperatura ou umidade a mostrar.
-     - alert: se true, usa a mensagem de alerta; senão, a normal
-     - unit: sufixo de unidade (ex.: "%" ou "\xDF""C").*/
+/**
+ * @brief Exibe no display o valor de temperatura ou umidade.
+ *
+ * Função genérica responsável por mostrar uma mensagem e o valor
+ * correspondente em uma linha específica do display, podendo
+ * alternar entre mensagem normal e mensagem de alerta.
+ *
+ * @param line Linha do display (0 = primeira linha, 1 = segunda linha).
+ * @param normalMsg Ponteiro para mensagem normal armazenada na memória Flash.
+ * @param alertMsg Ponteiro para mensagem de alerta armazenada na memória Flash.
+ * @param value Valor de temperatura ou umidade a ser exibido.
+ * @param alert Define se deve exibir a mensagem de alerta (true) ou normal (false).
+ * @param unit Sufixo da unidade de medida (ex.: "%" ou "\xDF""C").
+ */
 void show_value(uint8_t line,
                 const __FlashStringHelper* normalMsg,
                 const __FlashStringHelper* alertMsg,
@@ -88,12 +188,18 @@ void show_value(uint8_t line,
 }
 
 
-/* Função que exibe os valores de temperatura e umidade no display
-   Parâmetros:
-     - temp: valor da temperatura (float)
-     - humi: valor da umidade (float)
-     - alertTemp: indica se a temperatura ultrapassou o limite (true = alerta)
-     - alertHumi: indica se a umidade ultrapassou o limite (true = alerta)*/
+/**
+ * @brief Exibe os valores de temperatura e umidade no display LCD.
+ *
+ * Esta função atualiza o display com os valores atuais de temperatura
+ * e umidade, podendo indicar visualmente situações de alerta quando
+ * os limites configurados são ultrapassados.
+ *
+ * @param temp Valor da temperatura em graus Celsius.
+ * @param humi Valor da umidade relativa do ar em porcentagem.
+ * @param alertTemp Indica condição de alerta para temperatura.
+ * @param alertHumi Indica condição de alerta para umidade.
+ */
 void lcd1602_showData(float temp, float humi, bool alertTemp, bool alertHumi) {
 
   // Só chama a função se a temperatura mudou além do limiar (>= 0,01)
@@ -122,6 +228,9 @@ void lcd1602_showData(float temp, float humi, bool alertTemp, bool alertHumi) {
   }
 }
 
+/**
+ * @brief Liga o backlight.
+ */
 void turnOnBacklight() {
   if (isBacklightTurnOn == false) {
     lcd.backlight();
@@ -129,6 +238,9 @@ void turnOnBacklight() {
   }
 }
 
+/**
+ * @brief Desliga o backlight.
+ */
 void turnOffBacklight() {
   if (isBacklightTurnOn == true) {
     lcd.noBacklight();
@@ -136,6 +248,12 @@ void turnOffBacklight() {
   }
 }
 
+/**
+ * @brief Controla o estado do backlight.
+ *
+ * @param isAlertState Indica alerta.
+ * @param commandTurnOnLCD Comando manual.
+ */
 void handleBacklightLCD(bool isAlertState, bool commandTurnOnLCD) {
 
   if (isAlertState) {
