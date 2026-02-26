@@ -73,7 +73,7 @@ class UserService {
       { new: true }
     );
     if (!updatedUser) {
-      throw ApiError.badRequest("Usuário não encontrado");
+      throw ApiError.notFound("Usuário não encontrado");
     }
     return { _id: updatedUser._id, name: updatedUser.name, email: updatedUser.email, role: updatedUser.role };
   }
@@ -84,10 +84,30 @@ class UserService {
     }
     const user = await this.userModel.findById(userId);
     if (!user) {
-      throw ApiError.badRequest("Usuário não encontrado");
+      throw ApiError.notFound("Usuário não encontrado");
     }
 
     await this.userModel.findByIdAndDelete(userId);
+  }
+
+  changePassword = async (userId, currentPassword, newPassword) => {
+    if (!userId) {
+      throw ApiError.badRequest("ID do usuário é obrigatorio");
+    }
+    if (! await this.validatePassword(newPassword)) {
+      throw ApiError.badRequest("Senha deve ter pelo menos 8 caracteres, incluindo uma letra maiúscula, uma letra minúscula, um número e um caractere especial");
+    }
+    const user = await this.userModel.findById(userId).select('+password');
+    if (!user) {
+      throw ApiError.notFound("Usuário não encontrado");
+    }
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      throw ApiError.unauthorized("Senha atual incorreta");
+    }
+    const hashedPassword = await this.hashPassword(newPassword);
+    user.password = hashedPassword;
+    await user.save();
   }
 
 

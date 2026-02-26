@@ -35,5 +35,6 @@ router.get('/users', authenticate, userController.getAllUsers);
 router.get('/user/:email', authenticate, userController.getUserByEmail);
 router.patch('/user/:userId', authenticate, userController.updateUser);
 router.delete('/user/:userId', authenticate, userController.deleteUser);
+router.patch('/user/:userId/change-password', authenticate, userController.changePassword);
 
 export default router;

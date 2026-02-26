@@ -185,6 +185,37 @@ class UserController {
         await this.userService.deleteUser(userId);
         res.status(204).send();
     }
+
+    changePassword = async (req, res) => {
+        /*
+            #swagger.tags = ['Users']
+            #swagger.summary = 'Altera a senha de um usuário'
+            #swagger.description = 'Esse endpoint permite que um usuário altere sua senha. É necessário fornecer um ID de usuário válido como parâmetro, a senha atual e a nova senha no corpo da requisição.'
+                #swagger.security = [{
+                    "bearerAuth": []
+                }] 
+        */
+        const { userId } = req.params;
+        /*  #swagger.requestBody = {
+                    required: true,
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                properties: {
+                                    currentPassword: { type: "string", example: "SenhaSegura123", required: true },
+                                    newPassword: { type: "string", example: "NovaSenhaSegura123", required: true }
+                                }
+                            }
+                        }
+                    }
+                }
+        */
+
+        const { currentPassword, newPassword } = req.body;
+        await this.userService.changePassword(userId, currentPassword, newPassword);
+        res.status(200).json({ message: "Senha alterada com sucesso" });
+    }
 }
 
 export default UserController;
