@@ -176,6 +176,9 @@
         "responses": {
           "201": {
             "description": "Created"
+          },
+          "403": {
+            "description": "Forbidden"
           }
         },
         "security": [
@@ -299,6 +302,134 @@
         ]
       }
     },
+    "/room/current": {
+      "get": {
+        "tags": [
+          "Temperature"
+        ],
+        "summary": "Obtém a leitura de temperatura mais recente organizada por ambiente",
+        "description": "Esse endpoint retorna a leitura de temperatura mais recente registrada para cada ambiente.",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/room/{roomId}/report": {
+      "get": {
+        "tags": [
+          "Temperature"
+        ],
+        "summary": "Obtém as leituras de temperatura e humidade por hora de um ambiente específico por intervalo",
+        "description": "Esse endpoint retorna media, minima e maxima de temperatura e humidade por hora para um ambiente específico com base no ID do ambiente e no intervalo de datas fornecidos.",
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/room/{roomId}/pdf": {
+      "get": {
+        "tags": [
+          "Temperature"
+        ],
+        "summary": "Gera um relatório em PDF das leituras de temperatura e humidade por hora de um ambiente específico por intervalo",
+        "description": "Esse endpoint gera um relatório em PDF contendo media, minima e maxima de temperatura e humidade por hora para um ambiente específico com base no ID do ambiente e no intervalo de datas fornecidos. O PDF é gerado utilizando o serviço ReportPdfService e retorna um link para download do arquivo.",
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/room/id/{roomId}": {
       "get": {
         "tags": [
@@ -372,7 +503,7 @@
       }
     },
     "/room/{roomId}": {
-      "put": {
+      "patch": {
         "tags": [
           "Room"
         ],
@@ -398,6 +529,9 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "403": {
+            "description": "Forbidden"
           }
         },
         "security": [
@@ -432,6 +566,9 @@
         "responses": {
           "204": {
             "description": "No Content"
+          },
+          "403": {
+            "description": "Forbidden"
           }
         },
         "security": [
@@ -481,6 +618,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Forbidden"
           }
         },
         "security": [
@@ -643,7 +783,7 @@
       }
     },
     "/user/{userId}": {
-      "put": {
+      "patch": {
         "tags": [
           "Users"
         ],
@@ -691,9 +831,9 @@
                     "type": "string",
                     "example": "joao.silva@example.com"
                   },
-                  "password": {
+                  "role": {
                     "type": "string",
-                    "example": "SenhaSegura123"
+                    "example": "admin"
                   }
                 }
               }
@@ -727,6 +867,9 @@
         "responses": {
           "204": {
             "description": "No Content"
+          },
+          "403": {
+            "description": "Forbidden"
           }
         },
         "security": [
