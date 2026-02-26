@@ -23,7 +23,7 @@ class UserService {
 
     const user = new this.userModel(userData);
     await user.save();
-    return { id: user._id, name: user.name, email: user.email };
+    return { id: user._id, name: user.name, email: user.email, role: user.role };
 
   }
 
@@ -45,7 +45,8 @@ class UserService {
       {
         _id: user._id,
         name: user.name,
-        email: user.email
+        email: user.email,
+        role: user.role
       }
     ));
   }
@@ -68,13 +69,13 @@ class UserService {
 
     const updatedUser = await this.userModel.findByIdAndUpdate(
       userId,
-      { name: updateData.name, email: updateData.email },
+      { name: updateData.name, email: updateData.email, role: updateData.role },
       { new: true }
     );
     if (!updatedUser) {
       throw ApiError.badRequest("Usuário não encontrado");
     }
-    return { _id: updatedUser._id, name: updatedUser.name, email: updatedUser.email };
+    return { _id: updatedUser._id, name: updatedUser.name, email: updatedUser.email, role: updatedUser.role };
   }
 
   deleteUser = async (userId) => {

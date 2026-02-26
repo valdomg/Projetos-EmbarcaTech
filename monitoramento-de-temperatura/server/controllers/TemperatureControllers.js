@@ -71,6 +71,11 @@ class TemperatureController {
     res.status(200).json(temperatures);
   }
 
+  getCurrentTemperature = async (req, res) => {
+      const result = await this.temperatureService.getRoomsWithLastReading();
+      res.status(200).json(result);
+    }
+
   getReport = async (req, res) => {
           /*
           #swagger.tags = ['Temperature']

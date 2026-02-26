@@ -154,7 +154,7 @@ class UserController {
                                 properties: {
                                     name: { type: "string", example: "João Silva" },
                                     email: { type: "string", example: "joao.silva@example.com" },
-                                    password: { type: "string", example: "SenhaSegura123" }
+                                    role: { type: "string", example: "admin" }
                                 }
                             }
                         }
