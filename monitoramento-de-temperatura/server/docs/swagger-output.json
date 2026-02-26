@@ -878,6 +878,64 @@
           }
         ]
       }
+    },
+    "/user/{userId}/change-password": {
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Altera a senha de um usuário",
+        "description": "Esse endpoint permite que um usuário altere sua senha. É necessário fornecer um ID de usuário válido como parâmetro, a senha atual e a nova senha no corpo da requisição.",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "currentPassword": {
+                    "type": "string",
+                    "example": "SenhaSegura123",
+                    "required": true
+                  },
+                  "newPassword": {
+                    "type": "string",
+                    "example": "NovaSenhaSegura123",
+                    "required": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
