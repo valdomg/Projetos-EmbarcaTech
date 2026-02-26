@@ -1,7 +1,6 @@
 #include "wifi_utils.h"
 #include "mqtt.h"
 #include "server.h"
-
 #include "display_LCD-2004_I2C.h"
 #include "listNursingCall_utils.h"
 #include "jsonDataProcessing.h"
@@ -147,6 +146,7 @@ void loop() {
     createAccessPoint();
     startServer(&server);
     server_handle_loop(&server);
+    
 
     // log(LOG_INFO, "modo configuraçao");
 
@@ -163,7 +163,8 @@ void loop() {
 
   if (hasOKMessage) {
     // log(LOG_INFO,listCalls.getIdCurrent());
-    if (listCalls.removalById(calledToBeErased)) {  // Apaga o item selecionado
+    if (listCalls.removalById(calledToBeErased)) {  // Apaga o item 
+      publicReponseDivice(calledToBeErased,MQTT_PUB_CONFIRMATION_TOPIC,"",true);
       log(LOG_INFO, "Chamada removida com sucesso!");
     } else {
       log(LOG_ERROR, "Erro ao remover a chamada na lista!");

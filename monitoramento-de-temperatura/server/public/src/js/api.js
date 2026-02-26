@@ -3,7 +3,7 @@
 //buscar temperatura de todas as salas
 export async function buscarTemperaturas() {
   const token = localStorage.getItem("token");
-  const response = await fetch("http://localhost:3000/api/temperatures",
+  const response = await fetch("/api/temperatures",
     {
       headers: {
         "Content-Type": "application/json",
@@ -11,7 +11,7 @@ export async function buscarTemperaturas() {
       }
     });
 
-  if (!response) {
+  if (!response.ok) {
     throw new Error(`Erro na requisição: ${response.status}`);
   }
   const dados = await response.json();
@@ -22,7 +22,7 @@ export async function buscarTemperaturas() {
 //buscar intervalo registrado de temperaturas de todas as salas
 export async function TempIntervalo(start, end) {
   const token = localStorage.getItem("token");
-  const response = await fetch(`http://localhost:3000/api/temperatures/interval?startDate=${start}&endDate=${end}`,
+  const response = await fetch(`/api/temperatures/interval?startDate=${start}&endDate=${end}`,
     {
       headers: {
         "Content-Type": "application/json",
@@ -30,7 +30,7 @@ export async function TempIntervalo(start, end) {
       }
     });
 
-  if (!response) {
+  if (!response.ok) {
     throw new Error("Erro ao buscar temperaturas");
   }
   const dados = await response.json();
@@ -42,7 +42,7 @@ export async function TempIntervalo(start, end) {
 //buscar temperatura de uma sala especifica
 export async function buscarTemperaturaSala(salaId) {
   const token = localStorage.getItem("token");
-  const response = await fetch(`http://localhost:3000/api/room/${salaId}/temperatures`,
+  const response = await fetch(`/api/room/${salaId}/temperatures`,
     {
       headers: {
         "Content-Type": "application/json",
@@ -50,7 +50,7 @@ export async function buscarTemperaturaSala(salaId) {
       }
     });
 
-  if (!response) {
+  if (!response.ok) {
     throw new Error("Erro ao buscar temperaturas");
   }
   const dados = await response.json();
@@ -61,7 +61,7 @@ export async function buscarTemperaturaSala(salaId) {
 export async function roomTempInterval(salaId, start, end) {
 
   const token = localStorage.getItem("token");
-  const response = await fetch(`http://localhost:3000/api/room/${salaId}/temperatures/interval/?startDate=${start}&endDate=${end}`,
+  const response = await fetch(`/api/room/${salaId}/temperatures/interval/?startDate=${start}&endDate=${end}`,
     {
       headers: {
         "Content-Type": "application/json",
@@ -71,7 +71,7 @@ export async function roomTempInterval(salaId, start, end) {
 
   const dados = await response.json();
 
-  if (!response) {
+  if (!response.ok) {
     throw new Error(dados.erro || dados.message || "Erro ao buscar temperaturas");
   }
 
@@ -81,7 +81,7 @@ export async function roomTempInterval(salaId, start, end) {
 //Listar salas
 export async function roomsSearch() {
   const token = localStorage.getItem("token");
-  const response = await fetch(`http://localhost:3000/api/rooms`,
+  const response = await fetch(`/api/rooms`,
     {
       headers: {
         "Content-Type": "application/json",
@@ -89,7 +89,7 @@ export async function roomsSearch() {
       }
     });
 
-  if (!response) {
+  if (!response.ok) {
     throw new Error("Erro ao buscar salas");
   }
   const dados = await response.json();
@@ -106,7 +106,7 @@ export async function roomRegister(nome, microcontrolador) {
     microcontrollerId: microcontrolador
   };
   try {
-    const response = await fetch(`http://localhost:3000/api/room`,
+    const response = await fetch(`/api/room`,
       {
         method: "POST",
         headers: {
@@ -143,7 +143,7 @@ export async function roomEdit(id, nome, microcontrolador) {
     microcontrollerId: microcontrolador
   };
   try {
-    const response = await fetch(`http://localhost:3000/api/room/${id}`,
+    const response = await fetch(`/api/room/${id}`,
       {
         method: "PUT",
         headers: {
@@ -174,7 +174,7 @@ export async function roomEdit(id, nome, microcontrolador) {
 export async function roomDelete(roomId) {
   const token = localStorage.getItem("token");
 
-  const response = await fetch(`http://localhost:3000/api/room/${roomId}`, {
+  const response = await fetch(`/api/room/${roomId}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
@@ -206,7 +206,7 @@ export async function roomDelete(roomId) {
 //Listar usuários do sistema
 export async function usersSearch() {
   const token = localStorage.getItem("token");
-  const response = await fetch(`http://localhost:3000/api/users`,
+  const response = await fetch(`/api/users`,
     {
       headers: {
         "Content-Type": "application/json",
@@ -214,7 +214,7 @@ export async function usersSearch() {
       }
     });
 
-  if (!response) {
+  if (!response.ok) {
     throw new Error("Erro ao buscar usuários");
   }
   const dados = await response.json();
@@ -232,7 +232,7 @@ export async function userLogin(email, senha) {
 
   try {
     // Faz a requisição de login
-    const response = await fetch("http://localhost:3000/api/login", {
+    const response = await fetch("/api/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -285,7 +285,7 @@ export async function userRegister(usuario, email, senha) {
     password: senha
   };
   try {
-    const response = await fetch(`http://localhost:3000/api/user/`,
+    const response = await fetch(`/api/user/`,
       {
         method: "POST",
         headers: {
@@ -323,7 +323,7 @@ export async function userEdit(id, usuario, email, senha) {
     userId: id
   };
   try {
-    const response = await fetch(`http://localhost:3000/api/user/${id}`,
+    const response = await fetch(`/api/user/${id}`,
       {
         method: "PUT",
         headers: {
@@ -353,7 +353,7 @@ export async function userEdit(id, usuario, email, senha) {
 export async function userDelete(userId) {
   const token = localStorage.getItem("token");
 
-  const response = await fetch(`http://localhost:3000/api/user/${userId}`, {
+  const response = await fetch(`/api/user/${userId}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",

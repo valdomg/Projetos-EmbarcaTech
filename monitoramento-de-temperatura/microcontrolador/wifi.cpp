@@ -3,6 +3,7 @@
 #include "log.h"
 #include "config.h"
 #include "config_storage.h"
+#include "display_LCD-1602_I2C.h"
 
 // -----------------------------------------------------------------------------
 // Buffer e controle de tempo
@@ -16,6 +17,13 @@ static const unsigned long reconnectInterval = 1000 * 75; ///< Intervalo de reco
 // -----------------------------------------------------------------------------
 // Funções
 // -----------------------------------------------------------------------------
+
+const char* IPparserToConstChar(IPAddress ip) {
+  static char buffer[16];
+  snprintf(buffer, sizeof(buffer), "%u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
+
+  return buffer;
+}
 
 /**
  * @brief Conecta o dispositivo à rede Wi-Fi configurada.
@@ -104,8 +112,7 @@ void createAccessPoint() {
     WiFi.softAP(SSID_ACCESS_POINT, PASSWORD_ACCESS_POINT);
     IPAddress ip = WiFi.softAPIP();
     
-    snprintf(ipBuffer, sizeof(ipBuffer), "%u.%u.%u.%u",
-             ip[0], ip[1], ip[2], ip[3]);
+    showIPAddress(IPparserToConstChar(ip));
     log(LOG_INFO, "Endereço IP: %s", ipBuffer);
   }
 }
