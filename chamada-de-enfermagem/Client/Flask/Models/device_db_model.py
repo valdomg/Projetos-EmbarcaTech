@@ -12,6 +12,9 @@ class DeviceDBModel():
     def find_by_device(self, device:str):
         return self.db.check_if_document_exists('devices', 'device', device)
     
+    def find_by_room_number(self, room_number:int):
+        return self.db.check_if_document_exists('devices', 'room_number', room_number)
+    
     def find_device_by_id(self, document_id:str) -> bool:
         return self.db.check_if_document_exists_by_id('devices', document_id)
     
@@ -28,5 +31,5 @@ class DeviceDBModel():
     def return_count_all_devices(self):
         return self.db.count_all_documents_on_collection('devices')
 
-    def return_all_devices(self):
-        return self.db.list_all_documents_from_collection('devices')
+    def return_all_devices(self, field=None, type_sorting=None):
+        return self.db.list_all_documents_from_collection('devices', field, type_sorting)

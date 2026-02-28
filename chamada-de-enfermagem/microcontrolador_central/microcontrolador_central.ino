@@ -1,7 +1,6 @@
 #include "wifi_utils.h"
 #include "mqtt.h"
 #include "server.h"
-
 #include "display_LCD-2004_I2C.h"
 #include "listNursingCall_utils.h"
 #include "jsonDataProcessing.h"
@@ -147,6 +146,7 @@ void loop() {
     createAccessPoint();
     startServer(&server);
     server_handle_loop(&server);
+    
 
     // log(LOG_INFO, "modo configuraçao");
 

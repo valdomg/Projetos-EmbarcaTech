@@ -12,7 +12,7 @@ class ChamadasStatusModel:
         '''
         Retorna todos os documentos da collection
         '''
-        return self.db.list_all_documents_from_collection('status_chamadas')
+        return self.db.list_all_documents_from_collection('status_chamadas', field='room_number', type_sorting=1)
 
 
     def return_docs_status(self, status:str):
