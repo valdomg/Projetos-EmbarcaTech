@@ -68,8 +68,6 @@ class MongoDBConnection:
                 else:
                     data = list(collection.find())
                 
-                logging.info(data)
-                
                 return data
 
             else:
