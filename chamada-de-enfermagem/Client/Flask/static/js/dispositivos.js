@@ -39,7 +39,6 @@ form.addEventListener('submit', async (e) => {
     });
 
     const resultado = await resposta.json();
-    console.log(resultado);
     carregarDispositivos();
 
   } catch (error) {
@@ -89,10 +88,11 @@ async function carregarDispositivos() {
 
   devices.forEach(device => {
     const linha = document.createElement('div');
-    linha.classList.add('linha3');
+    linha.classList.add('linha');
 
     linha.innerHTML += `
       <div class="celula">${device.device}</div>
+      <div class="celula">${device.room_number}</div>
       <div class="celula">
         <button class="btn-excluir" data-id="${device._id}">Excluir</button>
         <button class="btn-editar" data-id="${device._id}">Alterar</button>
@@ -117,10 +117,12 @@ async function carregarDispositivos() {
   document.querySelectorAll('.btn-editar').forEach(btn => {
     btn.addEventListener('click', function () {
       const id = this.getAttribute('data-id');
-      const linha = this.closest('.linha3');
+      const linha = this.closest('.linha');
       const nome = linha.querySelector('.celula:nth-child(1)').innerText;
+      const room_number = linha.querySelector('.celula:nth-child(2)').innerText;
 
       document.querySelector('#formPut input[name="device"]').value = nome;
+      document.querySelector('#formPut input[name="room_number"]').value = room_number;
 
       idEditando = id;
       nomeEditando = nome;
