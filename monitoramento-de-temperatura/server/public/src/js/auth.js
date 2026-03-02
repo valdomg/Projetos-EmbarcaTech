@@ -70,3 +70,46 @@ export function checkAcess(permissao = null) {
     return false;
   }
 }
+
+
+//função abrir e fechar modal
+export function abrirModal(modalId, closeBtnSelector) {
+  // Mostrar o modal
+  const modal = document.getElementById(modalId);
+  if (!modal) {
+    console.log(`Modal com ID "${modalId}" não encontrado.`);
+    return;
+  }
+  modal.showModal();
+
+  //Fechar modal
+  const btnClose = modal.querySelector(closeBtnSelector);
+  if (!btnClose) {
+    console.log(`Modal com ID "${closeBtnSelector}" nao encontrado`)
+    return;
+  }
+  btnClose.onclick = () => modal.close();
+}
+
+//Função logout usuário
+export function logoutUser() {
+  // Confirmar exclusão
+  // Mostrar o modal
+  const modal = document.getElementById('modalLogout');
+  abrirModal('modalLogout', '#logoutNo');
+
+  // Mensagem final
+  const mensagem = "Tem certeza que deseja sair?";
+  document.getElementById('logoutMessage').innerText = mensagem;
+
+  const logout = document.getElementById("logoutYes");
+  logout.onclick = async (e) => {
+    e.preventDefault();
+
+    modal.close();
+    localStorage.removeItem("token");
+    window.location.href = "login.html";
+  }
+}
+
+
