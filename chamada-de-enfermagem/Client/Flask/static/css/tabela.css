@@ -9,14 +9,14 @@
   display: grid;
   grid-template-columns: 2fr 1fr 1.5fr;
   /* border-bottom: 1px solid #ddd; */
-  align-items: center;
+  /* align-items: center; */
 }
 
 .linha3 {
   display: grid;
   grid-template-columns: 2fr 1.5fr;
   /* border-bottom: 1px solid #ddd; */
-  align-items: center;
+  /* align-items: center; */
 }
 
 .celula {
@@ -31,17 +31,9 @@
   font-weight: bold;
 }
 
-.celula[contenteditable="true"] {
-  cursor: text;
-}
-
-.celula:focus {
-  outline: 2px solid #4da3ff;
-}
-
 #overlay {
   display: none;
-  position: fixed;            /* cobre toda a tela */
+  position: fixed;            
   top: 0;
   left: 0;
   width: 100vw;
