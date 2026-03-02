@@ -5,6 +5,7 @@ import os
 from MongoDB.mongo_conn import mongo_conn 
 from datetime import datetime
 import paho.mqtt.client as mqtt
+import json
 
 load_dotenv()
 
@@ -118,11 +119,13 @@ def register_status_chamada_mongo_db(device:str, payload:dict):
 
     room_number = int(payload.get('room_number'))
     estado = payload.get('estado')
+    local = payload.get('local')
     
     document = {
         'device': device,
         'room_number': room_number,
         'status': estado,
+        'local': local,
         'updateAt': datetime.now()
     }
     
@@ -147,6 +150,46 @@ def register_status_chamada_mongo_db(device:str, payload:dict):
     except Exception as e:
         print(e)
 
+def publish_message_to_stop_emergency(data:dict):
+
+    device = data['device']
+    room_number = data['room_number']
+    local = data['local']
+
+    result = mongo_conn.return_document('status_chamadas', 'device', device)
+
+    if not result:
+        return False
+    
+    if result['status'] == 'ocioso':
+        print('Aqui')
+        return False
+    
+    topic = f'dispositivos/enfermaria/{device}'
+
+    temp_payload = {
+        'id':device,
+        'estado':'ocioso',
+        'mensagem':'Mensagem do servidor',
+        'room_number': room_number,
+        'local': local,
+        'comando': 'desligar'
+    }
+
+    payload = json.dumps(temp_payload)
+
+    client = mqtt.Client(client_id=user_name)
+    client.username_pw_set(user_name, password)
+    client.connect(broker, port)
+
+
+    client.publish(topic, payload, retain=False)
+    client.disconnect()
+    logging.info(f'Mensagem publicada em {topic}')
+
+    return True
+
+'''
 def publish_message_on_topic_avoid_retain_messages(topic: str):
     """Publica uma mensagem MQTT no tópico especificado."""
     client = mqtt.Client(client_id=user_name)
@@ -156,3 +199,4 @@ def publish_message_on_topic_avoid_retain_messages(topic: str):
     client.publish(topic, payload=None, retain=True)
     client.disconnect()
     logging.info(f'Mensagem publicada em {topic}')
+'''
