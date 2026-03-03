@@ -71,6 +71,21 @@ class TemperatureController {
     res.status(200).json(temperatures);
   }
 
+  getCurrentTemperature = async (req, res) => {
+
+          /*
+          #swagger.tags = ['Temperature']
+          #swagger.summary = 'Obtém a leitura de temperatura mais recente organizada por ambiente'
+          #swagger.description = 'Esse endpoint retorna a leitura de temperatura mais recente registrada para cada ambiente.'
+          #swagger.security = [{
+            "bearerAuth": []
+          }] 
+          */
+
+      const result = await this.temperatureService.getRoomsWithLastReading();
+      res.status(200).json(result);
+    }
+
   getReport = async (req, res) => {
           /*
           #swagger.tags = ['Temperature']
@@ -88,6 +103,16 @@ class TemperatureController {
   }
 
   getPdfReport = async (req, res) => {
+
+          /*
+          #swagger.tags = ['Temperature']
+          #swagger.summary = 'Gera um relatório em PDF das leituras de temperatura e humidade por hora de um ambiente específico por intervalo'
+          #swagger.description = 'Esse endpoint gera um relatório em PDF contendo media, minima e maxima de temperatura e humidade por hora para um ambiente específico com base no ID do ambiente e no intervalo de datas fornecidos. O PDF é gerado utilizando o serviço ReportPdfService e retorna um link para download do arquivo.'
+          #swagger.security = [{
+            "bearerAuth": []
+          }] 
+          */
+
     const { roomId } = req.params;
     const { startDate, endDate } = req.query;
     const result = await this.temperatureService.getReport(roomId, startDate, endDate);

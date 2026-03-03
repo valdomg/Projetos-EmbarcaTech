@@ -157,6 +157,44 @@ class TemperatureService {
     return result;
   }
 
+  getRoomsWithLastReading = async () => {
+    const roomsWithLastReading = await this.temperatureModel.aggregate([
+      { $sort: { timestamp: -1 } },
+
+    {
+      $group: {
+        _id: "$room",
+        temperature: { $first: "$temperature" },
+        humidity: { $first: "$humidity" },
+        timestamp: { $first: "$timestamp" }
+      }
+    },
+    {
+      $lookup: {
+        from: "rooms",
+        localField: "_id",
+        foreignField: "_id",
+        as: "room"
+      }
+    },
+
+    { $unwind: "$room" },
+
+    {
+      $project: {
+        _id: "$room._id",
+        name: "$room.name",
+        temperature: 1,
+        humidity: 1,
+        timestamp: 1
+      }
+    },
+    { $sort: { name: 1 } }
+  ]);
+
+  return roomsWithLastReading;
+}
+
   deleteTemperatureReading = async (id) => {
     if (!id) {
       throw ApiError.badRequest("ID inválido");

@@ -5,6 +5,7 @@ const mockModel = {
   find: jest.fn(),
   findById: jest.fn(),
   findByIdAndDelete: jest.fn(),
+  findByIdAndUpdate: jest.fn(),
   create: jest.fn(),
 };
 

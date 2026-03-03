@@ -22,17 +22,19 @@ router.post('/room', authenticate, roomController.createRoom);
 router.get('/rooms', authenticate, roomController.getAllRooms);
 router.get('/room/:roomId/temperatures', authenticate, temperatureController.getRoomTemperatures);
 router.get('/room/:roomId/temperatures/interval', authenticate, temperatureController.getRoomTemperaturesByInterval);
+router.get('/room/current', authenticate, temperatureController.getCurrentTemperature);
 router.get('/room/:roomId/report', authenticate, temperatureController.getReport);
 router.get('/room/:roomId/pdf', authenticate, temperatureController.getPdfReport);
 router.get('/room/id/:roomId', authenticate, roomController.getRoomById);
 router.get('/room/microcontroller/:microcontrollerId', authenticate, roomController.getRoomByMicrocontrollerId);
-router.put('/room/:roomId', authenticate, roomController.updateRoom);
+router.patch('/room/:roomId', authenticate, roomController.updateRoom);
 router.delete('/room/:roomId', authenticate, roomController.deleteRoom);
 
 router.post('/user', authenticate, userController.createUser);
 router.get('/users', authenticate, userController.getAllUsers);
 router.get('/user/:email', authenticate, userController.getUserByEmail);
-router.put('/user/:userId', authenticate, userController.updateUser);
+router.patch('/user/:userId', authenticate, userController.updateUser);
 router.delete('/user/:userId', authenticate, userController.deleteUser);
+router.patch('/user/:userId/change-password', authenticate, userController.changePassword);
 
 export default router;

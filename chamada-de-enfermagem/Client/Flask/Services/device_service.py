@@ -19,12 +19,13 @@ class DeviceService:
     Registra um device com seu nome
     retorna um json com o status da inserção
     '''
-    def register(self, device:str, createdAt: datetime):
+    def register(self, device:str, room_number:int, createdAt: datetime):
         if self.device_db_model.find_by_device(device):
             return jsonify({'error': 'Device já existente'}), 400
 
         if self.device_db_model.insert_device({
             'device': device,
+            'room_number': room_number,
             'createdAt': createdAt
             }) is False:
 
@@ -52,19 +53,20 @@ class DeviceService:
         if ObjectId.is_valid(document_id) is False: 
             return jsonify({'message':'ID de dispositivo incorreto'}), 404
 
-        for key, name_device in document_with_updates.items():
+        for key, name_device, in document_with_updates.items():
 
-            if key != 'device':
+            if key != 'device' and key != 'room_number':
                 return jsonify({'message': 'Campos inválidos'}), 400
-    
-            if not name_device or name_device.split() == '' or ' ' in name_device:
-                return jsonify({'message': 'Valores faltosos ou com espaço, verifique as informações'}), 400
             
-            if self.device_db_model.find_device_by_id(document_id) is False:
-                return jsonify({'message': 'Device não encontrado'}), 400
-            
-            if self.device_db_model.find_by_device(name_device) is True:
-                return jsonify({'message': 'Nome de device em uso, valor não alterado!'}), 400
+            if key == 'device':
+                if not name_device or name_device.split() == '' or ' ' in name_device:
+                    return jsonify({'message': 'Valores faltosos ou com espaço, verifique as informações'}), 400
+
+                if self.device_db_model.find_device_by_id(document_id) is False:
+                    return jsonify({'message': 'Device não encontrado'}), 400
+
+                if self.device_db_model.find_by_device(name_device) is True:
+                    return jsonify({'message': 'Nome de device em uso, valor não alterado!'}), 400
             
         if self.device_db_model.update_device(document_id, document_with_updates) is False:
             return jsonify({'message': 'Device não alterado, tente novamente'}), 500

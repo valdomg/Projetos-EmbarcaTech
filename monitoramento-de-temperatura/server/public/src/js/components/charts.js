@@ -9,7 +9,7 @@ export const tempChart = new Chart(document.getElementById('tempChart'), {
 
             data: [],
             borderWidth: 6,
-            borderColor: 'rgba(255, 251, 0, 0.85)',
+            borderColor: 'rgba(0, 135, 34, 0.85)',
             // backgroundColor: 'transparent',
         },
 

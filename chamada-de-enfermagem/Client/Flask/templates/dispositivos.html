@@ -71,8 +71,9 @@
        <div class="col">
             <div class="usuarios-tabela">
                 <div id="planilha" class="borda-conteiner">
-                  <div class="linha3">
+                  <div class="linha">
                     <div class="celula cabecalho">Dispositivo</div>
+                    <div class="celula cabecalho">Número da Sala</div>
                     <div class="celula cabecalho">Ações</div>
                   </div>
                     <div id="userTable">
@@ -86,16 +87,20 @@
 
                 <form id="formCadastro" class="formulario">
                   <h3>Cadastrar Dispositivo</h3>
-                  <label>Nome:</label>
+                  <label>Nome do Dispositivo:</label><br>
                   <input type="text" name="device" required><br><br>
+                  <label>Número da sala:</label><br>
+                  <input type="text" name="room_number" required><br><br>
                   <button type="submit">Salvar</button>
                   <button type="button" id="fechar">Cancelar</button>
                 </form>
               
               <form id="formPut" class="formulario">
                   <h3>Alterar Dispositivo</h3>
-                  <label>Nome:</label>
+                  <label>Nome do Dispositivo:</label><br>
                   <input type="text" name="device" required><br><br>
+                  <label>Número da sala:</label><br>
+                  <input type="text" name="room_number" required><br><br>
                   <button type="submit">Salvar</button>
                   <button type="button" id="fecharPut">Cancelar</button>
                 </form>

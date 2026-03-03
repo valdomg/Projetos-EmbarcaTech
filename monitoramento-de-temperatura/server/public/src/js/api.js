@@ -78,6 +78,28 @@ export async function roomTempInterval(salaId, start, end) {
   return dados;
 }
 
+//buscar intervalo registrado de temperatura de uma sala especifica e gera um relatorio PDF
+export async function roomTempPDF(salaId, start, end) {
+
+  const token = localStorage.getItem("token");
+  const response = await fetch(`/api/room/${salaId}/pdf?startDate=${start}&endDate=${end}`,
+    {
+      method: 'GET',
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+  const dados = await response.json();
+
+  if (!response.ok) {
+    throw new Error(dados.erro || dados.message || "Erro ao buscar temperaturas");
+  }
+
+  return dados;
+}
+
 //Listar salas
 export async function roomsSearch() {
   const token = localStorage.getItem("token");
@@ -145,7 +167,7 @@ export async function roomEdit(id, nome, microcontrolador) {
   try {
     const response = await fetch(`/api/room/${id}`,
       {
-        method: "PUT",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
@@ -313,19 +335,18 @@ export async function userRegister(usuario, email, senha) {
 
 
 //Editar dados do usuario
-export async function userEdit(id, usuario, email, senha) {
+export async function userEdit(id, usuario, email) {
 
   const token = localStorage.getItem("token");
   const body = {
     name: usuario,
     email: email,
-    password: senha,
-    userId: id
+
   };
   try {
     const response = await fetch(`/api/user/${id}`,
       {
-        method: "PUT",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
@@ -333,13 +354,48 @@ export async function userEdit(id, usuario, email, senha) {
         body: JSON.stringify(body),
       });
 
+    const data = await response.json();
 
     if (!response.ok) {
-      const erroData = await response.json();
-      throw new Error(erroData.message || "Erro ao editar usuário");
+      throw new Error(data.message || "Erro ao editar usuário");
     }
 
+    return data;
+
+  } catch (err) {
+    console.error("Falha na edição:", err.message);
+    throw err;
+  }
+}
+
+
+
+//Editar senha do usuario
+export async function passwordEdit(id, currentPass, newPass) {
+
+  const token = localStorage.getItem("token");
+  const body = {
+    currentPassword: currentPass,
+    newPassword: newPass,
+  };
+  try {
+    const response = await fetch(`/api/user/${id}/change-password`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(body),
+      });
+
     const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || data.erro || "Erro ao atualizar senha");
+    }
+
+
     return data;
 
   } catch (err) {

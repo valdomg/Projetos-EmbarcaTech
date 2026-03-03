@@ -20,6 +20,10 @@ body {
     background-color: #ffffff;
 }
 
+.dark{
+    color: #8e8d8d;
+}
+
 .hide {
     display: none;
 }
@@ -180,8 +184,9 @@ button {
 }
 
 .chart-background {
-    background-color: rgba(68, 67, 67, 0.6);
+    background-color: rgba(68, 67, 67, 0);
     border-radius: 8px;
+    border: 1px solid rgba(198, 195, 195, 0.908);
 }
 
 .room-grid {
@@ -212,22 +217,26 @@ button {
 }
 
 .temp {
-    background-color: rgba(68, 67, 67, .6);
+    background-color: rgba(68, 67, 67, 0);
     align-items: center;
     justify-items: center;
     cursor: pointer;
     padding: 18px;
     height: 100%;
+    border: 1px solid rgba(198, 195, 195, 0.908);
+    border-radius: 8px;
 }
 
 
 .umid {
-    background-color: rgba(68, 67, 67, .6);
+    background-color: rgba(68, 67, 67, 0);
     align-items: center;
     justify-items: center;
     cursor: pointer;
     padding: 18px;
     height: 100%;
+    border: 1px solid rgba(198, 195, 195, 0.908);
+    border-radius: 8px;
 }
 
 .dashboard-admin {
@@ -245,7 +254,7 @@ button {
     left: 0;
     height: calc(100vh - 5rem);
     width: 70%;
-    max-width: 280px;
+    /* max-width: 280px; */
 
     background-color: #ffffff;
     border-right: 1px solid rgb(219, 218, 218);
@@ -427,6 +436,10 @@ dialog h3 {
     text-align: center;
     font-weight: bold;
     margin-top: 5px;
+}
+
+.alert-sucess a{
+    color: #007bff;
 }
 
 .relatorio label,
