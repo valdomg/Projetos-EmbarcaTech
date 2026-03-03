@@ -1,8 +1,10 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from Flask.Models.user_db_model import UserDBModel
+from Flask.Models.user_model import User
 from datetime import datetime
 from flask import jsonify
 from bson.objectid import ObjectId
+import logging
 '''
 Classe de utilitário de autenticação
 '''
@@ -20,17 +22,37 @@ class UserService:
 
     retorna um json com o status da inserção
     '''
-    def register(self, username:str, password:str, role:str, createdAt: datetime):
-        if self.user_db_model.check_user_exists_by_username(username):
-            return jsonify({'error': 'Nome de usuário em uso'}), 400
-        
+    def register(self, data:dict):
+
+        username = data['username']
+        password = data['password']
+        role = data['role']
+        try:
+            if not username or username.split() == '' or ' 'in username:
+                return jsonify({'message': 'Verifique as informações de nome de usuário!'}), 400
+            
+            if not password or password.split() == '' or password.isspace():
+                return jsonify({'message': 'Verifique as informações de senha'}), 400
+            
+            if role != 'user' and role != 'admin' or role.split() == '' or role.isspace():
+                return jsonify({'message': 'Verifique as informações de função!'}), 400
+
+            if self.user_db_model.check_user_exists_by_username(username):
+                return jsonify({'error': 'Nome de usuário em uso'}), 400
+            
+        except Exception as e:
+            logging.exception(e)
+            return jsonify({'Error':'verifique as informações e tente novamente'}), 500
+
+
         hashed_pw = generate_password_hash(password)
+        user_to_register = User(username, hashed_pw, role)
 
         if self.user_db_model.insert_user({
-            'username': username,
-            'password': hashed_pw,
-            'role': role, 
-            'createdAt': createdAt
+            'username': user_to_register.getUsername(),
+            'password': user_to_register.getPassword(),
+            'role': user_to_register.getRole(), 
+            'createdAt': user_to_register.getCreateAt()
             }) is False:
 
             return jsonify({'message': 'Usuário não inserido no banco de dados'}), 500
@@ -81,27 +103,36 @@ class UserService:
         if ObjectId.is_valid(document_id) is False: 
             return jsonify({'message':'ID de usuário incorreto'}), 404
 
-        for key, value in document_with_updates.items():
+        try:
+            for key, value in document_with_updates.items():
 
-            if key != 'username' and key != 'password' and key != 'role':
-                return jsonify({'Message': 'Campos inválidos'}), 400
+                if key != 'username' and key != 'password' and key != 'role':
+                    return jsonify({'Message': 'Campos inválidos'}), 400
 
-            if not value or value.split() == '' or ' ' in value:
-                return jsonify({'Message': 'Valores com faltosos ou com espaço, tente novamente'}), 400
+                if not value or value.split() == '' or ' ' in value:
+                    return jsonify({'Message': 'Valores com faltosos ou com espaço, tente novamente'}), 400
 
-            if key == 'username':
-                if self.user_db_model.check_user_exists_by_username(document_with_updates['username']):
-                    return jsonify({'message': 'nome de usuário em uso'}), 400
-            
-            if key == 'role':    
-                if value != 'user' and value != 'admin':
-                    return jsonify({'message': 'Valores errados em tipo de usuário'}) , 400
+                if key == 'username':
+                    if self.user_db_model.check_user_exists_by_username(document_with_updates['username']):
+                        return jsonify({'message': 'nome de usuário em uso'}), 400
                 
-            if key == 'password':
-                password = value
-                hashed_pw = generate_password_hash(password)
-                document_with_updates['password'] = hashed_pw
-            
+                if key == 'role':    
+                    if value != 'user' and value != 'admin':
+                        return jsonify({'message': 'Valores errados em tipo de usuário'}) , 400
+                    
+                if key == 'password':
+                    if not value or value.split() == '' or value.isspace():
+                        return jsonify({'message': 'Verifique as informações de senha'}), 400
+                    
+                    password = value
+                    hashed_pw = generate_password_hash(password)
+                    document_with_updates['password'] = hashed_pw
+
+        except Exception as e:
+            logging.exception(e)
+            return jsonify({'Error': 'verifique as informações'}), 500
+
+
         if self.user_db_model.update_user_by_id(document_id, document_with_updates) is False:
             return jsonify({'message': 'campos não atualizados'}), 500
 
