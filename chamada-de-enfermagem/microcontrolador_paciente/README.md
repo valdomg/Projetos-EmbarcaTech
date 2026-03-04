@@ -1,4 +1,4 @@
-README# ⚡ Microcontrolador Paciente – Sistema de Chamada de Enfermagem
+# ⚡ Microcontrolador Paciente – Sistema de Chamada de Enfermagem
 
 ## 📝 Descrição
 Este projeto implementa o firmware para o módulo paciente do sistema de chamada de enfermagem, utilizando **ESP8266**, **MQTT** e **LED/botão** como interface com o paciente.  
