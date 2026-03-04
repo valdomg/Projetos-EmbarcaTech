@@ -1,45 +1,133 @@
+/**
+ * @file config_storage.cpp
+ * @brief Implementação do subsistema de armazenamento de configuração.
+ *
+ * @details
+ * Este módulo é responsável por persistir e recuperar as configurações
+ * do sistema utilizando o sistema de arquivos LittleFS em formato JSON.
+ *
+ * As configurações incluem:
+ *
+ * - Parâmetros de conexão Wi-Fi
+ * - Configuração do broker MQTT
+ * - Tópicos de publicação
+ * - Limites de temperatura e umidade
+ *
+ * O armazenamento é realizado no arquivo:
+ *
+ * `/config.json`
+ *
+ * Este módulo garante:
+ *
+ * - Persistência entre reinicializações
+ * - Carregamento seguro
+ * - Validação básica
+ *
+ * @note O sistema de arquivos LittleFS deve ser montado antes da utilização
+ *       deste módulo.
+ */
+
 #include "config_storage.h"
 #include <ArduinoJson.h>
 #include <LittleFS.h>
 #include "log.h"
 
-// Caminho fixo do arquivo JSON de configuração armazenado no sistema de arquivos interno (LittleFS)
+
+// ============================================================================
+// Constantes
+// ============================================================================
+
+/**
+ * @brief Caminho do arquivo de configuração no LittleFS.
+ *
+ * Este arquivo armazena todas as configurações do sistema em formato JSON.
+ */
 const char* CONFIG_PATH = "/config.json";
 
-// Estrutura global que mantém os dados atuais de configuração do sistema
+// ============================================================================
+// Variáveis globais
+// ============================================================================
+
+/**
+ * @brief Estrutura global contendo a configuração ativa do sistema.
+ *
+ * Esta variável é atualizada após o carregamento ou salvamento
+ * das configurações.
+ *
+ * @warning Deve ser acessada somente após loadConfig() ou saveConfigutionData().
+ */
 ConfigurationData cfg;
+
+// ============================================================================
+// Inicialização
+// ============================================================================
 
 /**
  * @brief Inicializa o subsistema de armazenamento de configuração.
- * 
- * Essa função é responsável por preparar o módulo de configuração.
- * No caso, o LittleFS já é montado em outro módulo, portanto aqui
- * apenas é registrada uma mensagem de log para indicar que o sistema
- * de configuração está pronto para uso.
+ *
+ * @details
+ * Esta função prepara o módulo de armazenamento de configuração.
+ *
+ * Atualmente, assume que o LittleFS já foi montado por outro módulo (storage.h)
+ *
+ * Apenas registra uma mensagem de log indicando que o sistema está pronto.
+ *
+ * @note Esta função não monta o LittleFS.
+ *
+ * @see LittleFS.begin()
  */
 void initConfigStorage() {
   log(LOG_INFO, "Config storage pronto (LittleFS já montado)");
 }
 
+// ============================================================================
+// Verificação de existência
+// ============================================================================
+
 /**
  * @brief Verifica se existe um arquivo de configuração salvo.
- * 
- * @return true se o arquivo /config.json existir.
- * @return false caso o arquivo não exista.
+ *
+ * @details
+ * Essa função verifica a existência do arquivo `/config.json`
+ * no sistema de arquivos LittleFS.
+ *
+ * @retval true  Arquivo existe.
+ * @retval false Arquivo não existe.
  */
 bool hasConfigData() {
   return LittleFS.exists(CONFIG_PATH);
 }
 
+// ============================================================================
+// Carregamento
+// ============================================================================
+
 /**
- * @brief Carrega os dados de configuração do arquivo JSON.
- * 
- * Essa função abre o arquivo `/config.json`, lê seu conteúdo e
- * converte os valores armazenados em uma estrutura `ConfigurationData`.
- * Caso ocorra erro na leitura ou o arquivo não exista, retorna uma
- * estrutura vazia (com `valid = false`).
- * 
- * @return Estrutura ConfigurationData contendo os valores carregados.
+ * @brief Carrega as configurações do sistema a partir do arquivo.
+ *
+ * @details
+ * Esta função realiza as seguintes etapas:
+ *
+ * 1. Abre o arquivo `/config.json`
+ * 2. Lê o conteúdo JSON
+ * 3. Converte os dados para a estrutura ConfigurationData
+ * 4. Retorna a estrutura preenchida
+ *
+ * Em caso de erro:
+ *
+ * - Arquivo inexistente
+ * - Erro de leitura
+ * - JSON inválido
+ *
+ * retorna uma estrutura com:
+ *
+ * valid = false
+ *
+ * @return ConfigurationData Estrutura contendo as configurações carregadas.
+ *
+ * @note O tamanho do JSON é limitado a 768 bytes.
+ *
+ * @warning Se o JSON estiver corrompido, os dados serão descartados.
  */
 ConfigurationData loadConfig() {
 
@@ -82,19 +170,29 @@ ConfigurationData loadConfig() {
   return config;
 }
 
+// ============================================================================
+// Salvamento
+// ============================================================================
+
 /**
- * @brief Salva os dados de configuração no arquivo JSON.
- * 
- * Essa função cria ou sobrescreve o arquivo `/config.json` no
- * sistema de arquivos LittleFS, armazenando todos os valores da
- * estrutura `ConfigurationData` em formato JSON.
- * 
- * Após salvar, a função recarrega os dados salvos em `cfg` para
- * garantir consistência e retorna um valor booleano indicando sucesso.
- * 
- * @param config Estrutura ConfigurationData contendo os dados a serem salvos.
- * @return true se o arquivo for salvo corretamente.
- * @return false se ocorrer erro ao abrir ou escrever o arquivo.
+ * @brief Salva a configuração no sistema de arquivos.
+ *
+ * @details
+ * Esta função:
+ *
+ * - Cria ou sobrescreve o arquivo `/config.json`
+ * - Converte a estrutura ConfigurationData para JSON
+ * - Salva no LittleFS
+ * - Atualiza a variável global cfg
+ *
+ * @param config Configuração a ser salva.
+ *
+ * @retval true  Configuração salva com sucesso.
+ * @retval false Falha ao salvar.
+ *
+ * @note Após salvar, a configuração é recarregada automaticamente.
+ *
+ * @warning A configuração anterior será sobrescrita.
  */
 bool saveConfigutionData(const ConfigurationData& config) {
 

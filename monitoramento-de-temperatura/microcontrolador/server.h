@@ -1,3 +1,50 @@
+/**
+ * @file server.h
+ * @brief Interface do módulo responsável pelo servidor HTTP embarcado no ESP8266.
+ *
+ * Este módulo fornece funções para criação, configuração, execução e encerramento
+ * de um servidor web HTTP no microcontrolador ESP8266.
+ *
+ * O servidor é utilizado principalmente para:
+ *
+ * - Disponibilizar uma interface web de configuração do dispositivo;
+ * - Receber parâmetros enviados pelo usuário através de formulários HTML;
+ * - Permitir configuração de rede Wi-Fi, parâmetros MQTT e limites ambientais;
+ * - Controlar o ciclo de vida do servidor durante o modo de configuração.
+ *
+ * Funcionalidades principais:
+ *
+ * - Inicialização do servidor HTTP;
+ * - Registro de rotas e endpoints;
+ * - Processamento de requisições de clientes;
+ * - Encerramento seguro do servidor;
+ * - Suporte ao modo Access Point (AP) para configuração local.
+ *
+ * Fluxo típico de utilização:
+ *
+ * @code
+ * ESP8266WebServer server(80);
+ *
+ * startServer(&server);
+ *
+ * void loop() {
+ *     server_handle_loop(&server);
+ * }
+ * @endcode
+ *
+ * Dependências:
+ *
+ * - Biblioteca ESP8266WebServer
+ * - Módulo de configuração do sistema
+ *
+ * @note Este módulo é utilizado principalmente durante o modo de configuração do dispositivo.
+ *
+ * @warning O servidor deve ser processado continuamente no loop principal para garantir
+ * o atendimento das requisições HTTP.
+ *
+ * @see server.cpp
+ */
+
 #ifndef SERVER_H
 #define SERVER_H
 

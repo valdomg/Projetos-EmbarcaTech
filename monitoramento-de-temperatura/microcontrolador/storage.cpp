@@ -1,3 +1,68 @@
+/**
+ * @file storage.cpp
+ * @brief Implementação do módulo de armazenamento persistente de dados de sensores utilizando LittleFS.
+ *
+ * Este módulo é responsável por gerenciar o armazenamento local dos dados ambientais
+ * (temperatura e umidade) no sistema de arquivos LittleFS do microcontrolador.
+ *
+ * O armazenamento é utilizado como mecanismo de tolerância a falhas de comunicação,
+ * permitindo salvar temporariamente os dados quando não for possível enviá-los ao
+ * servidor remoto (por exemplo, falha na conexão MQTT).
+ *
+ * Funcionalidades principais:
+ *
+ * - Inicialização do sistema de arquivos LittleFS;
+ * - Armazenamento persistente de dados de sensores em formato JSON;
+ * - Recuperação de dados armazenados por índice;
+ * - Remoção sequencial de dados já transmitidos;
+ * - Verificação da existência de dados pendentes;
+ * - Impressão dos dados armazenados para fins de depuração.
+ *
+ * Estrutura de armazenamento:
+ *
+ * - Os dados são armazenados no arquivo `/storage.json`;
+ * - Cada linha do arquivo representa um objeto JSON independente;
+ * - Cada objeto contém:
+ *
+ * @code
+ * {
+ *   "t": 25.40,
+ *   "h": 60.20
+ * }
+ * @endcode
+ *
+ * Estratégia de funcionamento:
+ *
+ * 1. Quando ocorre falha no envio MQTT:
+ *    → Os dados são salvos localmente utilizando saveStorage();
+ *
+ * 2. Quando a conexão é restabelecida:
+ *    → Os dados são recuperados com getObjectStorage();
+ *    → Enviados ao servidor;
+ *    → Removidos com deleteOneMessage();
+ *
+ * Benefícios desta abordagem:
+ *
+ * - Evita perda de dados;
+ * - Garante entrega confiável;
+ * - Implementa buffer persistente;
+ * - Suporte a reconexão automática.
+ *
+ * Dependências:
+ *
+ * - LittleFS (Sistema de arquivos)
+ * - ArduinoJson (Serialização JSON)
+ * - log.h (Sistema de logging)
+ *
+ * Arquivo relacionado:
+ *
+ * @see storage.h
+ *
+ * @note O armazenamento é baseado em append, garantindo maior eficiência e menor desgaste da memória Flash.
+ *
+ * @warning O LittleFS deve ser inicializado com initStorage() antes de qualquer operação.
+ */
+
 #include "storage.h"
 #include "log.h"
 #include <ArduinoJson.h>

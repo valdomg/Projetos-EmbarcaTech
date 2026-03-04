@@ -1,23 +1,56 @@
+/**
+ * @file buzzer.cpp
+ * @brief Implementação do módulo de controle do buzzer.
+ *
+ * @details
+ * Este módulo é responsável por controlar o buzzer utilizado para
+ * alertas sonoros no sistema.
+ *
+ * O buzzer opera em modo intermitente, alternando entre ligado
+ * e desligado em um intervalo de tempo definido.
+ *
+ * Funcionalidades:
+ *
+ * - Inicialização do pino
+ * - Geração de alerta sonoro intermitente
+ * - Desativação do alerta sonoro
+ *
+ * Este módulo é utilizado pelo sistema de monitoramento ambiental
+ * para sinalizar condições de erro.
+ *
+ * @note O pino (PIN_BUZZER) e o intervalo (BUZZER_INTERVAL_MS) são definidos em config.h
+ *
+ * @date 2026
+ */
+
+
 #include "buzzer.h"
 #include "log.h"
 #include "config.h"
 
-// ------------------------------------------------------------
-// Variável de controle interno do módulo
-// ------------------------------------------------------------
 
 /**
- * @brief Guarda o tempo da última alternância do buzzer.
- * 
- * Usada para calcular o intervalo entre mudanças de estado,
- * evitando que o buzzer alterne em frequência muito alta.
+ * @brief Armazena o tempo da última alternância do buzzer.
+ *
+ * @details
+ * Utilizada para controlar o intervalo entre ativações,
+ * garantindo que o buzzer opere de forma intermitente
+ * sem bloquear o fluxo principal do programa.
+ *
+ * @note Variável de uso interno do módulo.
  */
 unsigned long lastBuzzerPlayTime = 0;
 
-// ------------------------------------------------------------
-// Implementação das funções públicas declaradas em buzzer.h
-// ------------------------------------------------------------
 
+/**
+ * @brief Inicializa o buzzer.
+ *
+ * @details
+ * Configura o pino do buzzer como saída digital e
+ * garante que o dispositivo inicie desligado.
+ *
+ * Esta função deve ser chamada durante a inicialização do sistema.
+ */
 void buzzerInit() {
   // Configura o pino do buzzer como saída
   // e garante que inicie desligado
@@ -25,6 +58,18 @@ void buzzerInit() {
   digitalWrite(PIN_BUZZER, LOW);
 }
 
+/**
+ * @brief Alterna o estado do buzzer.
+ *
+ * @param now Tempo atual em milissegundos (millis())
+ *
+ * @details
+ * Alterna entre ligado e desligado em intervalos definidos,
+ * criando um efeito sonoro intermitente.
+ *
+ * Essa abordagem evita o uso de delay(), permitindo que
+ * o sistema continue executando outras tarefas.
+ */
 void toggleBuzzer(unsigned long now) {
   // Verifica se já se passou o intervalo definido
   // desde a última vez que o buzzer foi alternado
@@ -38,6 +83,12 @@ void toggleBuzzer(unsigned long now) {
   }
 }
 
+/**
+ * @brief Desativa o alerta sonoro.
+ *
+ * @details
+ * Desliga o buzzer imediatamente, colocando o pino em nível lógico baixo.
+ */
 void disableSoundAlert() {
   // Desliga o buzzer forçando nível lógico baixo
   digitalWrite(PIN_BUZZER, LOW);
