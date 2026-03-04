@@ -61,6 +61,7 @@ Rota de api para registar usuário
 json = {
     "username": "nome_do_usuario",
     "password": "senha_do_usuário"
+    "role: "tipo_usuário"
 }
 
 APENAS PARA ADMINS
@@ -73,13 +74,9 @@ def register():
         data = request.get_json()
 
         if not 'username' in data or 'password' not in data or 'role' not in data:
-            return jsonify({'Error': 'Campos inválidos'}), 400
-            
-        user = User(data['username'], data['password'], data['role'])
-        if user.isValid() == False:
-            return {'Error': 'Campos inválidos'}, 400
-            
-        result = user_service.register(user.getUsername(), user.getPassword(), user.getRole(), user.getCreateAt())
+            return jsonify({'Error': 'Campos inválidos'}), 400    
+        
+        result = user_service.register(data)
           
     except Exception as e:
         logging.exception('Error in register user')

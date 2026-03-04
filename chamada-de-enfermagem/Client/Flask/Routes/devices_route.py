@@ -84,8 +84,10 @@ APENAS PARA ADMINS
 @admin_required
 def register_device():
 
-    data = request.get_json()
+    result= ''
 
+    '''
+    data = request.get_json()
     try:
         if not 'device' in data:
             return jsonify({'Erro': 'Campos incorretos'}), 400
@@ -95,6 +97,10 @@ def register_device():
             return jsonify({'Error': 'Valores incorretos, tente novamente'}), 400
         
         result = device_service.register(device.getDevice(), device.getRoomNumber(), device.getCreatedAt())
+    '''
+    try:
+        data = request.get_json()
+        result = device_service.register(data)
 
     except Exception as e:
         logging.exception('Error in register', e)
@@ -122,8 +128,6 @@ def delete_device():
             return jsonify({'Error': 'Campo inválido'}), 400
         
         result = device_service.delete(data['document_id'])
-
-        logging.info(f'{result}')
     
     except Exception as e:
         logging.exception('Error in delete', e)
@@ -170,11 +174,8 @@ def update_device_by_id():
     try:
         data = request.get_json()
 
-        if not 'document_id' in data or 'device' not in data or 'room_number' not in data:
-            return jsonify ({'Error': 'Campos inválidos'}), 400
-        
-        temp = int(data['room_number'])
-        data['room_number'] = temp
+        if not "document_id" in data:
+            return jsonify({'Error': "Campo de ID não encontrado"}), 400
 
         result = device_service.update(data['document_id'], data)
     except Exception as e:
