@@ -45,4 +45,4 @@ O fluxo do sistema de chamada é o seguinte:
 ## 🛠 Protótipo e Conexões
 Abaixo está o diagrama do protótipo mostrando as conexões físicas dos componentes (gerado no Fritzing):
 
-![Protótipo Fritzing](./hardware/prototipo.png)
+![Protótipo Fritzing](../hardware/prototipo.png)
