@@ -1,58 +1,118 @@
+/**
+ * @file microcontrolador_paciente.ino
+ * @brief Firmware principal do módulo paciente do sistema de chamada de enfermagem.
+ *
+ * @details
+ * Este firmware é responsável por:
+ * - Inicializar periféricos (botão e LED);
+ * - Estabelecer conexão Wi-Fi;
+ * - Conectar ao broker MQTT;
+ * - Monitorar o botão do paciente;
+ * - Publicar uma solicitação MQTT quando o botão for pressionado.
+ *
+ * Arquitetura modular:
+ * - wifi.h   → Gerenciamento de conexão Wi-Fi
+ * - mqtt.h   → Comunicação com broker MQTT
+ * - button.h → Leitura do botão físico
+ * - led.h    → Controle do LED indicador
+ */
+
 #include "wifi.h"
 #include "mqtt.h"
 #include "button.h"
 #include "led.h"
 
-// True quando o botão está habilitado para enviar uma solicitação
+/**
+ * @brief Indica se o botão está habilitado para enviar uma nova solicitação.
+ *
+ * @details
+ * - false → botão liberado para envio
+ * - true  → botão bloqueado após envio bem-sucedido
+ *
+ * Essa variável evita múltiplos envios consecutivos enquanto
+ * o botão permanece pressionado.
+ */
 bool buttonEnable = false;
 
 
-
+/**
+ * @brief Função de inicialização do sistema.
+ *
+ * @details
+ * Executada uma única vez ao iniciar o microcontrolador.
+ * Responsável por:
+ * - Inicializar comunicação serial;
+ * - Configurar periféricos;
+ * - Inicializar cliente MQTT;
+ * - Conectar à rede Wi-Fi.
+ */
 void setup() {
- // Inicializa comunicação serial para debug
+
+  /// Inicializa comunicação serial para debug
   Serial.begin(115200);
 
- // Inicializa periféricos de entrada e saída
+  /// Inicializa periféricos de entrada e saída
   setupButton();
   setupLed();
 
-  // Inicializa cliente MQTT e conecta ao Wi-Fi
+  /// Inicializa cliente MQTT e conecta ao Wi-Fi
   setupMQTT();
   connectWiFi();
 }
 
 
+/**
+ * @brief Loop principal do firmware.
+ *
+ * @details
+ * Executado continuamente após o setup().
+ * 
+ * Fluxo principal:
+ * 1. Garante conexão MQTT;
+ * 2. Processa loop interno do cliente MQTT;
+ * 3. Verifica conexão Wi-Fi;
+ * 4. Monitora botão e publica mensagem quando necessário.
+ */
 void loop() {
 
-  // Garante que o cliente MQTT esteja conectado
+  /// Garante que o cliente MQTT esteja conectado
   if (!client.connected()) {
     connectMQTT();
   }
 
-// Processa o loop interno do cliente MQTT
+  /// Processa o loop interno do cliente MQTT
   client.loop();
 
-  // Verifica estado da conexão Wi-Fi
+  /// Verifica estado da conexão Wi-Fi
   checkConnection();
 
-   // Executa a lógica principal apenas quando conectado ao broker MQTT
+  /// Executa lógica principal apenas quando conectado ao broker
   if (client.connected()) {
 
-    // Se o botão estiver liberado e for pressionado, envia uma solicitação para o broker MQTT
+    /**
+     * Envia solicitação apenas se:
+     * - O botão estiver liberado
+     * - O botão estiver pressionado
+     *
+     * Observação:
+     * readButton() retorna LOW quando pressionado
+     * (configuração INPUT_PULLUP)
+     */
     if (!buttonEnable && !readButton()) {
 
-      // Publica a mensagem no tópico configurado
+      /// Publica mensagem no tópico MQTT configurado
       if (client.publish(TOPIC_PUBLISH, createJsonPayload(), true)) {
+
         Serial.println("Solicitação enviada");
-        
-        // Bloqueia o botão após envio bem-sucedido, para evitar múltiplos publishes consecutivos
+
+        /// Bloqueia novo envio até liberação
         buttonEnable = true;
 
-
       } else {
+
         Serial.println("Falha ao enviar solicitação");
 
-        // Mantém o botão liberado em caso de falha no envio
+        /// Mantém botão liberado em caso de falha
         buttonEnable = false;
       }
     }
