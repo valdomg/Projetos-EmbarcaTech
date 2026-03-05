@@ -86,7 +86,7 @@ async function resolverEmergencia(id) {
     const dadosEmergencia = { device, room_number, local };
   
     // console.log(dadosEmergencia)
-    const resposta = await fetch('/mensagem/ocioso', {
+    const resposta = await fetch('/api/mapa/mensagem/ocioso', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(dadosEmergencia)
