@@ -1,3 +1,69 @@
+/**
+ * @file server.cpp
+ * @brief Implementação do servidor HTTP para configuração do dispositivo.
+ *
+ * @details
+ * Este módulo implementa um servidor HTTP embarcado utilizado para
+ * configuração inicial do sistema através de uma interface web.
+ *
+ * O servidor permite que o usuário configure parâmetros essenciais
+ * do dispositivo diretamente pelo navegador, sem necessidade de
+ * reprogramar o firmware.
+ *
+ * As principais funcionalidades incluem:
+ *
+ * - Exibir uma página web de configuração do sistema
+ * - Receber parâmetros de configuração via formulário HTML
+ * - Armazenar configurações em memória persistente
+ * - Reiniciar o dispositivo após salvar novas configurações
+ *
+ * ## Parâmetros configuráveis
+ *
+ * A interface web permite configurar:
+ *
+ * ### Wi-Fi
+ * - SSID da rede
+ * - Senha da rede
+ *
+ * ### MQTT
+ * - Endereço do broker MQTT
+ * - Usuário
+ * - Senha
+ * - Device ID do dispositivo
+ * - Porta do broker
+ *
+ * ## Fluxo de funcionamento
+ *
+ * 1. O dispositivo inicia em modo **Access Point**.
+ * 2. O usuário conecta-se ao AP e acessa a página web do dispositivo.
+ * 3. O servidor exibe um formulário de configuração.
+ * 4. O usuário envia os parâmetros através do formulário.
+ * 5. O sistema salva as configurações na memória persistente.
+ * 6. O dispositivo reinicia para aplicar as novas configurações.
+ *
+ * ## Dependências
+ *
+ * Este módulo utiliza:
+ *
+ * - ESP8266WebServer (servidor HTTP)
+ * - ESP8266WiFi (controle da interface Wi-Fi)
+ * - config_storage (armazenamento das configurações)
+ *
+ * ## Arquitetura
+ *
+ * As principais funções deste módulo são:
+ *
+ * - startServer() → inicia o servidor HTTP
+ * - stopServer() → encerra o servidor
+ * - server_handle_loop() → processa requisições HTTP
+ * - serverSetupRoutes() → define os endpoints da aplicação
+ *
+ * @note
+ * O servidor é utilizado apenas para configuração do dispositivo
+ * e normalmente é executado quando o sistema não possui configurações
+ * válidas ou quando entra em modo de configuração.
+ */
+
 #include "server.h"
 #include "Arduino.h"
 #include "log.h"

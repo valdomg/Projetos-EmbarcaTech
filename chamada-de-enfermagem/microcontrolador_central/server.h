@@ -1,3 +1,46 @@
+/**
+ * @file server.h
+ * @brief Interface do módulo de servidor HTTP para configuração do dispositivo.
+ *
+ * @details
+ * Este módulo define a interface do servidor HTTP embarcado utilizado
+ * para configurar o dispositivo através de uma interface web.
+ *
+ * O servidor permite que o usuário configure parâmetros essenciais
+ * do sistema, como credenciais de rede Wi-Fi e informações de conexão
+ * com o broker MQTT, diretamente por um navegador.
+ *
+ * ## Funcionalidades principais
+ *
+ * - Inicialização do servidor HTTP
+ * - Configuração das rotas de acesso (endpoints)
+ * - Processamento de requisições HTTP
+ * - Encerramento do servidor e limpeza de recursos
+ *
+ * ## Fluxo de uso
+ *
+ * Normalmente o servidor é utilizado da seguinte forma:
+ *
+ * 1. Criar uma instância de `ESP8266WebServer`.
+ * 2. Iniciar o servidor utilizando `startServer()`.
+ * 3. No `loop()` principal, chamar `server_handle_loop()` para
+ *    processar requisições HTTP.
+ * 4. Quando necessário, parar o servidor com `stopServer()`.
+ *
+ * ## Dependências
+ *
+ * Este módulo utiliza a biblioteca:
+ *
+ * - ESP8266WebServer
+ *
+ * responsável por implementar o servidor HTTP no ESP8266.
+ *
+ * @note
+ * O servidor é geralmente utilizado no modo de configuração
+ * do dispositivo, permitindo que o usuário forneça parâmetros
+ * necessários para o funcionamento do sistema.
+ */
+
 #ifndef SERVER_H
 #define SERVER_H
 

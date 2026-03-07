@@ -1,4 +1,34 @@
-#include "led.h"  // Inclui o header correspondente, que contém a definição do pino e protótipos das funções
+/**
+ * @file led.cpp
+ * @brief Implementação do controle do LED indicador do sistema.
+ *
+ * @details
+ * Este módulo é responsável por gerenciar o LED conectado ao microcontrolador,
+ * permitindo sua inicialização, acionamento, desligamento e operação em modo
+ * intermitente (piscar).
+ *
+ * O controle do piscar do LED é realizado utilizando a função `millis()`,
+ * evitando o uso de `delay()` e permitindo que o sistema continue executando
+ * outras tarefas simultaneamente. Esse método é conhecido como **temporização
+ * não bloqueante**, sendo amplamente utilizado em sistemas embarcados baseados
+ * em Arduino e ESP.
+ *
+ * Funcionalidades implementadas neste módulo:
+ * - Inicialização do pino do LED
+ * - Acionamento manual do LED (ligar/desligar)
+ * - Alternância automática do estado do LED em intervalos definidos
+ *
+ * O pino utilizado para controle do LED é definido no arquivo `config.h`.
+ *
+ * @note
+ * Este módulo depende das seguintes configurações:
+ * - `PIN_LED` definido em `config.h`
+ *
+ * @see config.h
+ * @date 2026
+ */
+
+#include "led.h"
 #include "config.h"
 
 // -----------------------------------------------------------------------------
@@ -16,7 +46,7 @@ unsigned long lastTimeLedTurnedOn = 0;
 /**
  * @brief Intervalo em milissegundos para alternar o estado do LED.
  * 
- * Neste caso, definido como 2000 ms (2 segundos).
+ * Neste caso, definido como 1000 ms (1 segundos).
  */
 constexpr unsigned long LED_INTERVAL_MS = 1000;
 

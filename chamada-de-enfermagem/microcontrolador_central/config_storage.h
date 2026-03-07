@@ -1,84 +1,168 @@
+/**
+ * @file config_storage.h
+ * @brief Interface do módulo de armazenamento persistente de configuração.
+ *
+ * @details
+ * Este módulo define a estrutura de dados utilizada para armazenar
+ * as configurações do sistema e fornece funções responsáveis por
+ * salvar e carregar essas informações utilizando o sistema de
+ * arquivos interno LittleFS.
+ *
+ * As configurações são armazenadas em formato JSON no arquivo
+ * `/config.json`, permitindo persistência mesmo após reinicializações
+ * do dispositivo.
+ *
+ * Entre os dados armazenados estão:
+ *
+ * - Credenciais da rede WiFi
+ * - Parâmetros de conexão com o servidor MQTT
+ * - Identificação do dispositivo no sistema
+ *
+ * O módulo fornece funções para:
+ *
+ * - Inicializar o subsistema de armazenamento
+ * - Verificar se existe configuração salva
+ * - Carregar configurações do armazenamento
+ * - Salvar novas configurações
+ *
+ * @note Este módulo depende do sistema de arquivos LittleFS.
+ *
+ * @date 2026
+ */
+
 #ifndef CONFIG_STORAGE
 #define CONFIG_STORAGE
 
 #include <Arduino.h>
 
-/**
- * @file config_storage.h
- * @brief Declarações relacionadas ao armazenamento e recuperação de configurações persistentes.
- * 
- * Este módulo define a estrutura de dados que armazena as configurações do sistema
- * (como credenciais de Wi-Fi, parâmetros MQTT e limites ambientais) e fornece funções
- * para salvar e carregar essas informações em memória persistente utilizando o sistema de arquivos LittleFS.
- */
+
 
 /**
  * @struct ConfigurationData
- * @brief Estrutura que contém os parâmetros de configuração do sistema.
- * 
- * Esta estrutura armazena todas as informações necessárias para o funcionamento
- * do sistema de monitoramento e comunicação MQTT, incluindo credenciais de rede
- * e limites de operação dos sensores.
+ * @brief Estrutura que armazena os parâmetros de configuração do sistema.
+ *
+ * @details
+ * Esta estrutura contém todas as informações necessárias para que
+ * o dispositivo consiga se conectar à rede WiFi e ao broker MQTT.
+ *
+ * Os dados são normalmente carregados do arquivo `/config.json`
+ * durante a inicialização do sistema.
+ *
+ * O campo `valid` indica se os dados foram carregados corretamente.
  */
 struct ConfigurationData {
-  String mqttServer;        /**< Endereço do servidor MQTT (ex.: "broker.hivemq.com") */
-  String mqttUser;          /**< Usuário para autenticação no servidor MQTT */
-  String mqttPass;          /**< Senha para autenticação no servidor MQTT */
-  String mqttDeviceId;      /**< Identificador único do dispositivo (Device ID) */
-  int mqttPort;      /**< Identificador único do dispositivo (Device ID) */
 
-  String wifiPass;          /**< Senha da rede Wi-Fi */
-  String wifiSSID;          /**< SSID (nome) da rede Wi-Fi */
+  /** Endereço do servidor MQTT (ex.: "broker.hivemq.com") */
+  String mqttServer;
 
-  bool valid = false;       /**< Indica se os dados carregados são válidos */
+  /** Usuário utilizado para autenticação no broker MQTT */
+  String mqttUser;
+
+  /** Senha utilizada para autenticação no broker MQTT */
+  String mqttPass;
+
+  /** Identificador único do dispositivo no sistema MQTT */
+  String mqttDeviceId;
+
+  /** Porta de conexão do servidor MQTT (ex.: 1883 ou 8883) */
+  int mqttPort;
+
+  /** Senha da rede WiFi */
+  String wifiPass;
+
+  /** Nome da rede WiFi (SSID) */
+  String wifiSSID;
+
+  /**
+   * Indica se os dados carregados são válidos.
+   *
+   * Este campo é utilizado para verificar se a configuração
+   * foi carregada corretamente do armazenamento persistente.
+   */
+  bool valid = false;
 };
+
 
 /**
  * @brief Inicializa o módulo de armazenamento de configuração.
- * 
- * Responsável por preparar o ambiente de leitura e escrita no sistema de arquivos
- * (LittleFS). Caso o sistema já tenha sido montado em outro módulo, esta função
- * mantém a consistência sem duplicar inicializações.
+ *
+ * @details
+ * Prepara o subsistema responsável por gerenciar as configurações
+ * persistentes do dispositivo.
+ *
+ * Esta função normalmente realiza a inicialização do sistema
+ * de arquivos LittleFS, permitindo leitura e escrita no
+ * arquivo de configuração.
+ *
+ * @note Deve ser chamada durante a inicialização do sistema
+ * (geralmente dentro do `setup()`).
  */
 void initConfigStorage();
 
+
 /**
- * @brief Carrega as configurações salvas no arquivo `/config.json`.
- * 
- * Lê o conteúdo do arquivo de configuração armazenado no sistema de arquivos
- * e converte-o em uma estrutura `ConfigurationData`.
- * 
- * @return Estrutura `ConfigurationData` contendo os parâmetros carregados.
- *         Se o arquivo não existir ou houver erro de leitura, retorna estrutura com `valid = false`.
+ * @brief Carrega os dados de configuração armazenados.
+ *
+ * @details
+ * Lê o arquivo `/config.json` presente no sistema de arquivos
+ * LittleFS e converte seu conteúdo para uma estrutura
+ * `ConfigurationData`.
+ *
+ * Caso o arquivo não exista ou ocorra erro durante a leitura,
+ * será retornada uma estrutura com `valid = false`.
+ *
+ * @return Estrutura `ConfigurationData` contendo os dados carregados.
  */
 ConfigurationData loadConfig();
 
+
 /**
- * @brief Salva as configurações atuais no arquivo `/config.json`.
- * 
- * Converte a estrutura `ConfigurationData` para o formato JSON e a armazena
- * de forma persistente no sistema de arquivos LittleFS.
- * 
- * @param config Estrutura contendo os valores de configuração a serem salvos.
- * @return true se o salvamento for bem-sucedido, false caso contrário.
+ * @brief Salva os dados de configuração no armazenamento persistente.
+ *
+ * @details
+ * Converte os dados da estrutura `ConfigurationData`
+ * para formato JSON e grava no arquivo `/config.json`
+ * dentro do sistema de arquivos LittleFS.
+ *
+ * Caso o arquivo já exista, ele será sobrescrito.
+ *
+ * @param config Estrutura contendo os dados de configuração.
+ *
+ * @return true  Se os dados foram salvos corretamente.
+ * @return false Caso ocorra erro ao gravar o arquivo.
  */
 bool saveConfigutionData(const ConfigurationData &config);
 
+
 /**
- * @brief Verifica se existe um arquivo de configuração armazenado.
- * 
- * @return true se o arquivo `/config.json` existir.
- * @return false se o arquivo não for encontrado.
+ * @brief Verifica se existe um arquivo de configuração salvo.
+ *
+ * @details
+ * Confere se o arquivo `/config.json` está presente
+ * no sistema de arquivos LittleFS.
+ *
+ * @return true  Se o arquivo existir.
+ * @return false Caso contrário.
  */
 bool hasConfigData();
 
+
 /**
- * @brief Variável global que contém os dados de configuração ativos.
- * 
- * Essa variável é atualizada ao carregar ou salvar os dados e
- * pode ser utilizada em outros módulos para acessar os parâmetros
- * configurados do sistema.
+ * @brief Estrutura global contendo a configuração atual do sistema.
+ *
+ * @details
+ * Esta variável armazena os dados de configuração atualmente
+ * utilizados pelo sistema.
+ *
+ * Ela é atualizada quando:
+ *
+ * - O sistema carrega a configuração do armazenamento
+ * - Uma nova configuração é salva
+ *
+ * Outros módulos podem acessar essa variável para obter
+ * os parâmetros de configuração ativos.
  */
 extern ConfigurationData cfg;
+
 
 #endif
