@@ -162,7 +162,6 @@ def publish_message_to_stop_emergency(data:dict):
         return False
     
     if result['status'] == 'ocioso':
-        print('Aqui')
         return False
     
     topic = f'dispositivos/enfermaria/{device}'
