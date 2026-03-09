@@ -3,7 +3,6 @@ from Flask.swagger.mock.mock_examples import chamadas
 from Flask.swagger.config import api
 
 ns_chamadas = Namespace('chamadas', description='Chamadas operations')
-
 @ns_chamadas.route('/')
 class ChamadasListResource(Resource):
     @ns_chamadas.doc('return_all_chamadas')
