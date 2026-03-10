@@ -32,18 +32,21 @@ devices = [
     {
         '_id': 'ObjectID',
         'device': 'Device1',
+        'room_number':'X',
         'createdAt':'ISODate'
     },
 
     {
         '_id': 'ObjectID',
         'device': 'Device2',
+        'room_number':'X',
         'createdAt':'ISODate'
     },
 
     {
         '_id': 'ObjectID',
         'device': 'Device3',
+        'room_number':'X',
         'createdAt':'ISODate'
     },
 
@@ -151,4 +154,12 @@ status_chamadas_oscioso = [
         'Data': 'ISODate'
     }
     
+]
+
+stop_emergency_response = [
+    {
+        'device':'Device1',
+        'room_number':'room_number',
+        'local': 'local_device'
+    }
 ]
