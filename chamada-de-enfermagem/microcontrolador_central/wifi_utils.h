@@ -1,57 +1,87 @@
+/**
+ * @file wifi_utils.h
+ * @brief Interface do módulo de gerenciamento de conexão Wi-Fi.
+ *
+ * @details
+ * Este módulo fornece funções para controle da conectividade Wi-Fi
+ * do dispositivo. Ele permite:
+ *
+ * - Conectar o dispositivo a uma rede Wi-Fi configurada
+ * - Monitorar o estado da conexão
+ * - Realizar reconexão automática em caso de perda de conexão
+ * - Criar um Access Point para configuração local
+ *
+ * Essas funções são utilizadas pelo firmware principal para garantir
+ * que o dispositivo permaneça conectado à rede e possa se comunicar
+ * com outros serviços (como MQTT).
+ *
+ * ## Fluxo típico de uso
+ *
+ * 1. O sistema tenta conectar à rede com `connectToWiFi()`.
+ * 2. Durante a execução normal, `checkAndReconnectWifi()` é chamada
+ *    no `loop()` principal para verificar a conexão.
+ * 3. Caso não seja possível conectar à rede, o sistema pode criar
+ *    um Access Point usando `createAccessPoint()` para permitir
+ *    configuração local do dispositivo.
+ *
+ * @note
+ * Este módulo depende da biblioteca `ESP8266WiFi`.
+ */
+
 #ifndef WIFI_HELPER_H
 #define WIFI_HELPER_H
 
 #include <ESP8266WiFi.h>
 #include "config.h"
 
-/**
- * @file wifi.h
- * @brief Módulo de gerenciamento da conexão Wi-Fi.
- * 
- * Este módulo fornece funções para conectar, verificar e reconectar
- * o ESP32 à rede Wi-Fi definida em config.h.
- * 
- * Funções disponíveis:
- *  - connectToWiFi()      : conecta ao Wi-Fi e retorna status.
- *  - checkAndReconnectWifi(): tenta reconectar periodicamente se desconectado.
- *  - wifiIsConnected()    : retorna true se conectado.
- */
 
 /**
- * @brief Conecta o ESP32 à rede Wi-Fi.
- * 
- * Inicia a conexão usando SSID e senha definidos em config.h.
- * Aguarda até 10 segundos pela conexão.
- * 
- * @return true se a conexão foi bem sucedida, false caso contrário.
+ * @brief Conecta o dispositivo à rede Wi-Fi configurada.
+ *
+ * Utiliza as credenciais armazenadas na estrutura de configuração
+ * (`cfg.wifiSSID` e `cfg.wifiPass`).
+ *
+ * A função aguarda um tempo limitado pela conexão e retorna
+ * o resultado da tentativa.
+ *
+ * @return true se a conexão foi estabelecida com sucesso.
+ * @return false se a conexão falhar.
  */
 bool connectToWiFi();
 
 /**
- * @brief Verifica se o Wi-Fi está conectado e tenta reconectar se necessário.
- * 
- * Esta função deve ser chamada periodicamente no loop() para garantir
- * que o ESP32 tente reconectar caso a conexão seja perdida.
- * 
- * O intervalo de reconexão é definido internamente (10 segundos).
+ * @brief Verifica o estado da conexão Wi-Fi e tenta reconectar.
+ *
+ * Caso o dispositivo esteja desconectado da rede, a função
+ * aguarda o intervalo configurado internamente antes de tentar
+ * uma nova conexão.
+ *
+ * Essa função deve ser chamada periodicamente no `loop()` principal.
+ *
+ * @return true se o dispositivo estiver conectado ao Wi-Fi.
+ * @return false se continuar desconectado.
  */
 bool checkAndReconnectWifi();
 
 
 
 /**
- * @brief Cria um ponto de acesso (Access Point) para configuração local.
- * 
- * - Configura o módulo Wi-Fi no modo AP.
- * - Cria uma rede com SSID e senha pré-definidos.
- * - Exibe o endereço IP do ponto de acesso via porta serial.
+ * @brief Cria um Access Point para configuração do dispositivo.
+ *
+ * Esta função coloca o dispositivo em modo `WIFI_AP` e cria
+ * um ponto de acesso utilizando o SSID e senha definidos
+ * nas constantes do sistema.
+ *
+ * O endereço IP do Access Point pode ser utilizado pelo
+ * usuário para acessar a interface web de configuração.
  */
 void createAccessPoint();
 
 /**
- * @brief Retorna o status da conexão Wi-Fi.
- * 
- * @return true se o ESP32 estiver conectado à rede Wi-Fi, false caso contrário.
+ * @brief Verifica se o dispositivo está conectado à rede Wi-Fi.
+ *
+ * @return true se o dispositivo estiver conectado.
+ * @return false caso contrário.
  */
 bool wifiIsConnected();
 
