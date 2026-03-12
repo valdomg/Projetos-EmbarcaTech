@@ -33,7 +33,7 @@ img {
     height: 100px;
 }
 
-a img{
+a img {
     border: none;
     outline: none;
 }
@@ -78,7 +78,7 @@ form {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin-top: 50px;
+    margin: auto;
     width: 550px;
     height: 550px;
     gap: 20px;
@@ -106,7 +106,7 @@ button {
     color: #ffffff;
     font-size: 16px;
     width: auto;
-    padding: 5px;
+    padding: 8px;
     justify-content: center;
     align-items: center;
     text-align: center;
@@ -127,6 +127,7 @@ button {
     align-items: center;
     text-align: center;
     box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+    outline: none;
 }
 
 .btn-primary:hover {
@@ -154,7 +155,7 @@ button {
     gap: 20px;
     flex-direction: row;
     justify-content: space-evenly;
-    margin: 100px;
+    margin: 50px 100px;
     flex-flow: wrap;
 
 }
@@ -215,7 +216,7 @@ button {
     align-items: center;
     justify-items: center;
     cursor: pointer;
-    padding: 20px;
+    padding: 18px;
     height: 100%;
 }
 
@@ -225,7 +226,7 @@ button {
     align-items: center;
     justify-items: center;
     cursor: pointer;
-    padding: 20px;
+    padding: 18px;
     height: 100%;
 }
 
@@ -239,16 +240,25 @@ button {
 }
 
 .menu-lateral {
+    position: fixed;
+    top: 5rem;
+    left: 0;
+    height: calc(100vh - 5rem);
+    width: 70%;
+    max-width: 280px;
+
+    background-color: #ffffff;
+    border-right: 1px solid rgb(219, 218, 218);
+
     display: flex;
     flex-direction: column;
-    justify-content: start;
     align-items: center;
-    padding-top: 40px;
-    width: 17%;
-    height: 100%;
     gap: 30px;
-    background-color: rgb(255, 255, 255);
-    border-right: 1px solid rgb(219, 218, 218);
+    padding-top: 40px;
+
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 9999;
 }
 
 .menu-lateral a {
@@ -279,7 +289,7 @@ hr {
     margin: 0;
 }
 
-.menu-lateral .fa{
+.menu-lateral .fa {
     border: none;
 }
 
@@ -294,8 +304,8 @@ hr {
     background-color: rgb(255, 255, 255);
 }
 
-.menu-principal .room-card{
-    background-color: rgba(221, 217, 217, 0.6);
+.menu-principal .room-card {
+    background-color: rgba(245, 242, 242, 0.313);
     border: 1px solid rgba(197, 197, 197, 0.6);
     border-radius: 3px;
     color: #747373;
@@ -333,7 +343,7 @@ caption {
     align-items: stretch;
     justify-content: space-evenly;
     width: 80%;
-    margin: 5rem 4rem;
+    margin: 5rem 3rem;
     gap: 20px;
 }
 
@@ -401,10 +411,19 @@ dialog h3 {
     opacity: 0;
 }
 
-.alert{
+.alert {
     width: 100%;
     background-color: rgb(244, 214, 210);
     color: rgb(118, 46, 35);
+    text-align: center;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+.alert-sucess {
+    width: 100%;
+    background-color: rgb(210, 244, 216);
+    color: rgb(9, 184, 0);
     text-align: center;
     font-weight: bold;
     margin-top: 5px;
@@ -426,22 +445,26 @@ dialog h3 {
     font-size: 18px;
 }
 
+.menu-lateral.aberto {
+    transform: translateX(0);
+}
 
-.modalDelete{
+
+.modalDelete {
     display: flex;
     align-items: start;
     flex-direction: column;
     gap: 0.8rem;
 }
 
-.deleteRow{
+.deleteRow {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
 }
 
-.deleteBtn{
+.deleteBtn {
     display: flex;
     justify-content: end;
     gap: 0.5rem;
@@ -449,7 +472,7 @@ dialog h3 {
 
 
 /*  BREAKPOINTS */
-@media (max-width: 767px) {
+@media (min-width: 320px) {
     .gauge {
         margin-top: 3rem;
         gap: 2rem;
@@ -468,11 +491,104 @@ dialog h3 {
 
     .room-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        margin: 100px 100px 10px 100px;
+        grid-template-columns: 1fr;
+        margin: 50px 50px 10px 50px;
         align-items: center;
         justify-content: center;
         gap: 20px;
         border-radius: 8px;
     }
+
+    .menu-lateral {
+        width: 50%;
+    }
+
+    .menu-principal {
+        width: 90%;
+    }
+
+    .login-form {
+        width: 100vw;
+        height: 100vh;
+        gap: 7px;
+        border-radius: 15px;
+    }
+
+    .login-form a img {
+        width: 200px;
+        height: 70px;
+    }
+}
+
+@media (min-width: 480px) {
+
+    .room-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+
+    }
+}
+
+@media (min-width: 767px) {
+    .gauge {
+        margin-top: .1rem;
+        gap: 1.5rem;
+    }
+
+    .monitor {
+        flex-direction: column;
+        margin-top: 3rem;
+        gap: 1px;
+    }
+
+    .temp,
+    .umid {
+        padding: 5px;
+    }
+
+    .room-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        margin: 80px 80px 10px 80px;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        border-radius: 8px;
+    }
+
+    .menu-lateral {
+        width: 25%;
+    }
+
+    .menu-principal {
+        width: 75%;
+    }
+
+    .login-form {
+        width: 550px;
+        height: 550px;
+        gap: 10px;
+        border-radius: 15px;
+    }
+
+    .login-form a img {
+        width: 280px;
+        height: 100px;
+    }
+
+}
+
+@media (min-width: 902px) {
+    .menu-lateral {
+        transform: translateX(0);
+        position: relative;
+        width: 20%;
+        height: 100%;
+        top: 0;
+    }
+
+    .menu-principal {
+        width: 80%;
+    }
+
 }

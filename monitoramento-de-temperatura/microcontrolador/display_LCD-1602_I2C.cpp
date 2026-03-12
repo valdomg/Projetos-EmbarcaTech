@@ -156,3 +156,13 @@ void handleBacklightLCD(bool isAlertState, bool commandTurnOnLCD) {
 
   }
 }
+
+void showIPAddress(const char* msg_IPAddress) {
+
+  lcd.clear();          // Limpa a tela toda
+  lcd.setCursor(0, 0);  // Posiciona o cursor na coluna 2, linha 0
+  lcd.print(F("Wi-Fi Conectado"));
+  lcd.setCursor(0, 1);  // Posiciona o cursor na coluna 0, linha 2
+  lcd.print(F("IP: "));
+  lcd.print(msg_IPAddress);
+}

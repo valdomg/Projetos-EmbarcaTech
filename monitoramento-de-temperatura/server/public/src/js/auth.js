@@ -56,6 +56,8 @@ export function checkAcess(permissao = null) {
       return false;
     }
 
+    document.body.classList.remove("hide");
+    document.body.classList.add("show");
     return true; // acesso liberado
 
   } catch (e) {

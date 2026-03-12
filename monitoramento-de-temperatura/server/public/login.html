@@ -5,28 +5,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="src/css/style.css" rel="stylesheet">
+             <!-- Favicon padrão -->
+    <link rel="icon" type="image/x-icon" href="src/img/icons/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="src/img/icons/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="src/img/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="src/img/icons/favicon-48x48.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="src/img/icons/apple-touch-icon-180x180.png">
+        <!----------->
     <title>Login</title>
 </head>
 
 <body class="default">
     <div class="container">
 
-        <main>
-            <div class="login-form">
-                <a href=""><img src="src/img/logo1.png" alt="logo do hospital sao camilo"></a>
-                <h2>Login</h2>
-                <form id="loginForm">
-                    <label for="usuario">Usuário </label><input type="text" name="usuario" id="email" required /><br>
-                    <label for="senha">Senha </label><input type="password" name="senha" id="senha" required /><br>
-                    <button type="submit" class="btn">Entrar</button><br>
-                    <p id="responseUser" class="alert"></p>
-                </form>
-                
-            </div>
-        </main>
+
+        <div class="login-form">
+            <a href=""><img src="src/img/logo1.png" alt="logo do hospital sao camilo"></a>
+            <h2>Login</h2>
+            <form id="loginForm">
+                <label for="usuario">Usuário </label><input type="text" name="usuario" id="email" required /><br>
+                <label for="senha">Senha </label><input type="password" name="senha" id="senha" required /><br>
+                <button type="submit" class="btn">Entrar</button><br>
+                <p id="responseUser" class="alert"></p>
+            </form>
+
+        </div>
+
     </div>
     <script src="src/js/components/jwt/jwt-decode.min.js"></script>
-<script type="module" src="src/js/auth.js"></script>
+    <script type="module" src="src/js/auth.js"></script>
 </body>
 
 </html>

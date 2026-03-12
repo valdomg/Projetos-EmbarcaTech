@@ -39,7 +39,7 @@ def register_chamada_mongodb(payload:dict):
 
     dispositivo_id = payload.get('id')
     mensagem = payload.get('mensagem')
-    room_number = payload.get('room_number')
+    room_number = int(payload.get('room_number'))
     local_emergencia = payload.get('local')
 
     document_to_save = {
@@ -116,7 +116,7 @@ def register_status_chamada_mongo_db(device:str, payload:dict):
     
     print(payload)
 
-    room_number = payload.get('room_number')
+    room_number = int(payload.get('room_number'))
     estado = payload.get('estado')
     
     document = {

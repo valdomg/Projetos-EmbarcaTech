@@ -41,7 +41,7 @@ Rota que retorna uma lista com todos os dispositivos
 def return_all_devices():
     
     try:
-        devices = device_db_model.return_all_devices()
+        devices = device_db_model.return_all_devices(field='room_number', type_sorting=1)
 
         if devices:
             json_devices = convert_all_id_to_string(devices)
@@ -75,6 +75,7 @@ def return_count_devices():
 Rota que registra um novo dispositivo no banco de dados
 json = {
     "device":"nome_device"
+    "room_number": "numero da sala"
 }
 
 APENAS PARA ADMINS
@@ -89,11 +90,11 @@ def register_device():
         if not 'device' in data:
             return jsonify({'Erro': 'Campos incorretos'}), 400
         
-        device = Device(data['device'])
+        device = Device(data['device'], int(data['room_number']))
         if device.isValid() == False:
             return jsonify({'Error': 'Valores incorretos, tente novamente'}), 400
         
-        result = device_service.register(device.getDevice(), device.getCreatedAt())
+        result = device_service.register(device.getDevice(), device.getRoomNumber(), device.getCreatedAt())
 
     except Exception as e:
         logging.exception('Error in register', e)
@@ -157,6 +158,7 @@ Rota para atualizar um dispositivo
 json{
     "document_id":"id_do_dispositivo"
     "device": "novo_nome_device"
+    "room_number": "novo_numero"
 }
 
 APENAS PARA ADMINS
@@ -168,8 +170,11 @@ def update_device_by_id():
     try:
         data = request.get_json()
 
-        if not 'document_id' in data or 'device' not in data:
+        if not 'document_id' in data or 'device' not in data or 'room_number' not in data:
             return jsonify ({'Error': 'Campos inválidos'}), 400
+        
+        temp = int(data['room_number'])
+        data['room_number'] = temp
 
         result = device_service.update(data['document_id'], data)
     except Exception as e:

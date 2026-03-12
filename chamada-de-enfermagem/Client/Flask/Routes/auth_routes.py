@@ -49,7 +49,7 @@ def login():
                 token = jwt.encode({
                     'user'  :   user['username'],
                     'role'  :   user['role'],
-                    'exp'   :   datetime.now(timezone.utc) + timedelta(minutes=10)
+                    'exp'   :   datetime.now(timezone.utc) + timedelta(hours=10)
                 }, SECRET_KEY, algorithm='HS256')
 
                 resp = make_response(redirect(url_for('pages.relatorio_page')))

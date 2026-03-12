@@ -52,14 +52,26 @@ class MongoDBConnection:
             logging.warning('Database não definida')
             return False
     
-    def list_all_documents_from_collection(self, collection:str):
+    def list_all_documents_from_collection(self, collection:str, field:str=None, type_sorting:int=None):
         '''
         Lista os documentos na coleção
         '''
+
+        data = {}
         try:
             if self.__client is not None:
                 collection = self.__db[collection]
-                return list(collection.find())
+
+                if field:
+                    data = list(collection.find().sort({field:type_sorting}))
+
+                else:
+                    data = list(collection.find())
+                
+                logging.info(data)
+                
+                return data
+
             else:
                 logging.warning('Client not connected')
         except PyMongoError as e:

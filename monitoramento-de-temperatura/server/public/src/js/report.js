@@ -37,8 +37,8 @@ export async function gerarRelatorio() {
 
     // Converte os valores dos inputs em ISO
   const idRoom = document.querySelector('select').value;
-  const start = new Date(document.getElementById('start').value).toISOString();
-  const end = new Date(document.getElementById('end').value).toISOString();
+  const start = document.getElementById('start').value; // YYYY-MM-DD
+  const end = document.getElementById('end').value;     // YYYY-MM-DD
 
   try {
     const dados = await roomTempInterval(idRoom, start, end);
