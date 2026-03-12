@@ -10,7 +10,7 @@ const doc = {
   },
   servers: [
     {
-      url: 'http://localhost:5000',
+      url: 'http://localhost:3000',
       description: 'Servidor Local',
     }
   ],
@@ -31,8 +31,19 @@ const doc = {
       room: {
         $name: "Sala do servidor",
         $microcontrollerId: "MCU123456",
-        min_temperature: 18,
-        max_temperature: 27
+        minTemperature: 18,
+        maxTemperature: 27,
+        minHumidity: 30,
+        maxHumidity: 60
+      },
+      report: {
+        _id: "64a7b2f5e4b0c8a1d2f3g4h5",
+        $room: "64a7b2f5e4b0c8a1d2f3g4h5",
+        generatedAt: "2025-01-15T14:30:00Z",
+        $filePath: "/public/reports/Relatorio-Sala-2025-01-01-2025-01-31-1710000000000.pdf"
+      },
+      error: {
+        erro: "Mensagem de erro"
       }
     },
     securitySchemes: {

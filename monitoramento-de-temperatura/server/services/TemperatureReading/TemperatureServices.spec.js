@@ -1,11 +1,13 @@
 import TemperatureService from "./TemperatureServices.js";
 import { describe, jest } from '@jest/globals';
+import mongoose from 'mongoose';
 
 const mockModel = {
   find: jest.fn(),
   findById: jest.fn(),
   findByIdAndDelete: jest.fn(),
   create: jest.fn(),
+  aggregate: jest.fn(),
 };
 
 const mockRoomService = {
@@ -28,6 +30,7 @@ describe('TemperatureService', () => {
     model.find = mockModel.find;
     model.findById = mockModel.findById;
     model.findByIdAndDelete = mockModel.findByIdAndDelete;
+    model.aggregate = mockModel.aggregate;
 
     service = new TemperatureService(model);
     service.roomService = mockRoomService;
@@ -277,6 +280,71 @@ describe('TemperatureService', () => {
       mockModel.findByIdAndDelete.mockResolvedValueOnce(undefined);
 
       await expect(service.deleteTemperatureReading('mockId')).rejects.toThrow("Leitura não encontrada");
+    });
+  });
+
+  describe('getReport', () => {
+    it('should throw error if roomId is missing', async () => {
+      await expect(service.getReport(null, '2025-01-01', '2025-01-31')).rejects.toThrow('ID da sala é obrigatório');
+    });
+
+    it('should throw error if room is not found', async () => {
+      mockRoomService.getRoomById = jest.fn().mockResolvedValue(null);
+      service.roomService = mockRoomService;
+
+      await expect(service.getReport('roomId', '2022-01-01', '2022-01-31')).rejects.toThrow('Sala não encontrada');
+    });
+
+    it('should return aggregated report data', async () => {
+      const validObjectId = new mongoose.Types.ObjectId().toString();
+      const mockRoom = { _id: validObjectId, name: 'Sala 1' };
+      const mockAggregation = [
+        {
+          _id: { year: 2025, month: 1, day: 15, hour: 14 },
+          averageTemperature: 22.5,
+          minTemperature: 20,
+          maxTemperature: 25,
+          averageHumidity: 55,
+          maxHumidity: 60,
+          minHumidity: 50
+        }
+      ];
+
+      mockRoomService.getRoomById = jest.fn().mockResolvedValue(mockRoom);
+      service.roomService = mockRoomService;
+      mockModel.aggregate.mockResolvedValue(mockAggregation);
+
+      const result = await service.getReport(validObjectId, '2022-01-01', '2022-01-31');
+
+      expect(result.room).toEqual(mockRoom);
+      expect(result.startDate).toBe('2022-01-01');
+      expect(result.endDate).toBe('2022-01-31');
+      expect(result.readings).toEqual(mockAggregation);
+      expect(mockModel.aggregate).toHaveBeenCalled();
+    });
+  });
+
+  describe('getRoomsWithLastReading', () => {
+    it('should return latest reading for each room', async () => {
+      const mockResult = [
+        { _id: 'room1', name: 'Sala 1', temperature: 22, humidity: 55, timestamp: new Date() },
+        { _id: 'room2', name: 'Sala 2', temperature: 25, humidity: 60, timestamp: new Date() }
+      ];
+
+      mockModel.aggregate.mockResolvedValue(mockResult);
+
+      const result = await service.getRoomsWithLastReading();
+
+      expect(mockModel.aggregate).toHaveBeenCalled();
+      expect(result).toEqual(mockResult);
+    });
+
+    it('should return empty array if no readings exist', async () => {
+      mockModel.aggregate.mockResolvedValue([]);
+
+      const result = await service.getRoomsWithLastReading();
+
+      expect(result).toEqual([]);
     });
   });
 });

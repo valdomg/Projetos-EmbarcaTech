@@ -197,4 +197,43 @@ describe('UserService', () => {
         });
     });
 
+    describe('changePassword', () => {
+        it('should throw error if userId is not provided', async () => {
+            await expect(userService.changePassword()).rejects.toThrow('ID do usuário é obrigatorio');
+        });
+
+        it('should throw error if new password does not meet criteria', async () => {
+            await expect(userService.changePassword('userId', 'OldPass1!', 'weak'))
+                .rejects.toThrow('Senha deve ter pelo menos 8 caracteres');
+        });
+
+        it('should throw error if user is not found', async () => {
+            userModelMock.findById.mockReturnValueOnce({
+                select: jest.fn().mockResolvedValue(null)
+            });
+            await expect(userService.changePassword('userId', 'OldPass1!', 'NewPass1!'))
+                .rejects.toThrow('Usuário não encontrado');
+        });
+
+        it('should throw error if current password is incorrect', async () => {
+            const hashedPassword = await bcrypt.hash('CorrectPass1!', 10);
+            userModelMock.findById.mockReturnValueOnce({
+                select: jest.fn().mockResolvedValue({ password: hashedPassword, save: jest.fn() })
+            });
+            await expect(userService.changePassword('userId', 'WrongPass1!', 'NewPass1!'))
+                .rejects.toThrow('Senha atual incorreta');
+        });
+
+        it('should change password successfully with valid data', async () => {
+            const hashedPassword = await bcrypt.hash('OldPass1!', 10);
+            const saveMock = jest.fn().mockResolvedValue(undefined);
+            userModelMock.findById.mockReturnValueOnce({
+                select: jest.fn().mockResolvedValue({ password: hashedPassword, save: saveMock })
+            });
+
+            await userService.changePassword('userId', 'OldPass1!', 'NewPass1!');
+            expect(saveMock).toHaveBeenCalled();
+        });
+    });
+
 });

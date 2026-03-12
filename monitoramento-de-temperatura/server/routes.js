@@ -3,6 +3,7 @@ import TemperatureController from './controllers/TemperatureControllers.js';
 import RoomController from './controllers/RoomControllers.js';
 import UserController from './controllers/UserControllers.js';
 import AuthController from './controllers/AuthControllers.js';
+import ReportController from './controllers/ReportControllers.js';
 import { authenticate } from './middlewares/auth.js';
 
 const router = express.Router();
@@ -10,6 +11,7 @@ const temperatureController = new TemperatureController();
 const roomController = new RoomController();
 const userController = new UserController();
 const authController = new AuthController();
+const reportController = new ReportController();
 
 router.post("/login", authController.signIn);
 
@@ -29,6 +31,10 @@ router.get('/room/id/:roomId', authenticate, roomController.getRoomById);
 router.get('/room/microcontroller/:microcontrollerId', authenticate, roomController.getRoomByMicrocontrollerId);
 router.patch('/room/:roomId', authenticate, roomController.updateRoom);
 router.delete('/room/:roomId', authenticate, roomController.deleteRoom);
+
+router.get('/reports', authenticate, reportController.getAllReports);
+router.get('/report/:reportId', authenticate, reportController.getReportById);
+router.delete('/report/:reportId', authenticate, reportController.deleteReport);
 
 router.post('/user', authenticate, userController.createUser);
 router.get('/users', authenticate, userController.getAllUsers);
