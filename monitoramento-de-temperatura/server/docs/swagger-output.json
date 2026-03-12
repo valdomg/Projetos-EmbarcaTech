@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5000",
+      "url": "http://localhost:3000",
       "description": "Servidor Local"
     }
   ],
@@ -18,10 +18,50 @@
           "Auth"
         ],
         "summary": "Realiza o login de um usuário",
-        "description": "Esse endpoint permite que um usuário faça login no sistema.",
+        "description": "Esse endpoint permite que um usuário faça login no sistema. Retorna um token JWT válido por 1 hora.",
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Login realizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "string",
+                          "example": "64a7b2f5e4b0c8a1d2f3g4h5"
+                        },
+                        "name": {
+                          "type": "string",
+                          "example": "João Silva"
+                        },
+                        "email": {
+                          "type": "string",
+                          "example": "joao.silva@example.com"
+                        },
+                        "role": {
+                          "type": "string",
+                          "example": "admin"
+                        }
+                      }
+                    },
+                    "token": {
+                      "type": "string",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Credenciais inválidas"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
           }
         },
         "requestBody": {
@@ -33,15 +73,17 @@
                 "properties": {
                   "email": {
                     "type": "string",
-                    "example": "joao.silva@example.com",
-                    "required": true
+                    "example": "joao.silva@example.com"
                   },
                   "password": {
                     "type": "string",
-                    "example": "SenhaSegura123",
-                    "required": true
+                    "example": "SenhaSegura@123"
                   }
-                }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ]
               }
             }
           }
@@ -66,7 +108,26 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Lista de leituras de temperatura",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/temperature"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token de acesso não fornecido"
+          },
+          "403": {
+            "description": "Token de acesso inválido"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
           }
         },
         "security": [
@@ -90,7 +151,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "ID da leitura de temperatura"
           },
           {
             "name": "authorization",
@@ -102,10 +164,29 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Leitura de temperatura encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/temperature"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ID inválido"
+          },
+          "401": {
+            "description": "Token de acesso não fornecido"
+          },
+          "403": {
+            "description": "Token de acesso inválido"
           },
           "404": {
-            "description": "Not Found"
+            "description": "Leitura não encontrada"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
           }
         },
         "security": [
@@ -133,12 +214,32 @@
           {
             "name": "startDate",
             "in": "query",
+            "required": true,
+            "description": "Data inicial no formato YYYY-MM-DD",
+            "example": "2025-01-01",
             "schema": {
               "type": "string"
             }
           },
           {
             "name": "endDate",
+            "in": "query",
+            "required": true,
+            "description": "Data final no formato YYYY-MM-DD",
+            "example": "2025-01-31",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "description",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "content",
             "in": "query",
             "schema": {
               "type": "string"
@@ -147,7 +248,29 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Lista de leituras no intervalo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/temperature"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datas inválidas ou intervalo inválido"
+          },
+          "401": {
+            "description": "Token de acesso não fornecido"
+          },
+          "403": {
+            "description": "Token de acesso inválido"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
           }
         },
         "security": [
@@ -163,7 +286,7 @@
           "Room"
         ],
         "summary": "Cria um novo ambiente",
-        "description": "Esse endpoint cria um novo ambiente no sistema.",
+        "description": "Esse endpoint cria um novo ambiente no sistema. Apenas administradores podem criar ambientes.",
         "parameters": [
           {
             "name": "authorization",
@@ -175,17 +298,73 @@
         ],
         "responses": {
           "201": {
-            "description": "Created"
+            "description": "Ambiente criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/room"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Nome e microcontrollerId são obrigatórios"
+          },
+          "401": {
+            "description": "Token de acesso não fornecido"
           },
           "403": {
-            "description": "Forbidden"
+            "description": "Acesso negado. Apenas administradores podem criar ambientes."
+          },
+          "500": {
+            "description": "Erro interno do servidor"
           }
         },
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Sala do Servidor"
+                  },
+                  "microcontrollerId": {
+                    "type": "string",
+                    "example": "MCU123456"
+                  },
+                  "minTemperature": {
+                    "type": "number",
+                    "example": 18
+                  },
+                  "maxTemperature": {
+                    "type": "number",
+                    "example": 27
+                  },
+                  "minHumidity": {
+                    "type": "number",
+                    "example": 30
+                  },
+                  "maxHumidity": {
+                    "type": "number",
+                    "example": 60
+                  }
+                },
+                "required": [
+                  "name",
+                  "microcontrollerId"
+                ]
+              }
+            }
+          }
+        }
       }
     },
     "/rooms": {
@@ -206,7 +385,26 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Lista de ambientes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/room"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token de acesso não fornecido"
+          },
+          "403": {
+            "description": "Token de acesso inválido"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
           }
         },
         "security": [
@@ -230,7 +428,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "ID do ambiente"
           },
           {
             "name": "authorization",
@@ -242,7 +441,29 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Lista de leituras do ambiente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/temperature"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ID da sala é obrigatório"
+          },
+          "401": {
+            "description": "Token de acesso não fornecido"
+          },
+          "403": {
+            "description": "Token de acesso inválido"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
           }
         },
         "security": [
@@ -266,7 +487,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "ID do ambiente"
           },
           {
             "name": "authorization",
@@ -278,12 +500,32 @@
           {
             "name": "startDate",
             "in": "query",
+            "required": true,
+            "description": "Data inicial no formato YYYY-MM-DD",
+            "example": "2025-01-01",
             "schema": {
               "type": "string"
             }
           },
           {
             "name": "endDate",
+            "in": "query",
+            "required": true,
+            "description": "Data final no formato YYYY-MM-DD",
+            "example": "2025-01-31",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "description",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "content",
             "in": "query",
             "schema": {
               "type": "string"
@@ -292,7 +534,29 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Lista de leituras do ambiente no intervalo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/temperature"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datas inválidas ou intervalo inválido"
+          },
+          "401": {
+            "description": "Token de acesso não fornecido"
+          },
+          "403": {
+            "description": "Token de acesso inválido"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
           }
         },
         "security": [
@@ -320,7 +584,48 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Lista de ambientes com a última leitura",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string",
+                        "example": "64a7b2f5e4b0c8a1d2f3g4h5"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Sala do Servidor"
+                      },
+                      "temperature": {
+                        "type": "number",
+                        "example": 22.5
+                      },
+                      "humidity": {
+                        "type": "number",
+                        "example": 60
+                      },
+                      "timestamp": {
+                        "type": "string",
+                        "example": "2025-01-15T14:30:00Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token de acesso não fornecido"
+          },
+          "403": {
+            "description": "Token de acesso inválido"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
           }
         },
         "security": [
@@ -344,7 +649,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "ID do ambiente"
           },
           {
             "name": "authorization",
@@ -356,12 +662,95 @@
           {
             "name": "startDate",
             "in": "query",
+            "required": true,
+            "description": "Data inicial no formato YYYY-MM-DD",
+            "example": "2025-01-01",
             "schema": {
               "type": "string"
             }
           },
           {
             "name": "endDate",
+            "in": "query",
+            "required": true,
+            "description": "Data final no formato YYYY-MM-DD",
+            "example": "2025-01-31",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "description",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "content",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "readings",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "month",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "day",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "hour",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "minTemperature",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "maxTemperature",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "averageHumidity",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "maxHumidity",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "minHumidity",
             "in": "query",
             "schema": {
               "type": "string"
@@ -370,7 +759,95 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Relatório com dados agregados por hora",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "room": {
+                      "$ref": "#/components/schemas/room"
+                    },
+                    "startDate": {
+                      "type": "string",
+                      "example": "2025-01-01"
+                    },
+                    "endDate": {
+                      "type": "string",
+                      "example": "2025-01-31"
+                    },
+                    "readings": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "_id": {
+                            "type": "object",
+                            "properties": {
+                              "year": {
+                                "type": "number",
+                                "example": 2025
+                              },
+                              "month": {
+                                "type": "number",
+                                "example": 1
+                              },
+                              "day": {
+                                "type": "number",
+                                "example": 15
+                              },
+                              "hour": {
+                                "type": "number",
+                                "example": 14
+                              }
+                            }
+                          },
+                          "averageTemperature": {
+                            "type": "number",
+                            "example": 22.5
+                          },
+                          "minTemperature": {
+                            "type": "number",
+                            "example": 20.1
+                          },
+                          "maxTemperature": {
+                            "type": "number",
+                            "example": 24.8
+                          },
+                          "averageHumidity": {
+                            "type": "number",
+                            "example": 55.3
+                          },
+                          "maxHumidity": {
+                            "type": "number",
+                            "example": 62
+                          },
+                          "minHumidity": {
+                            "type": "number",
+                            "example": 48
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datas inválidas ou intervalo inválido"
+          },
+          "401": {
+            "description": "Token de acesso não fornecido"
+          },
+          "403": {
+            "description": "Token de acesso inválido"
+          },
+          "404": {
+            "description": "Sala não encontrada"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
           }
         },
         "security": [
@@ -386,7 +863,7 @@
           "Temperature"
         ],
         "summary": "Gera um relatório em PDF das leituras de temperatura e humidade por hora de um ambiente específico por intervalo",
-        "description": "Esse endpoint gera um relatório em PDF contendo media, minima e maxima de temperatura e humidade por hora para um ambiente específico com base no ID do ambiente e no intervalo de datas fornecidos. O PDF é gerado utilizando o serviço ReportPdfService e retorna um link para download do arquivo.",
+        "description": "Esse endpoint gera um relatório em PDF contendo media, minima e maxima de temperatura e humidade por hora para um ambiente específico com base no ID do ambiente e no intervalo de datas fornecidos. O PDF é gerado utilizando o serviço ReportPdfService e retorna um link para download do arquivo. O relatório também é salvo no histórico do banco de dados.",
         "parameters": [
           {
             "name": "roomId",
@@ -394,7 +871,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "ID do ambiente"
           },
           {
             "name": "authorization",
@@ -406,12 +884,46 @@
           {
             "name": "startDate",
             "in": "query",
+            "required": true,
+            "description": "Data inicial no formato YYYY-MM-DD",
+            "example": "2025-01-01",
             "schema": {
               "type": "string"
             }
           },
           {
             "name": "endDate",
+            "in": "query",
+            "required": true,
+            "description": "Data final no formato YYYY-MM-DD",
+            "example": "2025-01-31",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "description",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "content",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reportId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "link",
             "in": "query",
             "schema": {
               "type": "string"
@@ -420,7 +932,43 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Relatório PDF gerado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Relatório gerado com sucesso"
+                    },
+                    "reportId": {
+                      "type": "string",
+                      "example": "64a7b2f5e4b0c8a1d2f3g4h5"
+                    },
+                    "link": {
+                      "type": "string",
+                      "example": "/reports/Relatorio-Sala-2025-01-01-2025-01-31-1710000000000.pdf"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datas inválidas ou intervalo inválido"
+          },
+          "401": {
+            "description": "Token de acesso não fornecido"
+          },
+          "403": {
+            "description": "Token de acesso inválido"
+          },
+          "404": {
+            "description": "Sala não encontrada"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
           }
         },
         "security": [
@@ -444,7 +992,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "ID do ambiente"
           },
           {
             "name": "authorization",
@@ -456,7 +1005,29 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Ambiente encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/room"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "roomId é obrigatório"
+          },
+          "401": {
+            "description": "Token de acesso não fornecido"
+          },
+          "403": {
+            "description": "Token de acesso inválido"
+          },
+          "404": {
+            "description": "Sala não encontrada"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
           }
         },
         "security": [
@@ -480,7 +1051,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "ID do microcontrolador vinculado ao ambiente"
           },
           {
             "name": "authorization",
@@ -492,7 +1064,29 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Ambiente encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/room"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "microcontrollerId é obrigatório"
+          },
+          "401": {
+            "description": "Token de acesso não fornecido"
+          },
+          "403": {
+            "description": "Token de acesso inválido"
+          },
+          "404": {
+            "description": "Sala não encontrada para o microcontrollerId fornecido"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
           }
         },
         "security": [
@@ -508,7 +1102,7 @@
           "Room"
         ],
         "summary": "Atualiza um ambiente pelo ID",
-        "description": "Esse endpoint atualiza um ambiente específico com base no ID fornecido.",
+        "description": "Esse endpoint atualiza um ambiente específico com base no ID fornecido. Apenas administradores podem atualizar ambientes.",
         "parameters": [
           {
             "name": "roomId",
@@ -516,7 +1110,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "ID do ambiente"
           },
           {
             "name": "authorization",
@@ -528,24 +1123,79 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Ambiente atualizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/room"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados para atualização são obrigatórios"
+          },
+          "401": {
+            "description": "Token de acesso não fornecido"
           },
           "403": {
-            "description": "Forbidden"
+            "description": "Acesso negado. Apenas administradores podem atualizar ambientes."
+          },
+          "404": {
+            "description": "Sala não encontrada para atualização"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
           }
         },
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Sala do Servidor"
+                  },
+                  "microcontrollerId": {
+                    "type": "string",
+                    "example": "MCU123456"
+                  },
+                  "minTemperature": {
+                    "type": "number",
+                    "example": 18
+                  },
+                  "maxTemperature": {
+                    "type": "number",
+                    "example": 27
+                  },
+                  "minHumidity": {
+                    "type": "number",
+                    "example": 30
+                  },
+                  "maxHumidity": {
+                    "type": "number",
+                    "example": 60
+                  }
+                }
+              }
+            }
+          }
+        }
       },
       "delete": {
         "tags": [
           "Room"
         ],
         "summary": "Deleta um ambiente pelo ID",
-        "description": "Esse endpoint deleta um ambiente específico com base no ID fornecido.",
+        "description": "Esse endpoint deleta um ambiente específico com base no ID fornecido. Apenas administradores podem deletar ambientes.",
         "parameters": [
           {
             "name": "roomId",
@@ -553,7 +1203,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "ID do ambiente"
           },
           {
             "name": "authorization",
@@ -565,10 +1216,178 @@
         ],
         "responses": {
           "204": {
-            "description": "No Content"
+            "description": "Ambiente deletado com sucesso"
+          },
+          "400": {
+            "description": "roomId é obrigatório"
+          },
+          "401": {
+            "description": "Token de acesso não fornecido"
           },
           "403": {
-            "description": "Forbidden"
+            "description": "Acesso negado. Apenas administradores podem deletar ambientes."
+          },
+          "404": {
+            "description": "Sala não encontrada para exclusão"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/reports": {
+      "get": {
+        "tags": [
+          "Report"
+        ],
+        "summary": "Lista todos os relatórios",
+        "description": "Retorna todos os relatórios gerados no sistema, com o nome do ambiente populado.",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de relatórios",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/report"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token de acesso não fornecido"
+          },
+          "403": {
+            "description": "Token de acesso inválido"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/report/{reportId}": {
+      "get": {
+        "tags": [
+          "Report"
+        ],
+        "summary": "Obtém um relatório pelo ID",
+        "description": "Retorna um relatório específico com base no ID fornecido, com o nome do ambiente populado.",
+        "parameters": [
+          {
+            "name": "reportId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID do relatório"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Relatório encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/report"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "reportId é obrigatório"
+          },
+          "401": {
+            "description": "Token de acesso não fornecido"
+          },
+          "403": {
+            "description": "Token de acesso inválido"
+          },
+          "404": {
+            "description": "Relatório não encontrado"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Report"
+        ],
+        "summary": "Deleta um relatório pelo ID",
+        "description": "Remove o registro do relatório do banco de dados e apaga o arquivo PDF correspondente do servidor. Apenas administradores podem realizar esta operação.",
+        "parameters": [
+          {
+            "name": "reportId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID do relatório"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Relatório deletado com sucesso"
+          },
+          "400": {
+            "description": "reportId é obrigatório"
+          },
+          "401": {
+            "description": "Token de acesso não fornecido"
+          },
+          "403": {
+            "description": "Acesso negado. Apenas administradores podem deletar relatórios."
+          },
+          "404": {
+            "description": "Relatório não encontrado"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
           }
         },
         "security": [
@@ -583,8 +1402,8 @@
         "tags": [
           "Users"
         ],
-        "summary": "cria um novo usuário",
-        "description": "Esse endpoint cria um novo usuário no sistema. É necessário fornecer um nome, email e senha válidos no corpo da requisição. O email deve ser único e a senha deve atender aos critérios de segurança estabelecidos. Ao criar um usuário com sucesso, o sistema retorna os detalhes do usuário criado, excluindo a senha por razões de segurança.",
+        "summary": "Cria um novo usuário",
+        "description": "Esse endpoint cria um novo usuário no sistema. É necessário fornecer um nome, email e senha válidos no corpo da requisição. O email deve ser único e a senha deve atender aos critérios de segurança estabelecidos. Apenas administradores podem criar usuários.",
         "parameters": [
           {
             "name": "authorization",
@@ -613,14 +1432,27 @@
                     "email": {
                       "type": "string",
                       "example": "joao.silva@example.com"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "user"
                     }
                   }
                 }
               }
             }
           },
+          "400": {
+            "description": "Nome e email são obrigatórios / Email já está em uso / Senha não atende critérios de segurança"
+          },
+          "401": {
+            "description": "Token de acesso não fornecido"
+          },
           "403": {
-            "description": "Forbidden"
+            "description": "Acesso negado. Apenas administradores podem criar usuários."
+          },
+          "500": {
+            "description": "Erro interno do servidor"
           }
         },
         "security": [
@@ -637,20 +1469,22 @@
                 "properties": {
                   "name": {
                     "type": "string",
-                    "example": "João Silva",
-                    "required": true
+                    "example": "João Silva"
                   },
                   "email": {
                     "type": "string",
-                    "example": "joao.silva@example.com",
-                    "required": true
+                    "example": "joao.silva@example.com"
                   },
                   "password": {
                     "type": "string",
-                    "example": "SenhaSegura123",
-                    "required": true
+                    "example": "SenhaSegura@123"
                   }
-                }
+                },
+                "required": [
+                  "name",
+                  "email",
+                  "password"
+                ]
               }
             }
           }
@@ -694,12 +1528,25 @@
                       "email": {
                         "type": "string",
                         "example": "joao.silva@example.com"
+                      },
+                      "role": {
+                        "type": "string",
+                        "example": "user"
                       }
                     }
                   }
                 }
               }
             }
+          },
+          "401": {
+            "description": "Token de acesso não fornecido"
+          },
+          "403": {
+            "description": "Token de acesso inválido"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
           }
         },
         "security": [
@@ -715,7 +1562,7 @@
           "Users"
         ],
         "summary": "Busca um usuário pelo email",
-        "description": "Esse endpoint busca um usuário existente no sistema pelo seu email. É necessário fornecer um email válido como parâmetro. Se o usuário for encontrado, o sistema retorna os detalhes do usuário, excluindo a senha por razões de segurança.",
+        "description": "Esse endpoint busca um usuário existente no sistema pelo seu email. Se o usuário for encontrado, o sistema retorna os detalhes do usuário, excluindo a senha por razões de segurança.",
         "parameters": [
           {
             "name": "email",
@@ -723,7 +1570,9 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Email do usuário",
+            "example": "joao.silva@example.com"
           },
           {
             "name": "authorization",
@@ -752,6 +1601,10 @@
                     "email": {
                       "type": "string",
                       "example": "joao.silva@example.com"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "user"
                     }
                   }
                 }
@@ -759,20 +1612,16 @@
             }
           },
           "400": {
-            "description": "Usuário não encontrado",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string",
-                      "example": "Usuário não encontrado"
-                    }
-                  }
-                }
-              }
-            }
+            "description": "Usuário não encontrado"
+          },
+          "401": {
+            "description": "Token de acesso não fornecido"
+          },
+          "403": {
+            "description": "Token de acesso inválido"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
           }
         },
         "security": [
@@ -796,7 +1645,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "ID do usuário"
           },
           {
             "name": "authorization",
@@ -808,7 +1658,47 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Usuário atualizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "_id": {
+                      "type": "string",
+                      "example": "64a7b2f5e4b0c8a1d2f3g4h5"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "João Silva"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "joao.silva@example.com"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "admin"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados para atualização são obrigatórios / Email já está em uso"
+          },
+          "401": {
+            "description": "Token de acesso não fornecido"
+          },
+          "403": {
+            "description": "Token de acesso inválido"
+          },
+          "404": {
+            "description": "Usuário não encontrado"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
           }
         },
         "security": [
@@ -846,7 +1736,7 @@
           "Users"
         ],
         "summary": "Deleta um usuário existente",
-        "description": "Esse endpoint deleta um usuário existente no sistema. É necessário fornecer um ID de usuário válido como parâmetro.",
+        "description": "Esse endpoint deleta um usuário existente no sistema. Apenas administradores podem deletar usuários.",
         "parameters": [
           {
             "name": "userId",
@@ -854,7 +1744,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "ID do usuário"
           },
           {
             "name": "authorization",
@@ -866,10 +1757,19 @@
         ],
         "responses": {
           "204": {
-            "description": "No Content"
+            "description": "Usuário deletado com sucesso"
+          },
+          "401": {
+            "description": "Token de acesso não fornecido"
           },
           "403": {
-            "description": "Forbidden"
+            "description": "Acesso negado. Apenas administradores podem deletar usuários."
+          },
+          "404": {
+            "description": "Usuário não encontrado"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
           }
         },
         "security": [
@@ -885,7 +1785,7 @@
           "Users"
         ],
         "summary": "Altera a senha de um usuário",
-        "description": "Esse endpoint permite que um usuário altere sua senha. É necessário fornecer um ID de usuário válido como parâmetro, a senha atual e a nova senha no corpo da requisição.",
+        "description": "Esse endpoint permite que um usuário altere sua senha. É necessário fornecer a senha atual e a nova senha no corpo da requisição.",
         "parameters": [
           {
             "name": "userId",
@@ -893,7 +1793,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "ID do usuário"
           },
           {
             "name": "authorization",
@@ -905,7 +1806,32 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Senha alterada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Senha alterada com sucesso"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Senha atual incorreta / Nova senha não atende critérios de segurança"
+          },
+          "401": {
+            "description": "Token de acesso não fornecido"
+          },
+          "403": {
+            "description": "Token de acesso inválido"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
           }
         },
         "security": [
@@ -922,15 +1848,17 @@
                 "properties": {
                   "currentPassword": {
                     "type": "string",
-                    "example": "SenhaSegura123",
-                    "required": true
+                    "example": "SenhaSegura@123"
                   },
                   "newPassword": {
                     "type": "string",
-                    "example": "NovaSenhaSegura123",
-                    "required": true
+                    "example": "NovaSenha@456"
                   }
-                }
+                },
+                "required": [
+                  "currentPassword",
+                  "newPassword"
+                ]
               }
             }
           }
@@ -1003,19 +1931,61 @@
             "type": "string",
             "example": "MCU123456"
           },
-          "min_temperature": {
+          "minTemperature": {
             "type": "number",
             "example": 18
           },
-          "max_temperature": {
+          "maxTemperature": {
             "type": "number",
             "example": 27
+          },
+          "minHumidity": {
+            "type": "number",
+            "example": 30
+          },
+          "maxHumidity": {
+            "type": "number",
+            "example": 60
           }
         },
         "required": [
           "name",
           "microcontrollerId"
         ]
+      },
+      "report": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "64a7b2f5e4b0c8a1d2f3g4h5"
+          },
+          "room": {
+            "type": "string",
+            "example": "64a7b2f5e4b0c8a1d2f3g4h5"
+          },
+          "generatedAt": {
+            "type": "string",
+            "example": "2025-01-15T14:30:00Z"
+          },
+          "filePath": {
+            "type": "string",
+            "example": "/public/reports/Relatorio-Sala-2025-01-01-2025-01-31-1710000000000.pdf"
+          }
+        },
+        "required": [
+          "room",
+          "filePath"
+        ]
+      },
+      "error": {
+        "type": "object",
+        "properties": {
+          "erro": {
+            "type": "string",
+            "example": "Mensagem de erro"
+          }
+        }
       }
     },
     "securitySchemes": {
