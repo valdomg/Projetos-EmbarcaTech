@@ -1,3 +1,37 @@
+/**
+ * @file wifi_utils.cpp
+ * @brief Implementação do módulo de gerenciamento de conexão Wi-Fi do dispositivo.
+ *
+ * @details
+ * Este módulo é responsável por controlar toda a conectividade Wi-Fi do sistema.
+ * Ele fornece funções para:
+ *
+ * - conectar o dispositivo a uma rede Wi-Fi existente
+ * - monitorar o estado da conexão
+ * - realizar reconexão automática quando necessário
+ * - criar um Access Point para configuração do dispositivo
+ *
+ * O módulo também exibe o endereço IP obtido no display LCD do sistema
+ * quando a conexão é estabelecida.
+ *
+ * ## Fluxo de funcionamento
+ *
+ * 1. O sistema tenta conectar à rede Wi-Fi utilizando `connectToWiFi()`.
+ * 2. Durante a execução normal, `checkAndReconnectWifi()` monitora a conexão.
+ * 3. Caso a conexão seja perdida, o sistema tenta reconectar automaticamente.
+ * 4. Se não houver rede disponível ou o dispositivo estiver em modo de
+ *    configuração, `createAccessPoint()` cria um ponto de acesso local.
+ *
+ * ## Dependências
+ *
+ * Este módulo utiliza:
+ *
+ * - ESP8266WiFi → gerenciamento da interface Wi-Fi
+ * - config_storage → leitura das configurações de rede
+ * - log → registro de eventos do sistema
+ * - display_LCD-2004_I2C → exibição do endereço IP no display
+ */
+
 #include <ESP8266WiFi.h>  // Biblioteca oficial ESP32 para conexão Wi-Fi
 #include "wifi_utils.h"   // Declarações das funções públicas do módulo Wi-Fi
 #include "config.h"       // Constantes globais do projeto (SSID e senha)
@@ -11,11 +45,26 @@
 // Variáveis internas do módulo
 // ------------------------------------------------------------
 
-char ipBuffer[16];  ///< Armazena o endereço IP do dispositivo em formato de string (ex: "192.168.1.10")
+/**
+ * @brief Buffer utilizado para armazenar o endereço IP em formato string.
+ *
+ * Exemplo de valor armazenado:
+ * `"192.168.1.10"`
+ */
+char ipBuffer[16];  
 
 // ------------------------------------------------------------
-// Funções uteis para o módulo
+// Funções auxiliares internas
 // ------------------------------------------------------------
+
+/**
+ * @brief Converte um objeto IPAddress para uma string constante.
+ *
+ * @param ip Endereço IP a ser convertido.
+ *
+ * @return Ponteiro para string contendo o endereço IP no formato
+ *         `"xxx.xxx.xxx.xxx"`.
+ */
 const char* IPparserToConstChar(IPAddress ip) {
   static char buffer[16];
   snprintf(buffer, sizeof(buffer), "%u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
@@ -32,21 +81,29 @@ const char* IPparserToConstChar(IPAddress ip) {
 static unsigned long lastConnectionAttemp = 0;
 
 /**
- * @brief Intervalo mínimo entre tentativas de reconexão (ms)
- * Evita reconectar muito rápido quando o Wi-Fi está instável.
+ * @brief Intervalo mínimo entre tentativas de reconexão Wi-Fi.
+ *
+ * Valor em milissegundos utilizado para evitar reconexões muito
+ * frequentes quando a rede está instável.
  */
-static const unsigned long reconnectInterval = 2000;  // 10 segundos
+static const unsigned long reconnectInterval = 2000;  // 2 segundos
 
 // ------------------------------------------------------------
 // Implementação das funções públicas do módulo
 // ------------------------------------------------------------
 
 /**
- * @brief Conecta o ESP32 à rede Wi-Fi definida em config.h.
- * 
- * Aguarda até 10 segundos pela conexão, imprimindo progresso no Serial.
- * 
- * @return true se a conexão foi bem sucedida, false caso contrário.
+ * @brief Conecta o dispositivo à rede Wi-Fi configurada.
+ *
+ * A função utiliza as credenciais armazenadas em `cfg.wifiSSID`
+ * e `cfg.wifiPass`.
+ *
+ * O sistema aguarda um tempo limitado pela conexão e exibe
+ * o endereço IP obtido no display LCD caso a conexão seja
+ * bem sucedida.
+ *
+ * @return true se a conexão foi estabelecida com sucesso.
+ * @return false caso a conexão falhe ou expire o tempo limite.
  */
 bool connectToWiFi() {
   WiFi.begin(cfg.wifiSSID.c_str(), cfg.wifiPass.c_str());  // inicia conexão
@@ -77,11 +134,17 @@ bool connectToWiFi() {
 }
 
 /**
- * @brief Verifica a conexão Wi-Fi e tenta reconectar automaticamente.
- * 
- * Essa função deve ser chamada periodicamente no loop() do programa.
- * Se o Wi-Fi estiver desconectado, ela espera o intervalo definido
- * em reconnectInterval antes de tentar reconectar.
+ * @brief Verifica o estado da conexão Wi-Fi e tenta reconectar se necessário.
+ *
+ * Esta função deve ser chamada periodicamente dentro do `loop()`
+ * principal do firmware.
+ *
+ * Caso o dispositivo esteja desconectado da rede, uma nova tentativa
+ * de conexão será realizada respeitando o intervalo definido em
+ * `reconnectInterval`.
+ *
+ * @return true se o dispositivo estiver conectado ao Wi-Fi.
+ * @return false caso continue desconectado.
  */
 bool checkAndReconnectWifi() {
   // Se já está conectado, não faz nada
@@ -110,18 +173,18 @@ bool checkAndReconnectWifi() {
 }
 
 /**
- * @brief Cria um ponto de acesso (Access Point) para configuração local.
- * 
- * Caso o dispositivo não esteja em modo AP, esta função:
- * - Desconecta o Wi-Fi atual.
- * - Configura o modo `WIFI_AP`.
- * - Inicializa um Access Point com o SSID e senha definidos nas constantes
- *   `SSID_ACCESS_POINT` e `PASSWORD_ACCESS_POINT`.
- * 
- * Também imprime o endereço IP do AP via `Serial`.
+ * @brief Cria um Access Point para configuração do dispositivo.
+ *
+ * Caso o dispositivo não esteja operando em modo Access Point,
+ * esta função:
+ *
+ * - Desconecta a interface Wi-Fi atual
+ * - Define o modo `WIFI_AP`
+ * - Cria um Access Point com SSID e senha definidos nas constantes
+ *   `SSID_ACCESS_POINT` e `PASSWORD_ACCESS_POINT`
+ *
+ * O endereço IP do Access Point também é exibido no display LCD.
  */
-
-
 void createAccessPoint() {
   WiFiMode_t mode = WiFi.getMode();
 

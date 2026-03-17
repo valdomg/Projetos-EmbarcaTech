@@ -1,3 +1,35 @@
+/**
+ * @file mqtt.cpp
+ * @brief Implementação do módulo de comunicação MQTT do sistema.
+ *
+ * @details
+ * Este módulo é responsável por gerenciar toda a comunicação MQTT do dispositivo,
+ * incluindo:
+ *
+ * - Conexão com o broker MQTT
+ * - Reconexão automática em caso de falha
+ * - Recebimento de mensagens através de callback
+ * - Processamento de mensagens JSON recebidas
+ * - Publicação de mensagens de confirmação
+ *
+ * O módulo utiliza a biblioteca PubSubClient para comunicação MQTT e
+ * WiFiClientSecure para estabelecer conexões seguras via TLS/SSL.
+ *
+ * Fluxo principal de funcionamento:
+ *
+ * 1. setupMQTT() configura o cliente MQTT e registra o callback.
+ * 2. checkMQTTConnected() mantém a conexão ativa e tenta reconectar se necessário.
+ * 3. Quando uma mensagem chega, a função callback() é executada.
+ * 4. O JSON recebido é processado por processing_json_MQTT().
+ * 5. Após processamento, o dispositivo envia uma confirmação ao broker.
+ *
+ * Além disso, o módulo também:
+ * - Ativa um alerta sonoro ao receber uma nova chamada.
+ * - Controla o recebimento de confirmações do servidor.
+ *
+ * Este módulo faz parte do sistema de chamadas de enfermagem baseado em MQTT.
+ */
+
 #include <WiFiClientSecure.h>    // Biblioteca para conexões seguras via TLS/SSL (necessária para MQTT com SSL/TLS).
 #include "mqtt.h"                // Header com as declarações das funções e variáveis MQTT usadas no projeto.
 #include "config.h"              // Arquivo de configuração com constantes (servidor, usuário, senha, tópicos, etc.).
@@ -7,19 +39,71 @@
 #include "config_storage.h"
 
 // -----------------------------------------------------------------------------
-// Objetos globais
+// Objetos globais de comunicação
 // -----------------------------------------------------------------------------
+
+/**
+ * @brief Cliente de rede utilizado para comunicação com o broker MQTT.
+ *
+ * Este objeto gerencia a conexão TCP/IP através da rede Wi-Fi e é utilizado
+ * pelo cliente MQTT como camada de transporte para envio e recebimento
+ * de mensagens.
+ */
 WiFiClient espClient;            // Cliente Wi-Fi seguro (usado pelo PubSubClient para comunicação MQTT).
+
+/**
+ * @brief Cliente MQTT responsável pela comunicação com o broker.
+ *
+ * Utiliza o objeto espClient como interface de transporte para a rede.
+ * Esse cliente gerencia:
+ * - conexão com o broker MQTT
+ * - envio de mensagens
+ * - recebimento de mensagens
+ * - manutenção da sessão MQTT
+ */
 PubSubClient client(espClient);  // Cliente MQTT que usa o cliente Wi-Fi seguro como transporte.
 
 // -----------------------------------------------------------------------------
-// Variáveis de controle
+// Variáveis de controle da conexão MQTT
 // -----------------------------------------------------------------------------
+
+/**
+ * @brief Armazena o instante da última tentativa de conexão ao broker MQTT.
+ *
+ * Essa variável é utilizada para controlar o intervalo entre tentativas
+ * de reconexão, evitando que o dispositivo tente conectar continuamente
+ * ao servidor.
+ */
 static unsigned long lastAttempConnectMQTT = 0;           // Guarda o tempo da última tentativa de conexão com o broker.
+
+/**
+ * @brief Intervalo mínimo entre tentativas de reconexão MQTT.
+ *
+ * Valor em milissegundos que define quanto tempo o sistema deve esperar
+ * antes de tentar se reconectar novamente ao broker MQTT.
+ */
 static const unsigned long reconnectIntervalMQTT = 3000;  // Intervalo (ms) entre tentativas de reconexão ao broker.
 
+// -----------------------------------------------------------------------------
+// Variáveis de estado do sistema
+// -----------------------------------------------------------------------------
+
+/**
+ * @brief Indica que uma mensagem de confirmação foi recebida do servidor MQTT.
+ *
+ * Quando o servidor confirma o processamento de uma chamada, essa flag
+ * é ativada para que o sistema possa tratar a confirmação e atualizar
+ * o estado interno da aplicação, deletando a chamada que foi atendida.
+ */
 bool hasOKMessage = false;
 
+/**
+ * @brief Armazena o identificador da chamada que deve ser removida.
+ *
+ * O valor é extraído da mensagem de confirmação recebida via MQTT.
+ * Após o processamento da confirmação, a chamada correspondente
+ * poderá ser removida da lista local de chamadas de enfermagem.
+ */
 const char* calledToBeErased;
 
 
@@ -71,12 +155,16 @@ void setupMQTT() {
   client.setCallback(callback);                            // Registra a função callback para mensagens recebidas.
 }
 
-
 /**
  * @brief Verifica a conexão com o broker MQTT e reconecta se necessário.
  * 
- * A cada chamada, mantém a conexão ativa (client.loop()).
- * Se a conexão caiu, tenta reconectar dentro do intervalo definido.
+ * Esta função deve ser chamada periodicamente dentro do loop principal
+ * do firmware.
+ * 
+ * Funções executadas:
+ * - Mantém a comunicação MQTT ativa (client.loop()).
+ * - Verifica se o cliente ainda está conectado.
+ * - Caso a conexão tenha sido perdida, tenta reconectar após um intervalo.
  */
 void checkMQTTConnected() {
   client.loop();                   // Mantém a comunicação ativa e processa mensagens recebidas.
@@ -113,11 +201,22 @@ void checkMQTTConnected() {
 }
 
 /**
- * @brief Função callback chamada automaticamente quando uma mensagem MQTT é recebida.
- * 
- * @param topic   - Tópico no qual a mensagem foi publicada.
- * @param payload - Ponteiro para os dados recebidos.
- * @param length  - Tamanho da mensagem.
+ * @brief Callback executada quando uma mensagem MQTT é recebida.
+ *
+ * @param topic   Tópico no qual a mensagem foi publicada.
+ * @param payload Dados da mensagem recebida.
+ * @param length  Tamanho do payload recebido.
+ *
+ * Comportamento da função:
+ *
+ * 1. Se a mensagem for de confirmação:
+ *    - Extrai o ID da chamada confirmada.
+ *    - Sinaliza que essa chamada deve ser removida da lista.
+ *
+ * 2. Se a mensagem for uma nova chamada:
+ *    - Processa o JSON recebido.
+ *    - Envia uma confirmação ao servidor MQTT.
+ *    - Ativa o alerta sonoro.
  */
 void callback(char* topic, byte* payload, unsigned int length) {
   log(LOG_DEBUG, "Mensagem recebida no tópico: %s", topic);
@@ -152,12 +251,18 @@ void callback(char* topic, byte* payload, unsigned int length) {
 }
 
 /**
- * @brief Publica um valor numérico (float) em um tópico MQTT.
- * 
- * O valor é formatado com duas casas decimais antes do envio.
- * 
- * @param id    - Sufixo do tópico (ex.: ID do dispositivo ou sensor).
- * @param value - Valor numérico a ser enviado.
+ * @brief Publica uma mensagem MQTT para um dispositivo específico.
+ *
+ * O tópico final é formado concatenando:
+ *    tópico_base + "/" + deviceId
+ *
+ * @param deviceId ID do dispositivo associado à mensagem.
+ * @param topic    Tópico base de publicação.
+ * @param message  Conteúdo da mensagem a ser enviada.
+ * @param retained Define se a mensagem deve ser mantida no broker.
+ *
+ * @return true se a mensagem foi publicada com sucesso.
+ * @return false se ocorreu falha na publicação.
  */
 bool publicReponseDivice(const char* deviceId, const char* topic, const char* message, bool retained) {
 

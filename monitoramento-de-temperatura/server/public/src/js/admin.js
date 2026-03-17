@@ -353,65 +353,6 @@ function abrirModal(modalId, closeBtnSelector) {
 }
 
 
-
-// // Evento para cadastrar
-// document.getElementById('btn-click').addEventListener('click', () => {
-
-//   // Mostrar o modal
-//   const modal = (document.getElementById('userInsert'));
-//   modal.showModal();
-
-//   //Fechar modal
-//   const btn_close = modal.querySelector("#userCloseBtn");
-//   btn_close.onclick = function () {
-//     modal.close();
-//   }
-
-//   const cadastrar = document.getElementById("userInsertBtn");
-//   cadastrar.onclick = async () => {
-//     const usuario = document.getElementById("name").value;
-//     const email = document.getElementById("email").value;
-//     const senha = document.getElementById("senha").value;
-//     const senha2 = document.getElementById("senha2").value;
-
-//     if (senha !== senha2) {
-//         const msgAlert = document.getElementById("response");
-//         alerta.innerText = "As senhas devem ser iguais!";
-
-//         // Limpa o texto de alerta depois de 3 segundos
-//         setTimeout(() => {alerta.innerText = "";}, 3000);
-//       return;
-//     }
-
-//     try {
-//       //requisicao da API para cadastrar usuario
-//       const data = await userRegister(usuario, email, senha) ;
-//       console.log(data);
-
-//       if (data && data.id) {
-//         const msgAlert = document.getElementById("response");
-//         alerta.innerText = `Usuário ${data.name} cadastrado com sucesso!`;
-
-//         // Limpa o texto de alerta depois de 3 segundos
-//         setTimeout(() => {alerta.innerText = "";}, 3000);
-
-//         //Limpa o formulário
-//         document.getElementById("userForm").reset();
-//       } else {
-
-//         // alerta de erro;
-//         const msgAlert = document.getElementById("response");
-//         alerta.innerText = data.erro || data.message || "Erro desconhecido no cadastro";
-//         // Limpa o texto depois de 3 segundos
-//         setTimeout(() => {alerta.innerText = "";}, 3000);
-//       }
-//     } catch (error) {
-//       alert(`${error.message}`);
-//     }
-//   };
-// });
-
-
 // Evento para excluir e editar usuário ou sala
 document.addEventListener('click', function (e) {
 

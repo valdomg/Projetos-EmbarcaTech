@@ -5,6 +5,7 @@ device_payload = api.model(
     'Device Register Model',
     {
         'device':     fields.String(description='nome do device'),
+        'room_number': fields.String()
     },
 )
 
@@ -27,5 +28,6 @@ device_payload_update = api.model(
     {
         'document_id': fields.String(description='id do device no banco de dados'),
         'device': fields.String(description='novo nome do device'),
+        'room_number': fields.String(description='novo room_number')
     }
 )

@@ -5,13 +5,22 @@
 
 /**
  * @file mqtt.h
- * @brief Declarações das funções e variáveis globais relacionadas à comunicação MQTT.
+ * @brief Interface pública do módulo de comunicação MQTT.
  *
- * Este módulo define a interface pública para:
- * - Configuração inicial da conexão com o broker MQTT;
- * - Manutenção e reconexão automática do cliente MQTT;
- * - Publicação de dados de sensores e mensagens de alerta em formato JSON.
- * - Reenvia mensagens armazenadas localmente em caso de falha de envio anterior.
+ * Este módulo fornece os recursos necessários para comunicação entre o
+ * microcontrolador e um broker MQTT.
+ *
+ * Funcionalidades principais:
+ *
+ * - Inicialização da conexão MQTT;
+ * - Gerenciamento automático de reconexão;
+ * - Publicação de dados de sensores;
+ * - Publicação de mensagens de alerta;
+ * - Reenvio automático de mensagens armazenadas localmente.
+ *
+ * O envio de dados é realizado utilizando payloads no formato JSON.
+ *
+ * @note A implementação está localizada em mqtt.cpp
  */
 
 
@@ -20,10 +29,18 @@
 // -----------------------------------------------------------------------------
 
 /**
- * @brief Cliente MQTT global utilizado para comunicação com o broker.
+ * @brief Cliente MQTT global.
  *
- * Este objeto é configurado e inicializado no arquivo `mqtt.cpp`,
- * utilizando um cliente seguro (`WiFiClientSecure`) como transporte.
+ * Responsável pela comunicação com o broker MQTT.
+ *
+ * Este objeto é:
+ *
+ * - Inicializado em mqtt.cpp
+ * - Utilizado internamente pelas funções deste módulo
+ *
+ * @note Pode ser utilizado diretamente em casos avançados.
+ *
+ * @warning Evite modificar suas configurações fora do módulo MQTT.
  */
 extern PubSubClient client;
 
@@ -33,61 +50,136 @@ extern PubSubClient client;
 // -----------------------------------------------------------------------------
 
 /**
- * @brief Inicializa a configuração para conexão com o servidor MQTT.
+ * @brief Inicializa o cliente MQTT.
  *
- * Define parâmetros como broker, porta e credenciais.
- * Esta função deve ser chamada durante a inicialização do sistema (ex.: no `setup()`).
+ * Configura:
+ *
+ * - Endereço do broker;
+ * - Porta de comunicação;
+ * - Cliente de rede associado.
+ *
+ * Deve ser chamada uma vez durante a inicialização do sistema.
+ *
+ * @example
+ *
+ * @code
+ * void setup()
+ * {
+ *     setupMQTT();
+ * }
+ * @endcode
  */
 void setupMQTT();
 
+
 /**
- * @brief Verifica e garante que a conexão MQTT esteja ativa.
+ * @brief Verifica e mantém a conexão com o broker MQTT.
  *
- * - Executa `client.loop()` para manter a comunicação.
- * - Caso a conexão tenha sido perdida, tenta reconectar automaticamente
- *   dentro do intervalo de tempo configurado.
+ * Esta função:
  *
- * @return true  Se o cliente MQTT estiver conectado.
- * @return false Se não foi possível restabelecer a conexão.
+ * - Mantém a conexão ativa;
+ * - Executa client.loop();
+ * - Realiza reconexão automática se necessário.
+ *
+ * @return true Cliente conectado
+ * @return false Cliente desconectado
+ *
+ * @note Deve ser chamada continuamente dentro do loop principal.
+ *
+ * @example
+ *
+ * @code
+ * void loop()
+ * {
+ *     checkMQTTConnected();
+ * }
+ * @endcode
  */
 bool checkMQTTConnected();
 
+
 /**
- * @brief Publica dados de sensores (temperatura e umidade) no broker MQTT.
+ * @brief Publica dados de sensores no broker MQTT.
  *
- * O payload é enviado em formato JSON com os seguintes campos:
- * - `Microcontrollerid` — Identificador do dispositivo;
- * - `temperature` — Valor de temperatura (°C);
- * - `humidity` — Valor de umidade relativa (%).
+ * Os dados são enviados no formato JSON contendo:
  *
- * @param temperature Valor da temperatura a ser enviado.
- * @param humidity    Valor da umidade a ser enviado.
- * @return true  Se a publicação foi bem-sucedida.
- * @return false Se ocorreu falha na publicação.
+ * - Identificador do dispositivo
+ * - Temperatura
+ * - Umidade
+ *
+ * Exemplo de payload:
+ *
+ * @code
+ * {
+ *   "microcontrollerId": "device01",
+ *   "temperature": 25.4,
+ *   "humidity": 60.1
+ * }
+ * @endcode
+ *
+ * @param temperature Temperatura em graus Celsius.
+ *
+ * @param humidity Umidade relativa em porcentagem.
+ *
+ * @return true Sucesso no envio
+ *
+ * @return false Falha no envio
+ *
+ * @note Em caso de falha, os dados podem ser armazenados localmente.
  */
 bool publishSensorData(float temperature, float humidity);
 
+
 /**
- * @brief Reenvia mensagens armazenadas localmente em caso de falha de envio anterior.
+ * @brief Reenvia mensagens armazenadas localmente.
  *
- * - Verifica se há dados pendentes no sistema de armazenamento;
- * - Reenvia os dados de forma periódica, respeitando o intervalo configurado;
- * - Remove mensagens já reenviadas com sucesso.
+ * Esta função:
+ *
+ * - Verifica se existem mensagens armazenadas;
+ * - Envia uma mensagem por vez;
+ * - Remove mensagens enviadas com sucesso.
+ *
+ * Utilizado para garantir integridade dos dados quando há falha de conexão.
+ *
+ * @note Deve ser chamada periodicamente dentro do loop principal.
  */
 void resendMqttData();
 
+
 /**
- * @brief Publica uma mensagem de alerta no broker MQTT.
+ * @brief Publica mensagem de alerta no broker MQTT.
  *
- * O payload é enviado em formato JSON com os seguintes campos:
- * - `Microcontrollerid` — Identificador do dispositivo;
- * - `alert` — Mensagem de alerta textual.
+ * Utilizado quando o sistema detecta condições críticas.
  *
- * @param alert Mensagem de alerta a ser publicada.
+ * Exemplo de uso:
+ *
+ * @code
+ * publishAlert(temp, hum);
+ * @endcode
+ *
+ * @param temperature Temperatura atual
+ *
+ * @param humidity Umidade atual
+ *
+ * @note O alerta é enviado apenas uma vez até ser resetado.
  */
 void publishAlert(float temperature, float humidity);
 
 
+/**
+ * @brief Reseta o estado de envio de alerta.
+ *
+ * Permite que novos alertas sejam enviados.
+ *
+ * Deve ser chamado quando o sistema retorna ao estado normal.
+ *
+ * @example
+ *
+ * @code
+ * resetStateSendAlert();
+ * @endcode
+ */
 void resetStateSendAlert();
+
 
 #endif

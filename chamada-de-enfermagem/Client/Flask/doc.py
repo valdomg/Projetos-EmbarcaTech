@@ -3,7 +3,7 @@ from Flask.swagger.config import api
 from Flask.swagger.docs.users_doc import ns_user
 from Flask.swagger.docs.devices_doc import ns_device
 from Flask.swagger.docs.chamadas_doc import ns_chamadas
-from Flask.swagger.docs.chamadas_status import ns_mapa
+from Flask.swagger.docs.chamadas_status_doc import ns_mapa
 
 
 

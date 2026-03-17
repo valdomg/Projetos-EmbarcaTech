@@ -7,16 +7,16 @@
 .linha-mapa {
     display: grid;
     grid-template-columns: repeat(4,1fr);
-    /* border-bottom: 1px solid #ddd; */
-    align-items: center;
+    align-items: stretch;
 }
 
 .celula-enfermaria{
     background: #fff;
-    padding: 10px;
+    padding: 5px;
     text-align: center;
     border: 2px solid #ddd;
-    margin: 3px 3px;
+    margin: 3px;
+    height: 100%;
 } 
 
 .celula-enfermaria p {

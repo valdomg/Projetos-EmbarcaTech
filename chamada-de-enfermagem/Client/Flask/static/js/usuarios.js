@@ -116,6 +116,13 @@ async function carregarUsuarios() {
 
   document.querySelectorAll('.btn-excluir').forEach(btn => {
     btn.addEventListener('click', async function() {
+
+      const confirmar = confirm("Tem certeza que deseja apagar o usuário?");
+
+      if (!confirmar) {
+        return;
+      } 
+
       const id = this.getAttribute('data-id');
       const resposta = await fetch(`/api/users/delete/${id}`, { method: 'DELETE' });
       if (resposta.ok) {

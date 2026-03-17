@@ -71,7 +71,8 @@ formPut.addEventListener('submit', async (e) => {
         overlay.style.display = 'none';
         carregarDispositivos();
       } else {
-        alert('Erro ao atualizar usuário.');
+        const body = await resposta.json();
+        alert(`Erro ao atualizar usuário. ${body.message}`);
       } 
   } catch (error) {
     console.error(error);
@@ -104,6 +105,13 @@ async function carregarDispositivos() {
 
   document.querySelectorAll('.btn-excluir').forEach(btn => {
     btn.addEventListener('click', async function() {
+      const confirmar = confirm("Tem certeza que deseja apagar o dispositivo?");
+
+      if (!confirmar) {
+        return;
+      } 
+
+
       const id = this.getAttribute('data-id');
       const resposta = await fetch(`/api/devices/delete/${id}`, { method: 'DELETE' });
       if (resposta.ok) {
