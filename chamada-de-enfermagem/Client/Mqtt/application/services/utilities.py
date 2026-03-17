@@ -42,6 +42,10 @@ def register_chamada_mongodb(payload:dict):
     mensagem = payload.get('mensagem')
     room_number = int(payload.get('room_number'))
     local_emergencia = payload.get('local')
+    status = payload.get('estado')
+    
+    if status == 'ocioso':
+        return 
 
     document_to_save = {
         'dispositivo_id': dispositivo_id,
@@ -68,8 +72,6 @@ def register_status_device_mongodb(device:str, payload:dict):
 
     if 'room_number' in payload:
         return
-    
-    
      
     document_to_save = {
         'device': device,
@@ -80,8 +82,6 @@ def register_status_device_mongodb(device:str, payload:dict):
     '''
     Removendo implementação de publicação de mensagem vazia para apagar mensagens retidas
     '''
-    #topic_to_publish = f'dispositivos/posto_enfermaria/{device}'
-    #topic_to_publish_on_enfermaria = f'dispostivos/enfermaria/{device}'
     try:
 
         result = mongo_conn.return_document('status_device', 'device', device)
@@ -115,7 +115,7 @@ def register_status_chamada_mongo_db(device:str, payload:dict):
     if not ('room_number' in payload) and ('estado' not in payload):
         return 
     
-    print(payload)
+    logging.info(payload)
 
     room_number = int(payload.get('room_number'))
     estado = payload.get('estado')
@@ -158,36 +158,79 @@ def publish_message_to_stop_emergency(data:dict):
 
     result = mongo_conn.return_document('status_chamadas', 'device', device)
 
+    print('Enviando mensagem para parar emergência')
+
     if not result:
         return False
     
     if result['status'] == 'ocioso':
         return False
     
-    topic = f'dispositivos/enfermaria/{device}'
+    topic = f'dispositivos/atendimento/{device}'
 
     temp_payload = {
-        'id':device,
-        'estado':'ocioso',
-        'mensagem':'Mensagem do servidor',
-        'room_number': room_number,
-        'local': local,
-        'comando': 'desligar'
+        'atendimento': 'atendido'
     }
 
-    payload = json.dumps(temp_payload)
+    result = public_topic_message(topic, temp_payload, False)
+    
+    return result
+
+
+def publish_message_confimation(device:str, payload:dict):
+    topic = f'dispositivos/confirmacao/{device}'
+
+    status = payload.get('estado')
+
+    if status != 'emergencia':
+        return
+    
+    payload_to_send = {'status': 'ok'}
+    result = public_topic_message(topic, payload_to_send, retain_message=True)
+
+    logging.info(f'{result}')
+
+    return result
+
+def publish_message_to_not_retain_confirmation(device:str, payload:dict):
+    topic = f'dispositivos/confirmacao/{device}'
+
+    status = payload.get('estado')
+
+    if status != 'ocioso':
+        return
+    
+    payload = ''    
+    result_confirm, result_atendimento = public_topic_message(topic, payload, True), publish_message_to_end_atendimento(device)
+
+    return result_confirm, result_atendimento
+
+def publish_message_to_end_atendimento(device:str):
+    topic = f'dispositivos/atendimento/{device}'
+
+    payload = {'atendimento': 'finalizado'}
+
+    result = public_topic_message(topic, payload, False)
+
+    return result
+
+def public_topic_message(topic:str, payload:dict, retain_message:bool):
+
+    if payload == '':
+        payload_temp = ''
+
+    else:
+        payload_temp = json.dumps(payload)
 
     client = mqtt.Client(client_id=user_name)
     client.username_pw_set(user_name, password)
     client.connect(broker, port)
 
+    result = client.publish(topic, payload=payload_temp, retain=retain_message)
+    logging.info(f'Mensagem publicada em {topic}, payload: {payload}')
 
-    client.publish(topic, payload, retain=False)
     client.disconnect()
-    logging.info(f'Mensagem publicada em {topic}')
-
-    return True
-
+    return result
 '''
 def publish_message_on_topic_avoid_retain_messages(topic: str):
     """Publica uma mensagem MQTT no tópico especificado."""
