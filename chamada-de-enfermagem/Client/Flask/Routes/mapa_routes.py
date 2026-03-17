@@ -95,10 +95,13 @@ def send_message_to_device():
         if not 'device' in data or 'room_number' not in data or 'local' not in data:
             return jsonify({'Error': 'dados incorretos'}), 400
         
-        result = publish_message_to_stop_emergency(data)
+        result_pub = publish_message_to_stop_emergency(data)
 
-        if result is False:
-            result = jsonify({'Erro':'verifique os dados do dispositivo'}), 404
+        if result_pub == False:
+            result = jsonify({'Error': 'Chamado de emergência não encontrado no banco de dados!'}), 404
+
+        if result_pub.is_published() == False:
+            result = jsonify({'Error': 'Erro interno do servidor!'}), 500
         
         else:
             result = jsonify({'Sucesso':'mensagem entregue ao destinatário'}), 200
