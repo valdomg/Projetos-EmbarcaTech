@@ -1,7 +1,7 @@
 import json
 import os
 from dotenv import load_dotenv
-from Mqtt.application.services.utilities import register_chamada_mongodb, register_status_chamada_mongo_db, check_if_device_exists, register_status_device_mongodb
+from Mqtt.application.services.utilities import register_chamada_mongodb, register_status_chamada_mongo_db, check_if_device_exists, register_status_device_mongodb, publish_message_confimation, publish_message_to_not_retain_confirmation
 from datetime import datetime
 import logging
 from time import sleep
@@ -52,7 +52,7 @@ def on_message(client, userdata, message, properties=None):
 
         o formato de payload será assim para os microcontroladores: {
             'id':'id_dispositivo',
-            'estado':'emergência/oscioso',
+            'estado':'emergencia/ocioso',
             'mensagem':'mensagem para debug',
             'room_number': 'número da sala'
             'local': 'Bloco/Ala/Região',
@@ -62,19 +62,26 @@ def on_message(client, userdata, message, properties=None):
         formato para status: {
             'status': 'ok/error'
         }
+
+        formato para atendimento : {
+            'atendimento':'finalizado/emergência'
+        }
     
     Tópicos = {
         dispositivos/enfermaria/enfermaria<id>        - para o dispositivo central enviar uma mensagem
-            neste tópico os disposito de enfermaria se inscreve e espera receber
-            mensagens do dispositivo central
+                                                        neste tópico os disposito de enfermaria se inscreve e espera receber
+                                                        mensagens do dispositivo central
 
         dispositivos/posto_enfermaria/enfermaria<id>  - para o dispositivo na enfermaria enviar uma mensagem
-            neste tópico o dispositivo central se inscreve e espera mensagens 
-            dos dispositivos de enfermaria
+                                                        neste tópico o dispositivo central se inscreve e espera mensagens 
+                                                        dos dispositivos de enfermaria
 
         dispositivos/confirmacao/enfermaria<id>       - para o dispositivo central confirmar o recebimento da mensagem
-            neste tópico o disposito central confirma o recebimento das mensagens e envia 
-            uma mensagem nula para retirar possíveis mensagens retidas
+                                                        neste tópico o disposito central confirma o recebimento das mensagens e envia 
+                                                        uma mensagem nula para retirar possíveis mensagens retidas
+
+        dispositivos/atendimento/enfermaria<id>       - tópico no qual o dispositivo paciente recebe o 
+                                                        comando para encerrar o atendimento 
     }
     '''
         
@@ -91,36 +98,36 @@ def on_message(client, userdata, message, properties=None):
     partes = message.topic.split('/')
     logging.info(f'Partes:{partes}')
     
-    dispositivo_topic = None
+    device_id_topic = None
 
     if len(partes) != 3:
         return
     
-    _, local_topic, dispositivo_topic = partes
+    _, local_topic, device_id_topic = partes
 
-    device = payload.get('id')
+    device_payload = payload.get('id')
 
-    if dispositivo_topic != None:
-        device = dispositivo_topic
-
-    if check_if_device_exists(device) == False:
-        logging.warning(f'Device com id {device} não encontrado!')
+    if check_if_device_exists(device_payload) == False and check_if_device_exists(device_id_topic) == False:
+        logging.warning(f'Device com id {device_payload}/{device_id_topic} não encontrado!')
         return
 
     if local_topic == 'confirmacao':
-        register_status_device_mongodb(dispositivo_topic, payload)
+        register_status_device_mongodb(device_id_topic, payload)
 
     if local_topic == 'posto_enfermaria':
         '''
         Laço condicional para registrar chamada no banco de dados
         '''
         register_chamada_mongodb(payload)
+        register_status_chamada_mongo_db(device_payload, payload)
+        publish_message_confimation(device_id_topic, payload)        
+        publish_message_to_not_retain_confirmation(device_id_topic, payload) 
         
     if local_topic == 'enfermaria':
-        logging.info(f'Mensagem para o tópico: {local_topic}')
+        logging.info(f'Mensagem recebida no tópico: {local_topic}')
 
-    
-    register_status_chamada_mongo_db(device, payload)
+    if local_topic == 'atendimento':
+        logging.info(f'Mensagem recebida no tópico: {local_topic}')
 
     return None
 
