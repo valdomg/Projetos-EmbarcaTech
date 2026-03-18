@@ -48,7 +48,7 @@ extern bool buttonEnable;
 /**
  * @brief Endereço do broker MQTT.
  */
-const char* MQTT_BROKER = "XXXXXX";
+const char* MQTT_BROKER = "";
 
 /**
  * @brief Porta do broker MQTT.
@@ -60,17 +60,17 @@ const int MQTT_PORT = 0;
  */
 const char* MQTT_USER = "";
 const char* MQTT_PASS = "";
-const char* ID_CLIENT = "{id-dispositivo}";
+const char* ID_CLIENT = "Idclient";
 
 
 /* ============================
    Tópicos MQTT
    ============================ */
 
-const char* TOPIC_PUBLISH = "dispositivos/posto_enfermaria/{id-dispositivo}";
-const char* TOPIC_SUBSCRIBE = "dispositivos/enfermaria/{id-dispositivo}";
-const char* PUBLISH_MSG_CONFIRM = "dispositivo/confirmacao/posto_enfermaria";
-const char* TOPIC_SUBSCRIBE_CONFIRM = "dispositivo/confirmacao/{id-dispositivo}";
+const char* TOPIC_PUBLISH = "dispositivos/posto_enfermaria/Idclient";  //ENVIA EMERGENCIA/OCIOSO
+const char* TOPIC_CONFIRMACAO = "dispositivos/confirmacao/Idclient";
+const char* TOPIC_ATENDIMENTO = "dispositivos/atendimento/Idclient";
+
 
 
 /* ============================
@@ -110,8 +110,9 @@ void connectMQTT() {
 
       Serial.println("Exito na conexão");
 
-      client.subscribe(TOPIC_SUBSCRIBE);
-      client.subscribe(TOPIC_SUBSCRIBE_CONFIRM);
+      client.subscribe(TOPIC_CONFIRMACAO);
+      client.subscribe(TOPIC_ATENDIMENTO);
+
 
     } else {
 
@@ -128,37 +129,19 @@ void connectMQTT() {
  *
  * @return Ponteiro para string JSON serializada.
  */
-const char* createJsonPayload() {
+const char* createJsonPayload(const char* estado, const char* mensagem, const char* comando) {
 
   StaticJsonDocument<200> doc;
 
   doc["id"] = ID_CLIENT;
-  doc["estado"] = "emergencia";
-  doc["mensagem"] = "solicitar atendimento";
+  doc["estado"] = estado;
+  doc["mensagem"] = mensagem;
+  doc["comando"] = comando;
+
   doc["room_number"] = 1;
   doc["local"] = "enfermaria";
-  doc["comando"] = "ligar";
 
   static char payload[200];
-  serializeJson(doc, payload);
-
-  return payload;
-}
-
-
-/**
- * @brief Cria payload JSON de confirmação.
- *
- * @return Ponteiro para string JSON serializada.
- */
-const char* createJsonConfirmPayload() {
-
-  StaticJsonDocument<64> doc;
-
-  doc["id"] = ID_CLIENT;
-  doc["status"] = "ok";
-
-  static char payload[64];
   serializeJson(doc, payload);
 
   return payload;
@@ -189,6 +172,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
   StaticJsonDocument<200> doc;
 
+  if (length == 0) {
+    Serial.println("Payload vazio recebido");
+    return;
+  }
+
   DeserializationError error = deserializeJson(doc, payload, length);
 
   if (error) {
@@ -197,41 +185,54 @@ void callback(char* topic, byte* payload, unsigned int length) {
     return;
   }
 
-  if (String(topic) == TOPIC_SUBSCRIBE) {
+  if (strcmp(topic, TOPIC_ATENDIMENTO) == 0)
+   {
 
-    if (doc.containsKey("comando") && !doc["comando"].isNull()) {
+    if (doc.containsKey("atendimento") && !doc["atendimento"].isNull()) {
 
-      const char* comando = doc["comando"];
-      Serial.println("Comando: " + String(comando));
+      const char* comando = doc["atendimento"];
+      Serial.print("Comando: ");
+      Serial.println(comando);
+      
+      if (strcmp(comando, "atendido") == 0){
 
-      if (String(comando) == "desligar") {
+
+        if (client.publish(TOPIC_PUBLISH, createJsonPayload("ocioso", "atendido", "desligar"), true)) {
+          
+          desligarLed();
+          buttonEnable = false;
+
+          Serial.println("Enviado estado ocioso!");
+        }
+      
+
+      } else if (strcmp(comando, "finalizado") == 0) {
 
         desligarLed();
         buttonEnable = false;
 
-        if (client.publish(PUBLISH_MSG_CONFIRM, createJsonConfirmPayload(), false)) {
-          Serial.println("Enviado confirmacao de finalizado!");
-        }
+        Serial.println("Solicitação finalizada. Botão liberado!");
 
         if (client.publish(TOPIC_PUBLISH, "", true)) {
-          Serial.println("Finalizado!");
+          //pode ser chamado logo apos receber o comando destravar/atendido
+          Serial.println("Enviado payload vazio.");
         }
-
-        Serial.println("Solicitação finalizada. Botão liberado!");
       }
 
     } else {
       Serial.println("Comando ausente ou nulo");
     }
 
-  } else if (String(topic) == TOPIC_SUBSCRIBE_CONFIRM) {
+  } else if (strcmp(topic, TOPIC_CONFIRMACAO) == 0) {
 
     if (doc.containsKey("status") && !doc["status"].isNull()) {
 
       const char* status = doc["status"];
-      Serial.println("Status: " + String(status));
+      
+      Serial.print("Status: ");
+      Serial.println(status);
 
-      if (String(status) == "ok") {
+      if (strcmp(status, "ok") == 0){
 
         Serial.println("Solicitação recebida pelo enfermeiro");
 
