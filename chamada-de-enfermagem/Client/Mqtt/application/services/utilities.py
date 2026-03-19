@@ -132,7 +132,7 @@ def register_status_chamada_mongo_db(device:str, payload:dict):
     try:
         result = mongo_conn.return_document('status_chamadas', 'device', device)
 
-        print(f':RESULTADO:{result}')
+        logging.info(f':RESULTADO:{result}')
 
         if not result:        
             logging.warning(f'Device [{device}] não encontrado no status de chamada!')
@@ -148,7 +148,7 @@ def register_status_chamada_mongo_db(device:str, payload:dict):
         mongo_conn.update_document_by_id('status_chamadas', id_chamada, document)
 
     except Exception as e:
-        print(e)
+        logging.exception(e)
 
 def publish_message_to_stop_emergency(data:dict):
 
@@ -158,7 +158,7 @@ def publish_message_to_stop_emergency(data:dict):
 
     result = mongo_conn.return_document('status_chamadas', 'device', device)
 
-    print('Enviando mensagem para parar emergência')
+    logging.info('Enviando mensagem para parar emergência')
 
     if not result:
         return False
@@ -185,7 +185,7 @@ def publish_message_confimation(device:str, payload:dict):
     if status != 'emergencia':
         return
     
-    payload_to_send = {'status': 'ok'}
+    payload_to_send = {'status': 'ok', 'id':device}
     result = public_topic_message(topic, payload_to_send, retain_message=True)
 
     logging.info(f'{result}')
