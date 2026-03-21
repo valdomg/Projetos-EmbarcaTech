@@ -45,7 +45,7 @@
  * - LOG_INFO  : informações gerais do sistema
  * - LOG_DEBUG : mensagens detalhadas para depuração
  */
-constexpr LogLevel LOG_MODE = LOG_DEBUG;
+constexpr LogLevel LOG_MODE = LOG_NONE;
 
 
 
@@ -98,7 +98,7 @@ constexpr uint8_t NUMBER_SOUND_ALERTS = 5;
 /**
  * @brief Tópico MQTT utilizado para publicação de eventos do dispositivo.
  */
-constexpr const char* MQTT_PUBLICATION_TOPIC = "dispositivos/enfermaria";
+constexpr const char* MQTT_PUBLICATION_TOPIC = "dispositivos/atendimento"; //virou topico de atendido/finalizado
 
 
 /**
@@ -110,13 +110,13 @@ constexpr const char* MQTT_SUBSCRIPTION_TOPIC = "dispositivos/posto_enfermaria";
 /**
  * @brief Tópico MQTT utilizado para envio de confirmação de mensagens.
  */
-constexpr const char* MQTT_PUB_CONFIRMATION_TOPIC = "dispositivo/confirmacao";
+constexpr const char* MQTT_PUB_CONFIRMATION_TOPIC = "dispositivos/confirmacao";
 
 
 /**
  * @brief Tópico MQTT utilizado para recebimento de confirmação do servidor.
  */
-constexpr const char* MQTT_SUB_CONFIRMATION_TOPIC = "dispositivo/confirmacao/posto_enfermaria";
+constexpr const char* MQTT_SUB_CONFIRMATION_TOPIC = "dispositivo/confirmacao/posto_enfermaria"; //não usa mais esse topico
 
 
 /**

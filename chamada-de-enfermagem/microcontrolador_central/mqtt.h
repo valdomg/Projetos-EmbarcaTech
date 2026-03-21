@@ -24,6 +24,16 @@
 // Declarações globais
 // -----------------------------------------------------------------------------
 
+
+#define MAX_TOPIC_SIZE 100
+#define MAX_PAYLOAD_SIZE 256
+
+extern volatile bool newMessage;
+
+extern char receivedTopic[MAX_TOPIC_SIZE];
+extern char receivedPayload[MAX_PAYLOAD_SIZE];
+extern unsigned int receivedLength;
+
 /**
  * @brief ID da chamada que deve ser removida após confirmação do servidor.
  *
@@ -79,7 +89,7 @@ void setupMQTT();
  * - verificação do estado da conexão
  * - tentativa automática de reconexão caso a conexão seja perdida
  */
-void checkMQTTConnected();
+bool checkMQTTConnected();
 
 /**
  * @brief Callback executada quando uma mensagem MQTT é recebida.

@@ -31,9 +31,6 @@
  * @see DoublyLinkedList_NursingCall.h
  * @see listNursingCall_utils.cpp
  *
- * @author
- * Fabrício Andrade Sousa
- *
  * @date 2026
  */
 

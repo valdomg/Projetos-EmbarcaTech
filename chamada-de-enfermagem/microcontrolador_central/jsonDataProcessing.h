@@ -23,6 +23,22 @@
 
 #include <Arduino.h>
 
+struct PatientStatus {
+
+  char id[50];
+
+  char room_number[50];
+
+  char estado[50];
+
+  char mensagem[50];
+
+  char local[50];
+
+  char comando[50];
+
+};
+
 
 
 /**
@@ -42,7 +58,8 @@
  * @return true se o JSON foi processado corretamente.
  * @return false caso ocorra erro no parse ou nos dados.
  */
-extern bool processing_json_MQTT(byte* payload, unsigned int length);
+extern bool
+processing_json_MQTT(byte* payload, unsigned int length, struct PatientStatus *patientStatus);
 
 
 /**
@@ -62,7 +79,7 @@ extern bool processing_json_MQTT(byte* payload, unsigned int length);
  *
  * @return Ponteiro para o buffer contendo o JSON serializado.
  */
-const char* createJsonPayload(char* buffer, size_t length, const char* roomNumber);
+const char* createJsonPayload(char* buffer, size_t length, const char* command);
 
 
 /**

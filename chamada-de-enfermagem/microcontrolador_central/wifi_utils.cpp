@@ -195,7 +195,7 @@ void createAccessPoint() {
     IPAddress ip = WiFi.softAPIP();
 
     showIPAddress(IPparserToConstChar(ip));
-    log(LOG_INFO, "Endereço IP: %s", IPparserToConstChar(ip));
+    log(LOG_INFO, "ponto de acesso criado no endereço IP: %s", IPparserToConstChar(ip));
   }
 }
 
