@@ -36,7 +36,8 @@ extern const char* TOPIC_PUBLISH;
  *
  * @return Ponteiro para string contendo JSON serializado.
  */
-const char* createJsonPayload();
+
+const char* createJsonPayload(const char* estado, const char* mensagem, const char* comando);
 
 /**
  * @brief Inicializa a configuração do cliente MQTT.

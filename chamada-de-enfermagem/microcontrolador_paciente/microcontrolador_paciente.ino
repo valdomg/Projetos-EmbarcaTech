@@ -101,7 +101,7 @@ void loop() {
     if (!buttonEnable && !readButton()) {
 
       /// Publica mensagem no tópico MQTT configurado
-      if (client.publish(TOPIC_PUBLISH, createJsonPayload(), true)) {
+      if (client.publish(TOPIC_PUBLISH, createJsonPayload("emergencia", "atender", "ligar"), true)) {
 
         Serial.println("Solicitação enviada");
 
