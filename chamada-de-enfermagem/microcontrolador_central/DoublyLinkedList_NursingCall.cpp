@@ -29,6 +29,7 @@
 
 #include "DoublyLinkedList_NursingCall.h"  // Inclui o header da lista
 #include <cstring>                         // para strncpy
+#include "log.h"
 
 
 /**
@@ -168,7 +169,7 @@ bool List_NursingCall::getDoNotRemoveCurrent() const {
 bool List_NursingCall::add(const char* infirmary, const char* id) {  // Adicionar um nó ao final da lista
   // verifica se o ID do dispositivo é valido
   if (id == nullptr || id[0] == '\0') return false;
-
+  
   // verifica se o número do quarto é valido
   if (!isValidInfirmary(infirmary)) return false;
 

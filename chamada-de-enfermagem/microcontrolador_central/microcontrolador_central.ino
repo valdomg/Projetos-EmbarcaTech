@@ -93,29 +93,25 @@ ESP8266WebServer server(80);
  * Caso contrário, avança para o próximo item da lista
  * de chamadas e atualiza o display.
  */
-void handleNext()
-{ // ===== Botão Next (>)
+void handleNext() {  // ===== Botão Next (>)
   // Se estava em modo confirmação de deleção, atualiza o display, mostrando que a ação foi cancelada
-  if (deletionConfirmation)
-  {
-    deletionConfirmation = false; // reset caso usuário navegue (cancela a exclusão)
+  if (deletionConfirmation) {
+    deletionConfirmation = false;  // reset caso usuário navegue (cancela a exclusão)
 
     // Quando clica 'next' e esta no esta no modo confirmação, garante que NÃO está bloqueado remover current (caso tenha atigido o limite de inserção na lista)
-    listCalls.setDoNotRemoveCurrent(false); // vira false -> pode remover current
-  }
-  else
-  {
-    if (listCalls.hasNursingCall())
-    {
+    listCalls.setDoNotRemoveCurrent(false);  // vira false -> pode remover current
+  } else {
+    if (listCalls.hasNursingCall()) {
       // Avança para o próximo item da lista
       listCalls.next();
+      log(LOG_DEBUG, listCalls.getIdCurrent());
     }
   }
   // Mostra o item atual
   showInfirmaryNumber(
-      listCalls.getInfirmaryCurrent(),
-      listCalls.hasNursingCall(),
-      listCalls.getTotal());
+    listCalls.getInfirmaryCurrent(),
+    listCalls.hasNursingCall(),
+    listCalls.getTotal());
 }
 
 /**
@@ -125,29 +121,25 @@ void handleNext()
  * Similar ao botão Next, mas navega para o item anterior
  * da lista de chamadas.
  */
-void handlePrev()
-{ // ===== Botão Prev (<)
+void handlePrev() {  // ===== Botão Prev (<)
   // Se estava em modo confirmação de deleção, atualiza o display, mostrando que a ação foi cancelada
-  if (deletionConfirmation)
-  {
-    deletionConfirmation = false; // reset caso usuário navegue (cancela a exclusão)
+  if (deletionConfirmation) {
+    deletionConfirmation = false;  // reset caso usuário navegue (cancela a exclusão)
 
     // Quando clica 'prev' e esta no esta no modo confirmação, garante que NÃO está bloqueado remover current (caso tenha atigido o limite de inserção na lista)
-    listCalls.setDoNotRemoveCurrent(false); // vira false - pode remover current
-  }
-  else
-  {
-    if (listCalls.hasNursingCall())
-    {
+    listCalls.setDoNotRemoveCurrent(false);  // vira false - pode remover current
+  } else {
+    if (listCalls.hasNursingCall()) {
       // Avança para o item anteriot da lista
       listCalls.prev();
+      log(LOG_DEBUG, listCalls.getIdCurrent());
     }
   }
   // Mostra o item atual
   showInfirmaryNumber(
-      listCalls.getInfirmaryCurrent(),
-      listCalls.hasNursingCall(),
-      listCalls.getTotal());
+    listCalls.getInfirmaryCurrent(),
+    listCalls.hasNursingCall(),
+    listCalls.getTotal());
 }
 
 /**
@@ -163,15 +155,12 @@ void handlePrev()
  * - Publica no MQTT a confirmação de resolução
  *   do chamado.
  */
-void handleDelete()
-{ // ===== Botão Delete
+void handleDelete() {  // ===== Botão Delete
   // Primeiro clique: apenas exibe a mensagem de confirmação
-  if (!deletionConfirmation)
-  {
+  if (!deletionConfirmation) {
 
     // Se a tela anterior não for a MAIN, não pode mostrar a tela de confirmação de exclusão
-    if (currentScreen != SCREEN_MAIN)
-    {
+    if (currentScreen != SCREEN_MAIN) {
       return;
     }
 
@@ -179,14 +168,11 @@ void handleDelete()
     deletionConfirmation = true;
 
     // Quando clica 1 vez no 'del' não pode remover current, caso tenha atigido o limite de inserção na lista
-    listCalls.setDoNotRemoveCurrent(true); // Aqui diz é true, não pode remover current
-  }
-  else
-  { // Segundo clique: executa deleção
+    listCalls.setDoNotRemoveCurrent(true);  // Aqui diz é true, não pode remover current
+  } else {                                  // Segundo clique: executa deleção
 
     // Se a tela anterior não for a de confirmação de exclusão, não pode continuar
-    if (currentScreen != SCREEN_EXCLUSION_CONFIRM)
-    {
+    if (currentScreen != SCREEN_EXCLUSION_CONFIRM) {
       return;
     }
 
@@ -198,13 +184,14 @@ void handleDelete()
     char buffer[256];
 
     // flag qu indica se deu certo publicar ou não
-    bool wasPublished = publicReponseDivice(idDevice, MQTT_PUBLICATION_TOPIC, createJsonPayload(buffer, sizeof(buffer), infirmary));
+    bool wasPublished = publicReponseDivice(idDevice, MQTT_PUBLICATION_TOPIC, createJsonPayload(buffer, sizeof(buffer), "atendido"));
 
     // Caso tenha falhado publicar o chamado, mostra a tela indicando a falha
-    if (!wasPublished)
-    {
+    if (!wasPublished) {
       showFailureMessage(MESSAGE_MQTT);
     }
+
+    log(LOG_INFO, "enfermaria a ser apagada foi enviada");
   }
 }
 
@@ -226,8 +213,7 @@ void handleDelete()
  * - conexão WiFi
  * - comunicação MQTT
  */
-void setup()
-{
+void setup() {
   // Serial.begin(115200);
   logInit(LOG_MODE);
   // inicializa o display
@@ -246,8 +232,7 @@ void setup()
   initConfigStorage();
   cfg = loadConfig();
 
-  if (!connectToWiFi())
-  {
+  if (!connectToWiFi()) {
     // Serial.println("WiFi não conectado.");
     log(LOG_WARN, "Falha ao conectar com WiFI.");
   }
@@ -255,9 +240,9 @@ void setup()
   setupMQTT();
 
   showInfirmaryNumber(
-      listCalls.getInfirmaryCurrent(),
-      listCalls.hasNursingCall(),
-      listCalls.getTotal()); // Mostra os dados no display
+    listCalls.getInfirmaryCurrent(),
+    listCalls.hasNursingCall(),
+    listCalls.getTotal());  // Mostra os dados no display
 }
 
 // -----------------------------------------------------------------------------
@@ -279,15 +264,15 @@ void setup()
  * - Tratar botões de navegação
  * - Controlar LED e buzzer
  */
-void loop()
-{
+void loop() {
 
   // -------------------------------------------------------------------------
   // Modo de configuração
   // -------------------------------------------------------------------------
 
-  if (isConfigurationMode() || !cfg.valid)
-  {
+  if (isConfigurationMode() || !cfg.valid) {
+    log(LOG_DEBUG, "isconfigurationMode %d",isConfigurationMode());
+    log(LOG_DEBUG, "cfgValid %d",!cfg.valid);
 
     turnOnLed();
     createAccessPoint();
@@ -295,21 +280,19 @@ void loop()
     server_handle_loop(&server);
 
     // log(LOG_INFO, "modo configuraçao");
-  }
-  else
-  {
+  } else {
 
     // ---------------------------------------------------------------------
     // Conexões de rede
     // ---------------------------------------------------------------------
 
-    if (checkAndReconnectWifi())
-    {
-      checkMQTTConnected();
-    }
-    else
-    {                                   // não há conexão
-      showFailureMessage(MESSAGE_WIFI); // Mensagem que indica que não há conexão Wi-Fi**
+    if (checkAndReconnectWifi()) {
+
+      if (!checkMQTTConnected()) {
+        listCalls.clear();
+      }
+    } else {                             // não há conexão
+      showFailureMessage(MESSAGE_WIFI);  // Mensagem que indica que não há conexão Wi-Fi**
     }
 
     stopServer(&server);
@@ -318,84 +301,113 @@ void loop()
     // Processamento de mensagens de confirmação MQTT
     // ---------------------------------------------------------------------
 
-    if (hasOKMessage){ //Quando verdadeira sinaliza que enfermaria pode ser apagada da lista
-                       //Isso pode ocorrer a qualquer momento 
-                       
-      if (listCalls.removalById(calledToBeErased)){ 
-        
-        publicReponseDivice(calledToBeErased, MQTT_PUB_CONFIRMATION_TOPIC, "", true);
-        log(LOG_INFO, "Chamada removida com sucesso!");
 
-      } else {
+    if (newMessage) {
+      newMessage = false;
 
-        log(LOG_ERROR, "Erro ao remover a chamada na lista!");
+      if (strncmp(receivedTopic, MQTT_SUBSCRIPTION_TOPIC, strlen(MQTT_SUBSCRIPTION_TOPIC)) == 0) {
+        PatientStatus patientStatus = {};
+
+        if (processing_json_MQTT((byte *)receivedPayload, receivedLength, &patientStatus)) {
+
+          if (strcmp(patientStatus.estado, "emergencia") == 0) {
+
+            // Adiciona na lista com verificação de sucesso
+            if (listCalls.add(patientStatus.room_number, patientStatus.id)) {
+              listUpdated = true;  // sinaliza que display precisa atualizar
+            } else {
+              log(LOG_ERROR, "Erro ao adicionar chamada na lista!");
+              return;
+            }
+
+            char buffer[90];
+            publicReponseDivice(
+              patientStatus.id,
+              MQTT_PUB_CONFIRMATION_TOPIC,
+              creteJsonPayloadConfirmationMessage(buffer, sizeof(buffer)),
+              true);
+
+            enableSoundAlert();
+          } else if (strcmp(patientStatus.estado, "ocioso") == 0) {
+
+            if (listCalls.removalById(patientStatus.id)) {
+              publicReponseDivice(patientStatus.id, MQTT_PUB_CONFIRMATION_TOPIC, "", true);
+              char buffer[150];
+              publicReponseDivice(patientStatus.id, MQTT_PUBLICATION_TOPIC, createJsonPayload(buffer, sizeof(buffer), "finalizar"));
+              log(LOG_INFO, "Chamada removida com sucesso!");
+
+              showInfirmaryNumber(
+                listCalls.getInfirmaryCurrent(),
+                listCalls.hasNursingCall(),
+                listCalls.getTotal());  // Mostra os dados no display
+
+              // Ao marcar o chamado como resolvido, reseta a flag, indicando se atingir o limite pode remover o current
+              deletionConfirmation = false;
+              listCalls.setDoNotRemoveCurrent(false);  // vira false - pode remover current
+
+            } else {
+              log(LOG_ERROR, "Erro ao remover a chamada na lista!");
+            }
+
+          } else {
+            log(LOG_INFO, "json com campo estado fora do comum");
+          }
+        } else {
+          log(LOG_INFO, "json não processado");
+        }
       }
-
-      showInfirmaryNumber(
-          listCalls.getInfirmaryCurrent(),
-          listCalls.hasNursingCall(),
-          listCalls.getTotal()); // Mostra os dados no display
-
-      // Ao marcar o chamado como resolvido, reseta a flag, indicando se atingir o limite pode remover o current
-      deletionConfirmation = false;
-      listCalls.setDoNotRemoveCurrent(false); // vira false - pode remover current
-      hasOKMessage = false;
     }
+  }
 
-    // ---------------------------------------------------------------------
-    // Atualização do display
-    // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
+  // Atualização do display
+  // ---------------------------------------------------------------------
 
-    if (listUpdated
-        && button_next.state == HIGH
-        && button_prev.state == HIGH
-        && button_delete.state == HIGH
-        && currentScreen == SCREEN_MAIN
-        && !deletionConfirmation) {
+  if (listUpdated
+      && button_next.state == HIGH
+      && button_prev.state == HIGH
+      && button_delete.state == HIGH
+      && currentScreen == SCREEN_MAIN
+      && !deletionConfirmation) {
 
 
-      showInfirmaryNumber(
-          listCalls.getInfirmaryCurrent(),
-          listCalls.hasNursingCall(),
-          listCalls.getTotal());
+    showInfirmaryNumber(
+      listCalls.getInfirmaryCurrent(),
+      listCalls.hasNursingCall(),
+      listCalls.getTotal());
 
-      listUpdated = false; // reseta a flag
-    }
+    listUpdated = false;  // reseta a flag
+  }
 
-    // ---------------------------------------------------------------------
-    // Leitura dos botões
-    // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
+  // Leitura dos botões
+  // ---------------------------------------------------------------------
 
-    if (checkButton(button_next))
-      handleNext();
-    if (checkButton(button_prev))
-      handlePrev();
+  if (checkButton(button_next))
+    handleNext();
+  if (checkButton(button_prev))
+    handlePrev();
 
-    // ---------------------------------------------------------------------
-    // Controle de LED e botão de exclusão
-    // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
+  // Controle de LED e botão de exclusão
+  // ---------------------------------------------------------------------
 
-    if (listCalls.hasNursingCall())
-    {
-      // if (checkButton(button_next)) handleNext();
-      // if (checkButton(button_prev)) handlePrev();
-      if (checkButton(button_delete))
-        handleDelete();
+  if (listCalls.hasNursingCall()) {
+    // if (checkButton(button_next)) handleNext();
+    // if (checkButton(button_prev)) handlePrev();
+    if (checkButton(button_delete))
+      handleDelete();
 
-      toggleLed();
-    }
-    else
-    {
-      turnOffLed();
-    }
+    toggleLed();
+  } else {
+    turnOffLed();
+  }
 
-    // ---------------------------------------------------------------------
-    // Controle do buzzer
-    // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
+  // Controle do buzzer
+  // ---------------------------------------------------------------------
 
-    if (doesHaveNotificationBuzzer())
-    {
-      toggleBuzzer();
-    }
+  if (doesHaveNotificationBuzzer()) {
+    toggleBuzzer();
   }
 }

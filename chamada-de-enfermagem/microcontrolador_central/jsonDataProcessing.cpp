@@ -31,7 +31,7 @@
  *   "id": "Enfermagem1",
  *   "estado": "emergencia",
  *   "mensagem": "Ligar LED",
- *   "room_number": "9",
+ *   "room_number": 9,
  *   "local": "Enfermaria",
  *   "comando": "ligar"
  * }
@@ -70,7 +70,7 @@ static constexpr size_t JSON_CAPACITY = 256;
  * @return true se o processamento foi realizado com sucesso.
  * @return false caso ocorra erro.
  */
-bool processing_json_MQTT(byte* payload, unsigned int length) {
+bool processing_json_MQTT(byte* payload, unsigned int length, struct PatientStatus* patientStatus) {
   // Cria um documento JSON estático na stack (memória temporária) com capacidade de 256 bytes para armazenar o JSON parseado.
   StaticJsonDocument<JSON_CAPACITY> doc;  // Ou <512>
 
@@ -89,12 +89,13 @@ bool processing_json_MQTT(byte* payload, unsigned int length) {
   // ____Extração dos Dados do JSON
   // Acessa o campo "id" do JSON e armazena como ponteiro para string constante
   // --- leitura de id ---
-  if (!doc["id"].is<const char*>()) { // verifica se o campo existir e se é uma string JSON
+  if (!doc["id"].is<const char*>()) {  // verifica se o campo existir e se é uma string JSON
     log(LOG_ERROR, "Campo 'id' ausente ou não é string");
     return false;
   }
-  const char* id = doc["id"];  // Ex: "Enfermagem1"
-  if (id[0] == '\0') { // verifica se a string está vazia
+
+  const char* id = doc["id"];            // Ex: "Enfermagem1"
+  if (id == nullptr || id[0] == '\0') {  // verifica se a string está vazia
     log(LOG_ERROR, "Campo 'id' vazio");
     return false;
   }
@@ -111,49 +112,56 @@ bool processing_json_MQTT(byte* payload, unsigned int length) {
    * Conversão temporária para String.
    * Utiliza variável estática para manter o buffer válido após a função.
    */
-  static String room_number_str; 
+  static String room_number_str;
   room_number_str = rn.as<String>();
+  // const char* room = doc["room_number"];
 
-  if (room_number_str.length() == 0) { // verifica se a string está vazia
+  if (room_number_str.length() == 0) {  // verifica se a string está vazia
     log(LOG_ERROR, "Campo 'room_number' vazio");
+    // log(LOG_ERROR, room);
     return false;
   }
+
+
+  const char* estado = doc["estado"];
+
+  if (estado == nullptr || estado[0] == '\0') {
+    log(LOG_ERROR, "Campo 'estado' vazio");
+    return false;
+  }
+
+  strncpy(patientStatus->id, id, sizeof(patientStatus->id));
+  patientStatus->id[sizeof(patientStatus->id) - 1] = '\0';
 
   // Obtem const char* seguro (aponta para buffer interno estático)
-  const char* room_number = room_number_str.c_str();
+  strncpy(patientStatus->room_number, room_number_str.c_str(), sizeof(patientStatus->room_number));
+  patientStatus->room_number[sizeof(patientStatus->room_number) - 1] = '\0';
 
   // Extrai campo "estado" do JSON
-  const char* estado = doc["estado"];  // Ex: "emergencia"
+  strncpy(patientStatus->estado, estado, sizeof(patientStatus->estado));
+  patientStatus->estado[sizeof(patientStatus->estado) - 1] = '\0';
   // Extrai campo "mensagem" do JSON
-  const char* mensagem = doc["mensagem"];  // Ex: "Ligar LED"
-  // Extrai campo "mensagem" do JSON
-  const char* local = doc["local"];  // Ex: "Enfermagem"
-  // Extrai campo "comando" do JSON
-  const char* comando = doc["comando"];  // Ex: "ligar"
+  // patientStatus->mensagem = doc["mensagem"];  // Ex: "Ligar LED"
+  // // Extrai campo "mensagem" do JSON
+  // patientStatus->local = doc["local"];  // Ex: "Enfermagem"
+  // // Extrai campo "comando" do JSON
+  // patientStatus->comando = doc["comando"];  // Ex: "ligar"
 
-  log(LOG_INFO,
-      " -> ID: %s\n"
-      " -> estado: %s\n"
-      " -> mensagem: %s\n"
-      " -> Num. enfermaria: %s\n"
-      " -> local: %s\n"
-      " -> comando: %s\n",
-      id,
-      estado,
-      mensagem,
-      room_number,
-      local,
-      comando);
+  // log(LOG_INFO,
+  //     " -> ID: %s\n"
+  //     " -> estado: %s\n"
+  //     " -> mensagem: %s\n"
+  //     " -> Num. enfermaria: %s\n"
+  //     " -> local: %s\n"
+  //     " -> comando: %s\n",
+  //     id,
+  //     estado,
+  //     mensagem,
+  //     room_number,
+  //     local,
+  //     comando);
 
-
-  // Adiciona na lista com verificação de sucesso
-  if (listCalls.add(room_number, id)) {
-    listUpdated = true;  // sinaliza que display precisa atualizar
-    return true;
-  } else {
-    log(LOG_ERROR, "Erro ao adicionar chamada na lista!");
-    return false;
-  }
+  return true;
 }
 
 /**
@@ -180,16 +188,19 @@ bool processing_json_MQTT(byte* payload, unsigned int length) {
  *
  * @return Ponteiro para o buffer contendo o JSON serializado.
  */
-const char* createJsonPayload(char* buffer, size_t length, const char* roomNumber) {
+const char* createJsonPayload(char* buffer, size_t length, const char* command) {
   StaticJsonDocument<256> doc;
 
-  doc["id"] = cfg.mqttDeviceId.c_str(); //ID do proprio dispositivo
-  doc["estado"] = "ocioso";
-  doc["mensagem"] = "Desligar LED";
-  doc["room_number"] = roomNumber;
-  doc["local"] = "posto_enfermaria";
-  doc["comando"] = "desligar";
+  // doc["id"] = cfg.mqttDeviceId.c_str(); //ID do proprio dispositivo
+  // doc["estado"] = "ocioso";
+  // doc["mensagem"] = "Desligar LED";
+  // doc["room_number"] = roomNumber;
+  // doc["local"] = "posto_enfermaria";
+  // doc["comando"] = "desligar";
 
+
+  // doc["id"] = cfg.mqttDeviceId.c_str();
+  doc["atendimento"] = command;
   serializeJson(doc, buffer, length);
 
   return buffer;
@@ -242,10 +253,10 @@ const char* getPayloadID(byte* payload, unsigned int length) {
  *
  * @return Ponteiro para o buffer contendo o JSON serializado.
  */
-const char* creteJsonPayloadConfirmationMessage(char* buffer, size_t length){
+const char* creteJsonPayloadConfirmationMessage(char* buffer, size_t length) {
   StaticJsonDocument<50> doc;
 
-  doc["status"] = "ok"; 
+  doc["status"] = "ok";
 
   serializeJson(doc, buffer, length);
 

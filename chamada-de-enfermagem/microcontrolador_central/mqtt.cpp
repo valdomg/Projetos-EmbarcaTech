@@ -34,6 +34,7 @@
 #include "mqtt.h"                // Header com as declarações das funções e variáveis MQTT usadas no projeto.
 #include "config.h"              // Arquivo de configuração com constantes (servidor, usuário, senha, tópicos, etc.).
 #include "jsonDataProcessing.h"  // Header com a declaração da função que processa os dados JSON recebido do MQTT
+#include "listNursingCall_utils.h"
 #include "log.h"
 #include "buzzer.h"
 #include "config_storage.h"
@@ -49,7 +50,7 @@
  * pelo cliente MQTT como camada de transporte para envio e recebimento
  * de mensagens.
  */
-WiFiClient espClient;            // Cliente Wi-Fi seguro (usado pelo PubSubClient para comunicação MQTT).
+WiFiClient espClient;  // Cliente Wi-Fi seguro (usado pelo PubSubClient para comunicação MQTT).
 
 /**
  * @brief Cliente MQTT responsável pela comunicação com o broker.
@@ -74,7 +75,7 @@ PubSubClient client(espClient);  // Cliente MQTT que usa o cliente Wi-Fi seguro 
  * de reconexão, evitando que o dispositivo tente conectar continuamente
  * ao servidor.
  */
-static unsigned long lastAttempConnectMQTT = 0;           // Guarda o tempo da última tentativa de conexão com o broker.
+static unsigned long lastAttempConnectMQTT = 0;  // Guarda o tempo da última tentativa de conexão com o broker.
 
 /**
  * @brief Intervalo mínimo entre tentativas de reconexão MQTT.
@@ -106,7 +107,11 @@ bool hasOKMessage = false;
  */
 const char* calledToBeErased;
 
+volatile bool newMessage = false;
 
+char receivedTopic[MAX_TOPIC_SIZE];
+char receivedPayload[MAX_PAYLOAD_SIZE];
+unsigned int receivedLength = 0;
 
 // -----------------------------------------------------------------------------
 // Funções auxiliares
@@ -166,9 +171,9 @@ void setupMQTT() {
  * - Verifica se o cliente ainda está conectado.
  * - Caso a conexão tenha sido perdida, tenta reconectar após um intervalo.
  */
-void checkMQTTConnected() {
+bool checkMQTTConnected() {
   client.loop();                   // Mantém a comunicação ativa e processa mensagens recebidas.
-  if (client.connected()) return;  // Se já está conectado, sai da função.
+  if (client.connected()) return true;  // Se já está conectado, sai da função.
 
   unsigned long now = millis();  // Captura o tempo atual (ms desde o boot).
 
@@ -185,6 +190,7 @@ void checkMQTTConnected() {
       client.subscribe(fullTopic);  // Inscreve-se no tópico para receber mensagens
       client.subscribe(MQTT_SUB_CONFIRMATION_TOPIC);
 
+      return true;
     } else {
       log(LOG_ERROR, "Falha na conexão com mqtt, rc= %d", client.state());  // Mostra o código de erro da conexão
 
@@ -196,8 +202,11 @@ void checkMQTTConnected() {
         resetMQTTClient();
         connection_drop_count = 0;
       }
+
+      return false;
     }
   }
+  return false;
 }
 
 /**
@@ -219,35 +228,21 @@ void checkMQTTConnected() {
  *    - Ativa o alerta sonoro.
  */
 void callback(char* topic, byte* payload, unsigned int length) {
-  log(LOG_DEBUG, "Mensagem recebida no tópico: %s", topic);
+  // log(LOG_DEBUG, "Mensagem recebida no tópico: %s", topic);
 
+  if (length >= MAX_PAYLOAD_SIZE || length == 0) return;
 
-  if (strcmp(topic, MQTT_SUB_CONFIRMATION_TOPIC) == 0) {
-    // Serial.println("recebeu ok");
-    calledToBeErased = getPayloadID(payload, length);
-    log(LOG_INFO,"recebeu ok");
-    hasOKMessage = true;
-  }
+  // copia payload
+  memcpy(receivedPayload, payload, length);
+  receivedPayload[length] = '\0';
 
-  else if (strncmp(topic, MQTT_SUBSCRIPTION_TOPIC, strlen(MQTT_SUBSCRIPTION_TOPIC)) == 0) {
-    // Processa os dados Json recebidos
-    if (length == 0){
-      return;
-    }
+  // copia tópico
+  strncpy(receivedTopic, topic, MAX_TOPIC_SIZE - 1);
+  receivedTopic[MAX_TOPIC_SIZE - 1] = '\0';
 
-    else if (processing_json_MQTT(payload, length)) {
-
-      char buffer[50];
-      publicReponseDivice(
-        getPayloadID(payload, length),
-        MQTT_PUB_CONFIRMATION_TOPIC,
-        creteJsonPayloadConfirmationMessage(buffer, sizeof(buffer)),
-        true
-        );
-
-      enableSoundAlert();
-    }
-  }
+  receivedLength = length;
+  newMessage = true;
+  
 }
 
 /**
@@ -271,7 +266,7 @@ bool publicReponseDivice(const char* deviceId, const char* topic, const char* me
 
 
   // char buffer[256];
-  if (!client.publish(fullTopic, message,retained)) {
+  if (!client.publish(fullTopic, message, retained)) {
     log(LOG_WARN, "Falha ao enviar dados ao broker MQTT");
     return false;
   }
